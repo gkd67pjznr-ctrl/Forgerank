@@ -24,6 +24,7 @@ import { getSettings } from "../src/lib/settings";
 import { RestTimerOverlay } from "../src/ui/components/RestTimerOverlay";
 import { addWorkoutSession } from "../src/lib/workoutStore";
 import { uid as uid2, formatDuration, type WorkoutSession, type WorkoutSet } from "../src/lib/workoutModel";
+import { useCurrentPlan, updateCurrentPlan, setCurrentPlan } from "../src/lib/workoutPlanStore";
 
 function uid() {
   return Math.random().toString(16).slice(2);
@@ -64,8 +65,22 @@ export default function LiveWorkout() {
   const c = useThemeColors();
   const unit: UnitSystem = "lb";
 
-  const [selectedExerciseId, setSelectedExerciseId] = useState(EXERCISES_V1[0].id);
+  const plan = useCurrentPlan();
+  const planMode = !!plan && plan.exercises.length > 0; // routine-driven if it has exercises
+  const freePlanMode = !!plan && plan.exercises.length === 0; // started free via start screen
+
+  const plannedExerciseIds = plan?.exercises.map((x) => x.exerciseId) ?? [];
+  const currentPlannedExerciseId = planMode ? plan!.exercises[plan!.currentExerciseIndex]?.exerciseId : null;
+
+  const [selectedExerciseId, setSelectedExerciseId] = useState(
+    currentPlannedExerciseId ?? EXERCISES_V1[0].id
+  );
   const [isPickingExercise, setIsPickingExercise] = useState(false);
+
+  // if plan changes, sync selection
+  useEffect(() => {
+    if (planMode && currentPlannedExerciseId) setSelectedExerciseId(currentPlannedExerciseId);
+  }, [planMode, currentPlannedExerciseId]);
 
   const [weightLb, setWeightLb] = useState(135);
   const [reps, setReps] = useState(8);
@@ -191,6 +206,28 @@ export default function LiveWorkout() {
     return formatDuration(nowMs - workoutStartedAt);
   }, [nowMs, workoutStartedAt]);
 
+  const planHeader = useMemo(() => {
+    if (!plan) return null;
+    if (planMode) {
+      const ex = plan.exercises[plan.currentExerciseIndex];
+      const exName = EXERCISES_V1.find((e) => e.id === ex.exerciseId)?.name ?? ex.exerciseId;
+      const done = plan.completedSetsByExerciseId[ex.exerciseId] ?? 0;
+      return {
+        title: plan.routineName ?? "Routine Workout",
+        subtitle: `Exercise ${plan.currentExerciseIndex + 1}/${plan.exercises.length}: ${exName} • Sets ${done}/${ex.targetSets}`,
+      };
+    }
+    return { title: "Free Workout (started)", subtitle: "No plan. Log anything." };
+  }, [plan, planMode]);
+
+  function advanceToNextPlannedExercise() {
+    if (!planMode || !plan) return;
+    updateCurrentPlan((p) => ({
+      ...p,
+      currentExerciseIndex: Math.min(p.exercises.length - 1, p.currentExerciseIndex + 1),
+    }));
+  }
+
   const addSet = () => {
     const now = Date.now();
 
@@ -206,10 +243,29 @@ export default function LiveWorkout() {
     };
 
     setSets((prev) => [...prev, next]);
-
-    // show rest overlay after set
     setRestVisible(true);
 
+    // If this set belongs to current planned exercise, increment plan progress
+    if (planMode && plan && selectedExerciseId === currentPlannedExerciseId) {
+      updateCurrentPlan((p) => {
+        const cur = p.exercises[p.currentExerciseIndex];
+        const prevDone = p.completedSetsByExerciseId[cur.exerciseId] ?? 0;
+        const nextDone = prevDone + 1;
+
+        const completedSetsByExerciseId = { ...p.completedSetsByExerciseId, [cur.exerciseId]: nextDone };
+
+        // auto-advance when target sets hit
+        const shouldAdvance = nextDone >= cur.targetSets && p.currentExerciseIndex < p.exercises.length - 1;
+
+        return {
+          ...p,
+          completedSetsByExerciseId,
+          currentExerciseIndex: shouldAdvance ? p.currentExerciseIndex + 1 : p.currentExerciseIndex,
+        };
+      });
+    }
+
+    // cues logic
     const prevState = sessionStateByExercise[selectedExerciseId] ?? makeEmptyExerciseState();
 
     const result = detectCueForWorkingSet({
@@ -222,7 +278,6 @@ export default function LiveWorkout() {
 
     setSessionStateByExercise((prev) => ({ ...prev, [selectedExerciseId]: result.next }));
 
-    // Cardio behaves like fallback
     if (result.meta.type === "cardio" && result.cue) {
       showInstantCue(result.cue);
       hapticFallback();
@@ -230,7 +285,6 @@ export default function LiveWorkout() {
       return;
     }
 
-    // PR: show always
     if (result.cue && (result.meta.type === "rep" || result.meta.type === "weight" || result.meta.type === "e1rm")) {
       let title = result.cue.message;
 
@@ -256,7 +310,6 @@ export default function LiveWorkout() {
       return;
     }
 
-    // No PR: show fallback only every 2–4 such sets
     const current = ensureCountdown(selectedExerciseId);
     if (current <= 1) {
       showInstantCue(randomFallbackCue());
@@ -283,7 +336,17 @@ export default function LiveWorkout() {
         reps: s.reps,
         timestampMs: s.timestampMs,
       })),
+
+      routineId: plan?.routineId,
+      routineName: plan?.routineName,
+      plannedExercises: plan?.exercises?.map((e) => ({
+        exerciseId: e.exerciseId,
+        targetSets: e.targetSets,
+        targetRepsMin: e.targetRepsMin,
+        targetRepsMax: e.targetRepsMax,
+      })),
     };
+
     addWorkoutSession(session);
 
     const grouped = groupSetsByExercise(sets);
@@ -308,6 +371,9 @@ export default function LiveWorkout() {
     showInstantCue({ message: "Workout saved.", detail: `Duration: ${formatDuration(end - start)}`, intensity: "low" });
     hapticFallback();
     soundFallback();
+
+    // clear current plan when done
+    setCurrentPlan(null);
   };
 
   const reset = () => {
@@ -320,7 +386,13 @@ export default function LiveWorkout() {
     setRestVisible(false);
     if (cueTimerRef.current) clearTimeout(cueTimerRef.current);
     cueTimerRef.current = null;
+    // keep plan; reset is just local workout state
   };
+
+  // Exercise picker: in planMode we only allow selecting within plan (v1)
+  const pickerExercises = planMode
+    ? EXERCISES_V1.filter((e) => plannedExerciseIds.includes(e.id))
+    : EXERCISES_V1;
 
   if (isPickingExercise) {
     return (
@@ -329,7 +401,7 @@ export default function LiveWorkout() {
 
         <View style={{ borderWidth: 1, borderColor: c.border, borderRadius: 12, overflow: "hidden" }}>
           <FlatList
-            data={EXERCISES_V1}
+            data={pickerExercises}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => {
               const isSelected = item.id === selectedExerciseId;
@@ -386,7 +458,13 @@ export default function LiveWorkout() {
           }}
         >
           <Text style={{ color: c.muted, marginBottom: 4, fontSize: 12 }}>Cue</Text>
-          <Text style={{ color: c.text, fontSize: toastFontSize, fontWeight: instantCue.intensity === "high" ? "800" : "700" }}>
+          <Text
+            style={{
+              color: c.text,
+              fontSize: toastFontSize,
+              fontWeight: instantCue.intensity === "high" ? "800" : "700",
+            }}
+          >
             {instantCue.message}
           </Text>
           {!!instantCue.detail && <Text style={{ color: c.muted, marginTop: 6, fontSize: 13 }}>{instantCue.detail}</Text>}
@@ -400,6 +478,18 @@ export default function LiveWorkout() {
           <Text style={{ fontSize: 22, fontWeight: "700", color: c.text }}>Live Workout</Text>
           <Text style={{ color: c.muted, fontWeight: "800" }}>⏱ {workoutElapsedLabel}</Text>
         </View>
+
+        {!!planHeader && (
+          <View style={{ borderWidth: 1, borderColor: c.border, borderRadius: 12, padding: 12, backgroundColor: c.card, gap: 6 }}>
+            <Text style={{ color: c.text, fontWeight: "900" }}>{planHeader.title}</Text>
+            <Text style={{ color: c.muted }}>{planHeader.subtitle}</Text>
+            {planMode && (
+              <View style={{ flexDirection: "row", gap: 10, marginTop: 6 }}>
+                <Button title="Next Exercise" onPress={advanceToNextPlannedExercise} flex />
+              </View>
+            )}
+          </View>
+        )}
 
         <View style={{ borderWidth: 1, borderColor: c.border, borderRadius: 12, padding: 12, backgroundColor: c.card, gap: 8 }}>
           <Text style={{ color: c.muted }}>Selected Exercise</Text>
