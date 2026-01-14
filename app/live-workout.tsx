@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, Pressable, FlatList, ScrollView, Animated, Easing } from "react-native";
 import { useThemeColors } from "../src/ui/theme";
 
@@ -21,6 +21,9 @@ import {
 } from "../src/lib/perSetCue";
 
 import { getSettings } from "../src/lib/settings";
+import { RestTimerOverlay } from "../src/ui/components/RestTimerOverlay";
+import { addWorkoutSession } from "../src/lib/workoutStore";
+import { uid as uid2, formatDuration, type WorkoutSession, type WorkoutSet } from "../src/lib/workoutModel";
 
 function uid() {
   return Math.random().toString(16).slice(2);
@@ -74,8 +77,19 @@ export default function LiveWorkout() {
   const [sessionStateByExercise, setSessionStateByExercise] = useState<Record<string, ExerciseSessionState>>({});
   const [fallbackCountdownByExercise, setFallbackCountdownByExercise] = useState<Record<string, number>>({});
 
-  const cueTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Workout timing
+  const [workoutStartedAt, setWorkoutStartedAt] = useState<number | null>(null);
+  const [nowMs, setNowMs] = useState<number>(Date.now());
 
+  // Rest overlay
+  const [restVisible, setRestVisible] = useState(false);
+
+  useEffect(() => {
+    const t = setInterval(() => setNowMs(Date.now()), 500);
+    return () => clearInterval(t);
+  }, []);
+
+  const cueTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const toastOpacity = useRef(new Animated.Value(0)).current;
   const toastTranslateY = useRef(new Animated.Value(-18)).current;
 
@@ -172,8 +186,17 @@ export default function LiveWorkout() {
     return `+${Math.round(meta.e1rmDeltaLb)} lb e1RM`;
   }
 
+  const workoutElapsedLabel = useMemo(() => {
+    if (!workoutStartedAt) return "0:00";
+    return formatDuration(nowMs - workoutStartedAt);
+  }, [nowMs, workoutStartedAt]);
+
   const addSet = () => {
     const now = Date.now();
+
+    // start workout timer on first set
+    if (!workoutStartedAt) setWorkoutStartedAt(now);
+
     const next: LoggedSet = {
       id: uid(),
       exerciseId: selectedExerciseId,
@@ -184,6 +207,9 @@ export default function LiveWorkout() {
     };
 
     setSets((prev) => [...prev, next]);
+
+    // rest overlay pops after set
+    setRestVisible(true);
 
     const prevState = sessionStateByExercise[selectedExerciseId] ?? makeEmptyExerciseState();
 
@@ -244,6 +270,24 @@ export default function LiveWorkout() {
   };
 
   const finishWorkout = () => {
+    const end = Date.now();
+    const start = workoutStartedAt ?? (sets[0]?.timestampMs ?? end);
+
+    // save to store
+    const session: WorkoutSession = {
+      id: uid2(),
+      startedAtMs: start,
+      endedAtMs: end,
+      sets: sets.map<WorkoutSet>((s) => ({
+        id: s.id,
+        exerciseId: s.exerciseId,
+        weightKg: s.weightKg,
+        reps: s.reps,
+        timestampMs: s.timestampMs,
+      })),
+    };
+    addWorkoutSession(session);
+
     const grouped = groupSetsByExercise(sets);
     const all: Cue[] = [];
 
@@ -263,7 +307,7 @@ export default function LiveWorkout() {
     if (all.length === 0) all.push({ message: "No working sets logged yet.", intensity: "low" });
     setRecapCues(all);
 
-    showInstantCue({ message: "Workout saved (local).", intensity: "low" });
+    showInstantCue({ message: "Workout saved.", detail: `Duration: ${formatDuration(end - start)}`, intensity: "low" });
     hapticFallback();
     soundFallback();
   };
@@ -274,6 +318,8 @@ export default function LiveWorkout() {
     setInstantCue(null);
     setSessionStateByExercise({});
     setFallbackCountdownByExercise({});
+    setWorkoutStartedAt(null);
+    setRestVisible(false);
     if (cueTimerRef.current) clearTimeout(cueTimerRef.current);
     cueTimerRef.current = null;
   };
@@ -350,8 +396,14 @@ export default function LiveWorkout() {
         </Animated.View>
       )}
 
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 40 }}>
-        <Text style={{ fontSize: 22, fontWeight: "700", color: c.text }}>Live Workout</Text>
+      {/* Rest timer overlay */}
+      <RestTimerOverlay visible={restVisible} initialSeconds={90} onClose={() => setRestVisible(false)} />
+
+      <ScrollView contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 80 }}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" }}>
+          <Text style={{ fontSize: 22, fontWeight: "700", color: c.text }}>Live Workout</Text>
+          <Text style={{ color: c.muted, fontWeight: "800" }}>⏱ {workoutElapsedLabel}</Text>
+        </View>
 
         <View style={{ borderWidth: 1, borderColor: c.border, borderRadius: 12, padding: 12, backgroundColor: c.card, gap: 8 }}>
           <Text style={{ color: c.muted }}>Selected Exercise</Text>
