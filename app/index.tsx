@@ -30,17 +30,16 @@ export default function Index() {
         Verified ranks. Real feedback. No fake leaderboards.
       </Text>
 
-      <CardLink
-        href="/live-workout"
-        title="Live Workout"
-        subtitle="Log sets, get fast cues, track PRs."
-      />
+      <CardLink href="/live-workout" title="Live Workout" subtitle="Log sets, cues, PRs, rest timer." />
+      <CardLink href="/calendar" title="Calendar" subtitle="Highlighted workout days + timeline." />
+      <CardLink href="/history" title="History" subtitle="Workout sessions by day, duration, sets." />
+      <CardLink href="/profile" title="Profile" subtitle="Stats, lifetime PRs, ranks summary." />
 
-      <CardLink
-        href="/settings"
-        title="Settings"
-        subtitle="Toggle haptics & sounds (more options soon)."
-      />
+      <CardLink href="/routines" title="Routines" subtitle="Routine builder (scaffold)." />
+      <CardLink href="/exercises" title="Exercise DB" subtitle="Browse exercises (scaffold)." />
+
+      <CardLink href="/debug/ranks" title="Debug: Ranks" subtitle="Verify 20-rank curve + thresholds." />
+      <CardLink href="/settings" title="Settings" subtitle="Toggle haptics & sounds (wired)." />
     </View>
   );
 }
