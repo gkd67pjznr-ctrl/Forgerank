@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, Pressable, FlatList, ScrollView, Animated, Easing } from "react-native";
 import { useThemeColors } from "../src/ui/theme";
 
-import { lbToKg, kgToLb } from "../src/lib/units";
+import { lbToKg } from "../src/lib/units";
 import type { UnitSystem } from "../src/lib/buckets";
 import type { LoggedSet } from "../src/lib/loggerTypes";
 import { groupSetsByExercise, generateCuesForExerciseSession } from "../src/lib/simpleSession";
@@ -25,9 +25,14 @@ import { RestTimerOverlay } from "../src/ui/components/RestTimerOverlay";
 import { addWorkoutSession } from "../src/lib/workoutStore";
 import { uid as uid2, formatDuration, type WorkoutSession, type WorkoutSet } from "../src/lib/workoutModel";
 import { useCurrentPlan, updateCurrentPlan, setCurrentPlan } from "../src/lib/workoutPlanStore";
+import { completionPct as planCompletionPct, clampPlanIndex } from "../src/lib/workoutPlanUtils";
 
 function uid() {
   return Math.random().toString(16).slice(2);
+}
+
+function exerciseName(exerciseId: string) {
+  return EXERCISES_V1.find((e) => e.id === exerciseId)?.name ?? exerciseId;
 }
 
 // Optional runtime requires (no-op if not installed)
@@ -66,8 +71,7 @@ export default function LiveWorkout() {
   const unit: UnitSystem = "lb";
 
   const plan = useCurrentPlan();
-  const planMode = !!plan && plan.exercises.length > 0; // routine-driven if it has exercises
-  const freePlanMode = !!plan && plan.exercises.length === 0; // started free via start screen
+  const planMode = !!plan && plan.exercises.length > 0;
 
   const plannedExerciseIds = plan?.exercises.map((x) => x.exerciseId) ?? [];
   const currentPlannedExerciseId = planMode ? plan!.exercises[plan!.currentExerciseIndex]?.exerciseId : null;
@@ -77,7 +81,7 @@ export default function LiveWorkout() {
   );
   const [isPickingExercise, setIsPickingExercise] = useState(false);
 
-  // if plan changes, sync selection
+  // sync selection to current plan exercise
   useEffect(() => {
     if (planMode && currentPlannedExerciseId) setSelectedExerciseId(currentPlannedExerciseId);
   }, [planMode, currentPlannedExerciseId]);
@@ -108,16 +112,8 @@ export default function LiveWorkout() {
   const toastOpacity = useRef(new Animated.Value(0)).current;
   const toastTranslateY = useRef(new Animated.Value(-18)).current;
 
-  const selectedExerciseName =
-    EXERCISES_V1.find((e) => e.id === selectedExerciseId)?.name ?? selectedExerciseId;
-
+  const selectedExerciseName = exerciseName(selectedExerciseId);
   const displayWeight = useMemo(() => `${weightLb.toFixed(1)} lb`, [weightLb]);
-
-  const setsForSelectedExercise = useMemo(() => {
-    return sets
-      .filter((s) => s.exerciseId === selectedExerciseId)
-      .sort((a, b) => a.timestampMs - b.timestampMs);
-  }, [sets, selectedExerciseId]);
 
   const Button = (props: { title: string; onPress: () => void; flex?: boolean }) => (
     <Pressable
@@ -208,29 +204,32 @@ export default function LiveWorkout() {
 
   const planHeader = useMemo(() => {
     if (!plan) return null;
-    if (planMode) {
-      const ex = plan.exercises[plan.currentExerciseIndex];
-      const exName = EXERCISES_V1.find((e) => e.id === ex.exerciseId)?.name ?? ex.exerciseId;
-      const done = plan.completedSetsByExerciseId[ex.exerciseId] ?? 0;
-      return {
-        title: plan.routineName ?? "Routine Workout",
-        subtitle: `Exercise ${plan.currentExerciseIndex + 1}/${plan.exercises.length}: ${exName} • Sets ${done}/${ex.targetSets}`,
-      };
-    }
-    return { title: "Free Workout (started)", subtitle: "No plan. Log anything." };
+    if (!planMode) return { title: "Free Workout (started)", subtitle: "No plan. Log anything." };
+
+    const ex = plan.exercises[plan.currentExerciseIndex];
+    const done = plan.completedSetsByExerciseId[ex.exerciseId] ?? 0;
+
+    return {
+      title: plan.routineName ?? "Routine Workout",
+      subtitle: `Exercise ${plan.currentExerciseIndex + 1}/${plan.exercises.length}: ${exerciseName(ex.exerciseId)} • Sets ${done}/${ex.targetSets}`,
+    };
   }, [plan, planMode]);
+
+  function jumpToPlanIndex(index: number) {
+    if (!planMode || !plan) return;
+    const clamped = clampPlanIndex(plan, index);
+
+    updateCurrentPlan((p) => ({ ...p, currentExerciseIndex: clamped }));
+    setSelectedExerciseId(plan.exercises[clamped].exerciseId);
+  }
 
   function advanceToNextPlannedExercise() {
     if (!planMode || !plan) return;
-    updateCurrentPlan((p) => ({
-      ...p,
-      currentExerciseIndex: Math.min(p.exercises.length - 1, p.currentExerciseIndex + 1),
-    }));
+    jumpToPlanIndex(plan.currentExerciseIndex + 1);
   }
 
   const addSet = () => {
     const now = Date.now();
-
     if (!workoutStartedAt) setWorkoutStartedAt(now);
 
     const next: LoggedSet = {
@@ -245,7 +244,7 @@ export default function LiveWorkout() {
     setSets((prev) => [...prev, next]);
     setRestVisible(true);
 
-    // If this set belongs to current planned exercise, increment plan progress
+    // plan progress only counts if it's the CURRENT planned exercise
     if (planMode && plan && selectedExerciseId === currentPlannedExerciseId) {
       updateCurrentPlan((p) => {
         const cur = p.exercises[p.currentExerciseIndex];
@@ -253,8 +252,6 @@ export default function LiveWorkout() {
         const nextDone = prevDone + 1;
 
         const completedSetsByExerciseId = { ...p.completedSetsByExerciseId, [cur.exerciseId]: nextDone };
-
-        // auto-advance when target sets hit
         const shouldAdvance = nextDone >= cur.targetSets && p.currentExerciseIndex < p.exercises.length - 1;
 
         return {
@@ -265,7 +262,6 @@ export default function LiveWorkout() {
       });
     }
 
-    // cues logic
     const prevState = sessionStateByExercise[selectedExerciseId] ?? makeEmptyExerciseState();
 
     const result = detectCueForWorkingSet({
@@ -325,6 +321,8 @@ export default function LiveWorkout() {
     const end = Date.now();
     const start = workoutStartedAt ?? (sets[0]?.timestampMs ?? end);
 
+    const completionPct = planMode && plan ? planCompletionPct(plan) : undefined;
+
     const session: WorkoutSession = {
       id: uid2(),
       startedAtMs: start,
@@ -339,12 +337,14 @@ export default function LiveWorkout() {
 
       routineId: plan?.routineId,
       routineName: plan?.routineName,
+      planId: plan?.id,
       plannedExercises: plan?.exercises?.map((e) => ({
         exerciseId: e.exerciseId,
         targetSets: e.targetSets,
         targetRepsMin: e.targetRepsMin,
         targetRepsMax: e.targetRepsMax,
       })),
+      completionPct,
     };
 
     addWorkoutSession(session);
@@ -360,7 +360,7 @@ export default function LiveWorkout() {
         previous: { bestE1RMKg: 0, bestRepsAtWeight: {} },
       });
 
-      const name = EXERCISES_V1.find((e) => e.id === exerciseId)?.name ?? exerciseId;
+      const name = exerciseName(exerciseId);
       all.push({ message: `— ${name} —`, intensity: "low" });
       all.push(...cueEvents);
     }
@@ -368,11 +368,17 @@ export default function LiveWorkout() {
     if (all.length === 0) all.push({ message: "No working sets logged yet.", intensity: "low" });
     setRecapCues(all);
 
-    showInstantCue({ message: "Workout saved.", detail: `Duration: ${formatDuration(end - start)}`, intensity: "low" });
+    showInstantCue({
+      message: "Workout saved.",
+      detail:
+        completionPct == null
+          ? `Duration: ${formatDuration(end - start)}`
+          : `Duration: ${formatDuration(end - start)} • ${Math.round(completionPct * 100)}%`,
+      intensity: "low",
+    });
     hapticFallback();
     soundFallback();
 
-    // clear current plan when done
     setCurrentPlan(null);
   };
 
@@ -386,10 +392,9 @@ export default function LiveWorkout() {
     setRestVisible(false);
     if (cueTimerRef.current) clearTimeout(cueTimerRef.current);
     cueTimerRef.current = null;
-    // keep plan; reset is just local workout state
   };
 
-  // Exercise picker: in planMode we only allow selecting within plan (v1)
+  // Exercise picker: in planMode only allow choosing within plan (v1)
   const pickerExercises = planMode
     ? EXERCISES_V1.filter((e) => plannedExerciseIds.includes(e.id))
     : EXERCISES_V1;
@@ -467,7 +472,9 @@ export default function LiveWorkout() {
           >
             {instantCue.message}
           </Text>
-          {!!instantCue.detail && <Text style={{ color: c.muted, marginTop: 6, fontSize: 13 }}>{instantCue.detail}</Text>}
+          {!!instantCue.detail && (
+            <Text style={{ color: c.muted, marginTop: 6, fontSize: 13 }}>{instantCue.detail}</Text>
+          )}
         </Animated.View>
       )}
 
@@ -480,24 +487,96 @@ export default function LiveWorkout() {
         </View>
 
         {!!planHeader && (
-          <View style={{ borderWidth: 1, borderColor: c.border, borderRadius: 12, padding: 12, backgroundColor: c.card, gap: 6 }}>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: c.border,
+              borderRadius: 12,
+              padding: 12,
+              backgroundColor: c.card,
+              gap: 6,
+            }}
+          >
             <Text style={{ color: c.text, fontWeight: "900" }}>{planHeader.title}</Text>
             <Text style={{ color: c.muted }}>{planHeader.subtitle}</Text>
-            {planMode && (
-              <View style={{ flexDirection: "row", gap: 10, marginTop: 6 }}>
-                <Button title="Next Exercise" onPress={advanceToNextPlannedExercise} flex />
-              </View>
-            )}
           </View>
         )}
 
-        <View style={{ borderWidth: 1, borderColor: c.border, borderRadius: 12, padding: 12, backgroundColor: c.card, gap: 8 }}>
+        {planMode && plan && (
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: c.border,
+              borderRadius: 12,
+              padding: 12,
+              backgroundColor: c.card,
+              gap: 8,
+            }}
+          >
+            <Text style={{ color: c.text, fontWeight: "900" }}>Planned Exercises</Text>
+
+            {plan.exercises.map((ex, idx) => {
+              const done = plan.completedSetsByExerciseId[ex.exerciseId] ?? 0;
+              const isCurrent = idx === plan.currentExerciseIndex;
+
+              return (
+                <Pressable
+                  key={`${ex.exerciseId}-${idx}`}
+                  onPress={() => jumpToPlanIndex(idx)}
+                  style={{
+                    paddingVertical: 10,
+                    paddingHorizontal: 12,
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    borderColor: c.border,
+                    backgroundColor: isCurrent ? c.bg : c.card,
+                    gap: 3,
+                  }}
+                >
+                  <Text style={{ color: c.text, fontWeight: isCurrent ? "900" : "700" }}>
+                    {idx + 1}. {exerciseName(ex.exerciseId)}
+                  </Text>
+                  <Text style={{ color: c.muted }}>
+                    Sets: {done}/{ex.targetSets}{" "}
+                    {ex.targetRepsMin != null && ex.targetRepsMax != null
+                      ? `• ${ex.targetRepsMin}-${ex.targetRepsMax} reps`
+                      : ""}
+                  </Text>
+                </Pressable>
+              );
+            })}
+
+            <View style={{ flexDirection: "row", gap: 10, marginTop: 4 }}>
+              <Button title="Next Exercise" onPress={advanceToNextPlannedExercise} flex />
+            </View>
+          </View>
+        )}
+
+        <View
+          style={{
+            borderWidth: 1,
+            borderColor: c.border,
+            borderRadius: 12,
+            padding: 12,
+            backgroundColor: c.card,
+            gap: 8,
+          }}
+        >
           <Text style={{ color: c.muted }}>Selected Exercise</Text>
           <Text style={{ color: c.text, fontSize: 18, fontWeight: "800" }}>{selectedExerciseName}</Text>
           <Button title="Change Exercise" onPress={() => setIsPickingExercise(true)} />
         </View>
 
-        <View style={{ borderWidth: 1, borderColor: c.border, borderRadius: 12, padding: 12, gap: 10, backgroundColor: c.card }}>
+        <View
+          style={{
+            borderWidth: 1,
+            borderColor: c.border,
+            borderRadius: 12,
+            padding: 12,
+            gap: 10,
+            backgroundColor: c.card,
+          }}
+        >
           <Text style={{ fontSize: 16, fontWeight: "700", color: c.text }}>Quick Add Set</Text>
 
           <View style={{ flexDirection: "row", gap: 10 }}>
@@ -536,13 +615,25 @@ export default function LiveWorkout() {
           </Pressable>
         </View>
 
-        <View style={{ borderWidth: 1, borderColor: c.border, borderRadius: 12, padding: 12, gap: 6, backgroundColor: c.card }}>
+        <View
+          style={{
+            borderWidth: 1,
+            borderColor: c.border,
+            borderRadius: 12,
+            padding: 12,
+            gap: 6,
+            backgroundColor: c.card,
+          }}
+        >
           <Text style={{ fontSize: 16, fontWeight: "700", color: c.text }}>Recap Cues</Text>
           {recapCues.length === 0 ? (
             <Text style={{ opacity: 0.8, color: c.muted }}>Tap Finish Workout to generate recap cues.</Text>
           ) : (
             recapCues.map((cue, idx) => (
-              <Text key={idx} style={{ color: c.text, fontWeight: cue.intensity === "high" ? "700" : "400" }}>
+              <Text
+                key={idx}
+                style={{ color: c.text, fontWeight: cue.intensity === "high" ? "700" : "400" }}
+              >
                 • {cue.message}
               </Text>
             ))
