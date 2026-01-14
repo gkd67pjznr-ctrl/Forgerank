@@ -42,14 +42,17 @@ export function startOfDayMs(ms: number): number {
   return d.getTime();
 }
 
-export function formatDuration(ms: number): {
+export function formatDuration(ms: number): string {
   const s = Math.floor(ms / 1000);
   const m = Math.floor(s / 60);
   const r = s % 60;
   const h = Math.floor(m / 60);
   const mm = m % 60;
 
-  if (h > 0) return `${h}:${String(mm).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
+  if (h > 0) {
+    return `${h}:${String(mm).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
+  }
+
   return `${mm}:${String(r).padStart(2, "0")}`;
 }
 
