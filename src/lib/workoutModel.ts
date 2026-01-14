@@ -24,7 +24,7 @@ export type WorkoutSession = {
     targetRepsMax?: number;
   }>;
 
-  // 0..1 if planned, else undefined
+  // 0..1 if planned
   completionPct?: number;
 };
 
@@ -42,7 +42,7 @@ export function startOfDayMs(ms: number): number {
   return d.getTime();
 }
 
-export function formatDuration(ms: number): string {
+export function formatDuration(ms: number): {
   const s = Math.floor(ms / 1000);
   const m = Math.floor(s / 60);
   const r = s % 60;
@@ -55,10 +55,17 @@ export function formatDuration(ms: number): string {
 
 export function formatDateShort(ms: number): string {
   const d = new Date(ms);
-  return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  return d.toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 export function formatTimeShort(ms: number): string {
   const d = new Date(ms);
-  return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  return d.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
