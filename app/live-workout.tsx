@@ -44,6 +44,34 @@ try {
   Haptics = null;
 }
 
+let Speech: any = null;
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  Speech = require("expo-speech");
+} catch {
+  Speech = null;
+}
+
+function onRestTimerDoneFeedback() {
+  const s = getSettings();
+
+  // haptic feedback
+  if (s.hapticsEnabled && Haptics) {
+    Haptics.notificationAsync?.(
+      Haptics.NotificationFeedbackType.Success
+    ).catch?.(() => {});
+  }
+
+  // audio feedback
+  if (s.soundsEnabled && Speech) {
+    Speech.stop?.();
+    Speech.speak?.("Rest over.", {
+      rate: 1.05,
+      pitch: 1.1,
+    });
+  }
+}
+
 function hapticFallback() {
   const s = getSettings();
   if (!s.hapticsEnabled || !Haptics) return;
@@ -250,18 +278,26 @@ export default function LiveWorkout() {
         const cur = p.exercises[p.currentExerciseIndex];
         const prevDone = p.completedSetsByExerciseId[cur.exerciseId] ?? 0;
         const nextDone = prevDone + 1;
-
-        const completedSetsByExerciseId = { ...p.completedSetsByExerciseId, [cur.exerciseId]: nextDone };
-        const shouldAdvance = nextDone >= cur.targetSets && p.currentExerciseIndex < p.exercises.length - 1;
-
+    
+        const completedSetsByExerciseId = {
+          ...p.completedSetsByExerciseId,
+          [cur.exerciseId]: nextDone,
+        };
+    
+        const shouldAdvance =
+          nextDone >= cur.targetSets &&
+          p.currentExerciseIndex < p.exercises.length - 1;
+    
         return {
           ...p,
           completedSetsByExerciseId,
-          currentExerciseIndex: shouldAdvance ? p.currentExerciseIndex + 1 : p.currentExerciseIndex,
+          currentExerciseIndex: shouldAdvance
+            ? p.currentExerciseIndex + 1
+            : p.currentExerciseIndex,
         };
       });
     }
-
+    
     const prevState = sessionStateByExercise[selectedExerciseId] ?? makeEmptyExerciseState();
 
     const result = detectCueForWorkingSet({
@@ -478,7 +514,7 @@ export default function LiveWorkout() {
         </Animated.View>
       )}
 
-      <RestTimerOverlay visible={restVisible} initialSeconds={90} onClose={() => setRestVisible(false)} />
+      <RestTimerOverlay visible={restVisible} initialSeconds={90} onClose={() => setRestVisible(false)} onDone={onRestTimerDoneFeedback} />
 
       <ScrollView contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 80 }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" }}>
