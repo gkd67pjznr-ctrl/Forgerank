@@ -1,5 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Animated, Easing, FlatList, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import {
+  Animated,
+  Easing,
+  FlatList,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { useThemeColors } from "../src/ui/theme";
 
 import { EXERCISES_V1 } from "../src/data/exercises";
@@ -20,13 +29,13 @@ import {
   randomHighlightDurationMs,
 } from "../src/lib/perSetCue";
 
-import { type Routine, type RoutineExercise, uid as routineUid } from "../src/lib/routinesModel";
-import { upsertRoutine } from "../src/lib/routinesStore";
 import { getSettings } from "../src/lib/settings";
 import { formatDuration, uid as uid2, type WorkoutSession, type WorkoutSet } from "../src/lib/workoutModel";
 import { setCurrentPlan, updateCurrentPlan, useCurrentPlan } from "../src/lib/workoutPlanStore";
 import { clampPlanIndex, completionPct as planCompletionPct } from "../src/lib/workoutPlanUtils";
 import { addWorkoutSession } from "../src/lib/workoutStore";
+import { upsertRoutine } from "../src/lib/routinesStore";
+import { uid as routineUid, type RoutineExercise, type Routine } from "../src/lib/routinesModel";
 import { RestTimerOverlay } from "../src/ui/components/RestTimerOverlay";
 
 function uid() {
@@ -59,9 +68,7 @@ function onRestTimerDoneFeedback() {
 
   // haptic feedback
   if (s.hapticsEnabled && Haptics) {
-    Haptics.notificationAsync?.(
-      Haptics.NotificationFeedbackType.Success
-    ).catch?.(() => {});
+    Haptics.notificationAsync?.(Haptics.NotificationFeedbackType.Success).catch?.(() => {});
   }
 
   // audio feedback
@@ -118,10 +125,14 @@ export default function LiveWorkout() {
 
   const [weightLb, setWeightLb] = useState(135);
   const [reps, setReps] = useState(8);
+
+  // typing inputs for quick add (in addition to +/- buttons)
   const [weightLbText, setWeightLbText] = useState(String(135));
   const [repsText, setRepsText] = useState(String(8));
+
   const [sets, setSets] = useState<LoggedSet[]>([]);
-    // Per-set lock state (Done = locked)
+
+  // Per-set lock state (Done = locked)
   const [doneBySetId, setDoneBySetId] = useState<Record<string, boolean>>({});
 
   function isDone(setId: string): boolean {
@@ -136,10 +147,9 @@ export default function LiveWorkout() {
     return kg * 2.2046226218;
   }
 
-  function estimateE1RMLb(weightLb: number, reps: number): number {
-    // Epley: 1RM = w * (1 + reps/30)
-    if (!weightLb || reps <= 0) return 0;
-    return weightLb * (1 + reps / 30);
+  function estimateE1RMLb(weightLb2: number, reps2: number): number {
+    if (!weightLb2 || reps2 <= 0) return 0;
+    return weightLb2 * (1 + reps2 / 30);
   }
 
   function updateSet(setId: string, patch: Partial<LoggedSet>) {
@@ -147,7 +157,6 @@ export default function LiveWorkout() {
   }
 
   function setWeightForSet(setId: string, text: string) {
-    // allow "135" or "135.5"
     const parsed = Number(text);
     if (!Number.isFinite(parsed)) return;
     updateSet(setId, { weightKg: lbToKg(Math.max(0, parsed)) });
@@ -319,26 +328,23 @@ export default function LiveWorkout() {
         const cur = p.exercises[p.currentExerciseIndex];
         const prevDone = p.completedSetsByExerciseId[cur.exerciseId] ?? 0;
         const nextDone = prevDone + 1;
-    
+
         const completedSetsByExerciseId = {
           ...p.completedSetsByExerciseId,
           [cur.exerciseId]: nextDone,
         };
-    
+
         const shouldAdvance =
-          nextDone >= cur.targetSets &&
-          p.currentExerciseIndex < p.exercises.length - 1;
-    
+          nextDone >= cur.targetSets && p.currentExerciseIndex < p.exercises.length - 1;
+
         return {
           ...p,
           completedSetsByExerciseId,
-          currentExerciseIndex: shouldAdvance
-            ? p.currentExerciseIndex + 1
-            : p.currentExerciseIndex,
+          currentExerciseIndex: shouldAdvance ? p.currentExerciseIndex + 1 : p.currentExerciseIndex,
         };
       });
     }
-    
+
     const prevState = sessionStateByExercise[selectedExerciseId] ?? makeEmptyExerciseState();
 
     const result = detectCueForWorkingSet({
@@ -395,7 +401,6 @@ export default function LiveWorkout() {
   };
 
   function makeRoutineNameNow(): string {
-    // Keep it simple + readable, local device timezone
     const d = new Date();
     const date = d.toLocaleDateString(undefined, { month: "short", day: "2-digit" });
     const time = d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
@@ -442,7 +447,6 @@ export default function LiveWorkout() {
       return {
         id: routineUid(),
         exerciseId,
-        // sensible defaults if no plan targets
         targetSets: t?.targetSets ?? 3,
         targetRepsMin: t?.targetRepsMin ?? 6,
         targetRepsMax: t?.targetRepsMax ?? 12,
@@ -547,9 +551,7 @@ export default function LiveWorkout() {
   };
 
   // Exercise picker: in planMode only allow choosing within plan (v1)
-  const pickerExercises = planMode
-    ? EXERCISES_V1.filter((e) => plannedExerciseIds.includes(e.id))
-    : EXERCISES_V1;
+  const pickerExercises = planMode ? EXERCISES_V1.filter((e) => plannedExerciseIds.includes(e.id)) : EXERCISES_V1;
 
   if (isPickingExercise) {
     return (
@@ -624,15 +626,18 @@ export default function LiveWorkout() {
           >
             {instantCue.message}
           </Text>
-          {!!instantCue.detail && (
-            <Text style={{ color: c.muted, marginTop: 6, fontSize: 13 }}>{instantCue.detail}</Text>
-          )}
+          {!!instantCue.detail && <Text style={{ color: c.muted, marginTop: 6, fontSize: 13 }}>{instantCue.detail}</Text>}
         </Animated.View>
       )}
 
-      <RestTimerOverlay visible={restVisible} initialSeconds={90} onClose={() => setRestVisible(false)} onDone={onRestTimerDoneFeedback} />
+      <RestTimerOverlay
+        visible={restVisible}
+        initialSeconds={90}
+        onClose={() => setRestVisible(false)}
+        onDone={onRestTimerDoneFeedback}
+      />
 
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 80 }}>
+      <ScrollView contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 120 }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" }}>
           <Text style={{ fontSize: 22, fontWeight: "700", color: c.text }}>Live Workout</Text>
           <Text style={{ color: c.muted, fontWeight: "800" }}>{`⏱ ${workoutElapsedLabel}`}</Text>
@@ -690,9 +695,7 @@ export default function LiveWorkout() {
                   </Text>
                   <Text style={{ color: c.muted }}>
                     Sets: {done}/{ex.targetSets}{" "}
-                    {ex.targetRepsMin != null && ex.targetRepsMax != null
-                      ? `• ${ex.targetRepsMin}-${ex.targetRepsMax} reps`
-                      : ""}
+                    {ex.targetRepsMin != null && ex.targetRepsMax != null ? `• ${ex.targetRepsMin}-${ex.targetRepsMax} reps` : ""}
                   </Text>
                 </Pressable>
               );
@@ -732,23 +735,113 @@ export default function LiveWorkout() {
           <Text style={{ fontSize: 16, fontWeight: "700", color: c.text }}>Quick Add Set</Text>
 
           <View style={{ flexDirection: "row", gap: 10 }}>
-            <Button title="- 2.5 lb" onPress={() => setWeightLb((w) => Math.max(0, w - 2.5))} flex />
-            <Button title="+ 2.5 lb" onPress={() => setWeightLb((w) => w + 2.5)} flex />
+            <Button
+              title="- 2.5 lb"
+              onPress={() =>
+                setWeightLb((w) => {
+                  const next = Math.max(0, w - 2.5);
+                  setWeightLbText(next.toFixed(1));
+                  return next;
+                })
+              }
+              flex
+            />
+            <Button
+              title="+ 2.5 lb"
+              onPress={() =>
+                setWeightLb((w) => {
+                  const next = w + 2.5;
+                  setWeightLbText(next.toFixed(1));
+                  return next;
+                })
+              }
+              flex
+            />
           </View>
-
-          <Text style={{ fontSize: 18, fontWeight: "700", color: c.text }}>{displayWeight}</Text>
 
           <View style={{ flexDirection: "row", gap: 10 }}>
-            <Button title="- 1 rep" onPress={() => setReps((r) => Math.max(0, r - 1))} flex />
-            <Button title="+ 1 rep" onPress={() => setReps((r) => r + 1)} flex />
+            <View style={{ flex: 1, gap: 6 }}>
+              <Text style={{ color: c.muted, fontSize: 12, fontWeight: "800" }}>Weight (lb)</Text>
+              <TextInput
+                value={weightLbText}
+                keyboardType="decimal-pad"
+                onChangeText={(t) => {
+                  setWeightLbText(t);
+                  const n = Number(t);
+                  if (Number.isFinite(n)) setWeightLb(Math.max(0, n));
+                }}
+                onBlur={() => setWeightLbText(weightLb.toFixed(1))}
+                style={{
+                  borderWidth: 1,
+                  borderColor: c.border,
+                  borderRadius: 10,
+                  paddingVertical: 10,
+                  paddingHorizontal: 10,
+                  color: c.text,
+                  backgroundColor: c.bg,
+                  fontWeight: "900",
+                  fontSize: 16,
+                }}
+              />
+            </View>
+
+            <View style={{ width: 110, gap: 6 }}>
+              <Text style={{ color: c.muted, fontSize: 12, fontWeight: "800" }}>Reps</Text>
+              <TextInput
+                value={repsText}
+                keyboardType="number-pad"
+                onChangeText={(t) => {
+                  setRepsText(t);
+                  const n = Math.floor(Number(t));
+                  if (Number.isFinite(n)) setReps(Math.max(0, n));
+                }}
+                onBlur={() => setRepsText(String(reps))}
+                style={{
+                  borderWidth: 1,
+                  borderColor: c.border,
+                  borderRadius: 10,
+                  paddingVertical: 10,
+                  paddingHorizontal: 10,
+                  color: c.text,
+                  backgroundColor: c.bg,
+                  fontWeight: "900",
+                  fontSize: 16,
+                }}
+              />
+            </View>
           </View>
 
-          <Text style={{ fontSize: 18, fontWeight: "700", color: c.text }}>{reps} reps</Text>
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <Button
+              title="- 1 rep"
+              onPress={() =>
+                setReps((r) => {
+                  const next = Math.max(0, r - 1);
+                  setRepsText(String(next));
+                  return next;
+                })
+              }
+              flex
+            />
+            <Button
+              title="+ 1 rep"
+              onPress={() =>
+                setReps((r) => {
+                  const next = r + 1;
+                  setRepsText(String(next));
+                  return next;
+                })
+              }
+              flex
+            />
+          </View>
+
+          <Text style={{ color: c.muted, fontWeight: "800" }}>{`Current: ${displayWeight} • ${reps} reps`}</Text>
 
           <Button title="Add Set" onPress={addSet} />
         </View>
 
-                {/* Workout Log */}
+        {/* Workout Log */}
         <View
           style={{
             borderWidth: 1,
@@ -768,7 +861,6 @@ export default function LiveWorkout() {
             <Text style={{ color: c.muted, opacity: 0.9 }}>No sets yet. Add your first set above.</Text>
           ) : (
             (() => {
-              // Order exercises by first appearance
               const seen = new Set<string>();
               const orderedExerciseIds: string[] = [];
               for (const s of sets) {
@@ -788,8 +880,8 @@ export default function LiveWorkout() {
                     </Text>
 
                     {exSets.map((s, idx) => {
-                      const weightLb = kgToLb(s.weightKg);
-                      const e1rm = estimateE1RMLb(weightLb, s.reps);
+                      const wLb = kgToLb(s.weightKg);
+                      const e1rm = estimateE1RMLb(wLb, s.reps);
                       const done = isDone(s.id);
 
                       return (
@@ -828,11 +920,11 @@ export default function LiveWorkout() {
                               <Text style={{ color: c.muted, fontSize: 12 }}>Weight (lb)</Text>
                               {done ? (
                                 <Text style={{ color: c.text, fontWeight: "900", fontSize: 16 }}>
-                                  {weightLb.toFixed(1)}
+                                  {wLb.toFixed(1)}
                                 </Text>
                               ) : (
                                 <TextInput
-                                  defaultValue={weightLb.toFixed(1)}
+                                  defaultValue={wLb.toFixed(1)}
                                   keyboardType="decimal-pad"
                                   onChangeText={(t) => setWeightForSet(s.id, t)}
                                   style={{
@@ -891,7 +983,6 @@ export default function LiveWorkout() {
           )}
         </View>
 
-
         <View style={{ flexDirection: "row", gap: 10 }}>
           <Button title="Finish Workout" onPress={finishWorkout} flex />
 
@@ -931,7 +1022,6 @@ export default function LiveWorkout() {
           </Pressable>
         </View>
 
-
         <View
           style={{
             borderWidth: 1,
@@ -947,10 +1037,7 @@ export default function LiveWorkout() {
             <Text style={{ opacity: 0.8, color: c.muted }}>Tap Finish Workout to generate recap cues.</Text>
           ) : (
             recapCues.map((cue, idx) => (
-              <Text
-                key={idx}
-                style={{ color: c.text, fontWeight: cue.intensity === "high" ? "700" : "400" }}
-              >
+              <Text key={idx} style={{ color: c.text, fontWeight: cue.intensity === "high" ? "700" : "400" }}>
                 • {cue.message}
               </Text>
             ))
