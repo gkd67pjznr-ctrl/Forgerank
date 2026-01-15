@@ -118,7 +118,8 @@ export default function LiveWorkout() {
 
   const [weightLb, setWeightLb] = useState(135);
   const [reps, setReps] = useState(8);
-
+  const [weightLbText, setWeightLbText] = useState(String(135));
+  const [repsText, setRepsText] = useState(String(8));
   const [sets, setSets] = useState<LoggedSet[]>([]);
     // Per-set lock state (Done = locked)
   const [doneBySetId, setDoneBySetId] = useState<Record<string, boolean>>({});
