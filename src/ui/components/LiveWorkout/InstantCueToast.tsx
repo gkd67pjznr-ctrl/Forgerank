@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from "react";
+// src/ui/components/LiveWorkout/InstantCueToast.tsx
+import { useEffect, useMemo, useRef } from "react";
 import { Animated, Easing, Text } from "react-native";
-import { useThemeColors } from "../../theme";
+import { useThemeColors } from "../../../ui/theme";
 
 export type InstantCue = {
   message: string;
@@ -8,36 +9,63 @@ export type InstantCue = {
   intensity: "low" | "high";
 };
 
-type Props = {
+export function InstantCueToast(props: {
   cue: InstantCue | null;
   onClear: () => void;
-  randomHoldMs: (isHighlight: boolean) => number; // allows you to reuse your existing random durations
-};
-
-export function InstantCueToast(props: Props) {
+  // NOTE: this is intentionally NOT used as a dependency; we stash it in a ref
+  // to avoid "effect re-runs every render" spam.
+  randomHoldMs: (isHighlight: boolean) => number;
+}) {
   const c = useThemeColors();
 
-  const toastOpacity = useRef(new Animated.Value(0)).current;
-  const toastTranslateY = useRef(new Animated.Value(-18)).current;
+  const holdFnRef = useRef(props.randomHoldMs);
+  useEffect(() => {
+    holdFnRef.current = props.randomHoldMs;
+  }, [props.randomHoldMs]);
+
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(-18)).current;
+
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastCueKeyRef = useRef<string>("");
+
+  const cueKey = useMemo(() => {
+    if (!props.cue) return "";
+    // key that changes ONLY when cue content changes
+    return `${props.cue.intensity}::${props.cue.message}::${props.cue.detail ?? ""}`;
+  }, [props.cue]);
 
   useEffect(() => {
-    if (!props.cue) return;
+    // No cue -> ensure hidden
+    if (!props.cue) {
+      lastCueKeyRef.current = "";
+      opacity.setValue(0);
+      translateY.setValue(-18);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = null;
+      return;
+    }
 
-    // reset any pending timer
+    // Same cue as last time -> do nothing (prevents spam)
+    if (cueKey && cueKey === lastCueKeyRef.current) return;
+    lastCueKeyRef.current = cueKey;
+
+    // Clear any previous timer
     if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = null;
 
-    toastOpacity.setValue(0);
-    toastTranslateY.setValue(-18);
+    // Animate in
+    opacity.setValue(0);
+    translateY.setValue(-18);
 
     Animated.parallel([
-      Animated.timing(toastOpacity, {
+      Animated.timing(opacity, {
         toValue: 1,
         duration: 180,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
-      Animated.timing(toastTranslateY, {
+      Animated.timing(translateY, {
         toValue: 0,
         duration: 180,
         easing: Easing.out(Easing.cubic),
@@ -46,17 +74,17 @@ export function InstantCueToast(props: Props) {
     ]).start();
 
     const isHighlight = props.cue.intensity !== "low";
-    const holdMs = props.randomHoldMs(isHighlight);
+    const holdMs = holdFnRef.current(isHighlight);
 
     timerRef.current = setTimeout(() => {
       Animated.parallel([
-        Animated.timing(toastOpacity, {
+        Animated.timing(opacity, {
           toValue: 0,
           duration: 220,
           easing: Easing.in(Easing.cubic),
           useNativeDriver: true,
         }),
-        Animated.timing(toastTranslateY, {
+        Animated.timing(translateY, {
           toValue: -10,
           duration: 220,
           easing: Easing.in(Easing.cubic),
@@ -69,11 +97,14 @@ export function InstantCueToast(props: Props) {
       timerRef.current = null;
     }, holdMs);
 
+    // Cleanup
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = null;
     };
-  }, [props.cue, props, toastOpacity, toastTranslateY]);
+    // IMPORTANT: do NOT depend on props.randomHoldMs (we ref it)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cueKey, props.cue, props.onClear, opacity, translateY]);
 
   if (!props.cue) return null;
 
@@ -94,8 +125,8 @@ export function InstantCueToast(props: Props) {
         paddingVertical: 10,
         paddingHorizontal: 12,
         backgroundColor: c.card,
-        opacity: toastOpacity,
-        transform: [{ translateY: toastTranslateY }],
+        opacity,
+        transform: [{ translateY }],
         shadowOpacity: 0.2,
         shadowRadius: 10,
         shadowOffset: { width: 0, height: 4 },
@@ -103,6 +134,7 @@ export function InstantCueToast(props: Props) {
       }}
     >
       <Text style={{ color: c.muted, marginBottom: 4, fontSize: 12 }}>Cue</Text>
+
       <Text
         style={{
           color: c.text,
@@ -112,7 +144,10 @@ export function InstantCueToast(props: Props) {
       >
         {props.cue.message}
       </Text>
-      {!!props.cue.detail && <Text style={{ color: c.muted, marginTop: 6, fontSize: 13 }}>{props.cue.detail}</Text>}
+
+      {!!props.cue.detail && (
+        <Text style={{ color: c.muted, marginTop: 6, fontSize: 13 }}>{props.cue.detail}</Text>
+      )}
     </Animated.View>
   );
 }

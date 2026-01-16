@@ -1,10 +1,16 @@
 // app/(tabs)/feed.tsx
+import { Link } from "expo-router";
+import { useMemo, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { useThemeColors } from "../../src/ui/theme";
-import { toggleReaction, useFeedAll, useMyReaction } from "../../src/lib/socialStore";
+import { useFriendEdges } from "../../src/lib/friendsStore";
 import type { EmoteId, WorkoutPost } from "../../src/lib/socialModel";
+import { toggleReaction, useFeedAll, useMyReaction } from "../../src/lib/socialStore";
+import { displayName, ME_ID } from "../../src/lib/userDirectory";
+import { FR } from "../../src/ui/forgerankStyle";
+import { useThemeColors } from "../../src/ui/theme";
 
-const MY_USER_ID = "u_demo_me"; // v1 placeholder (later: auth user id)
+type FeedMode = "public" | "friends";
+const ME = ME_ID;
 
 function timeAgo(ms: number): string {
   const s = Math.max(1, Math.floor((Date.now() - ms) / 1000));
@@ -34,170 +40,182 @@ function compactNum(n: number): string {
 
 export default function FeedTab() {
   const c = useThemeColors();
-  const posts = useFeedAll();
+  const all = useFeedAll();
+  const edges = useFriendEdges(ME);
+  const [mode, setMode] = useState<FeedMode>("public");
 
-  const EmoteButton = (p: { postId: string; emote: EmoteId; active?: boolean }) => (
+  const friendIdSet = useMemo(() => {
+    const set = new Set<string>();
+    for (const e of edges) {
+      if (e.status === "friends") set.add(e.otherUserId);
+    }
+    return set;
+  }, [edges]);
+
+  const posts = useMemo(() => {
+    const sorted = [...all].sort((a, b) => b.createdAtMs - a.createdAtMs);
+
+    if (mode === "public") return sorted;
+
+    // friends mode:
+    // - must be friends visibility
+    // - must be authored by a friend (or you)
+    return sorted.filter((p) => p.privacy === "friends" && (p.authorUserId === ME || friendIdSet.has(p.authorUserId)));
+  }, [all, mode, friendIdSet]);
+
+  const ToggleChip = (p: { label: string; active: boolean; onPress: () => void }) => (
     <Pressable
-      onPress={() => toggleReaction(p.postId, MY_USER_ID, p.emote)}
-      style={{
-        paddingVertical: 8,
-        paddingHorizontal: 10,
-        borderRadius: 999,
+      onPress={p.onPress}
+      style={({ pressed }) => ({
         borderWidth: 1,
         borderColor: p.active ? c.text : c.border,
         backgroundColor: p.active ? c.bg : c.card,
-      }}
+        borderRadius: FR.radius.pill,
+        paddingVertical: FR.space.x2,
+        paddingHorizontal: FR.space.x3,
+        opacity: pressed ? 0.7 : 1,
+      })}
     >
-      <Text style={{ color: c.text, fontWeight: "900" }}>{emoteLabel(p.emote)}</Text>
+      <Text style={{ color: c.text, ...FR.type.body }}>{p.label}</Text>
+    </Pressable>
+  );
+
+  const EmoteButton = (p: { postId: string; emote: EmoteId; active?: boolean }) => (
+    <Pressable
+      onPress={() => toggleReaction(p.postId, ME, p.emote)}
+      style={({ pressed }) => ({
+        paddingVertical: FR.space.x2,
+        paddingHorizontal: FR.space.x3,
+        borderRadius: FR.radius.pill,
+        borderWidth: 1,
+        borderColor: p.active ? c.text : c.border,
+        backgroundColor: p.active ? c.bg : c.card,
+        opacity: pressed ? 0.7 : 1,
+      })}
+    >
+      <Text style={{ color: c.text, ...FR.type.h3 }}>{emoteLabel(p.emote)}</Text>
     </Pressable>
   );
 
   const PostCard = (p: { post: WorkoutPost }) => {
-    const my = useMyReaction(p.post.id, MY_USER_ID);
+    const my = useMyReaction(p.post.id, ME);
     const top = p.post.workoutSnapshot?.topLines?.slice(0, 2) ?? [];
 
     return (
-      <View
-        style={{
-          borderWidth: 1,
-          borderColor: c.border,
-          borderRadius: 16,
-          padding: 14,
-          backgroundColor: c.card,
-          gap: 10,
-        }}
-      >
-        {/* Header */}
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" }}>
-          <View style={{ gap: 2 }}>
-            <Text style={{ color: c.text, fontWeight: "900", fontSize: 16 }}>
-              {p.post.authorDisplayName}
-              <Text style={{ color: c.muted, fontWeight: "900" }}>
-                {" "}
-                • {p.post.privacy === "friends" ? "Friends" : "Public"}
+      <Link href={({ pathname: "/post/[id]", params: { id: p.post.id } } as any) as any} asChild>
+        <Pressable
+          style={({ pressed }) => ({
+            ...FR.card({ card: c.card, border: c.border }),
+            gap: FR.space.x3,
+            opacity: pressed ? 0.85 : 1,
+          })}
+        >
+          {/* Header */}
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: FR.space.x3 }}>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text style={{ color: c.text, ...FR.type.h3 }}>{displayName(p.post.authorUserId)}</Text>
+              <Text style={{ color: c.muted, ...FR.type.sub }}>
+                {p.post.title ?? "Workout"} • {timeAgo(p.post.createdAtMs)}
               </Text>
-            </Text>
-            <Text style={{ color: c.muted, fontWeight: "800", fontSize: 12 }}>
-              {timeAgo(p.post.createdAtMs)}
-            </Text>
-          </View>
-
-          {!!p.post.title && (
-            <View
-              style={{
-                paddingVertical: 6,
-                paddingHorizontal: 10,
-                borderRadius: 999,
-                borderWidth: 1,
-                borderColor: c.border,
-                backgroundColor: c.bg,
-              }}
-            >
-              <Text style={{ color: c.text, fontWeight: "900", fontSize: 12 }}>{p.post.title}</Text>
             </View>
-          )}
-        </View>
 
-        {/* Caption */}
-        {!!p.post.caption && (
-          <Text style={{ color: c.text, lineHeight: 18 }}>{p.post.caption}</Text>
-        )}
-
-        {/* Snapshot lines */}
-        {top.length > 0 && (
-          <View style={{ gap: 6 }}>
-            {top.map((t, idx) => (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: FR.space.x2 }}>
               <View
-                key={`${t.exerciseName}-${idx}`}
                 style={{
                   borderWidth: 1,
                   borderColor: c.border,
-                  borderRadius: 12,
-                  paddingVertical: 10,
-                  paddingHorizontal: 12,
                   backgroundColor: c.bg,
-                  gap: 2,
+                  borderRadius: FR.radius.pill,
+                  paddingVertical: 4,
+                  paddingHorizontal: FR.space.x2,
                 }}
               >
-                <Text style={{ color: c.text, fontWeight: "900" }}>{t.exerciseName}</Text>
-                {!!t.bestSet && (
-                  <Text style={{ color: c.muted }}>
-                    {t.bestSet.weightLabel} × {t.bestSet.reps}
-                    {t.bestSet.e1rmLabel ? ` • e1RM ${t.bestSet.e1rmLabel}` : ""}
-                  </Text>
-                )}
+                <Text style={{ color: c.text, ...FR.type.mono }}>{p.post.privacy.toUpperCase()}</Text>
               </View>
-            ))}
+            </View>
           </View>
-        )}
 
-        {/* Meta row */}
-        <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
-          <Text style={{ color: c.muted, fontWeight: "800" }}>
-            ❤️ {compactNum(p.post.likeCount)}
-          </Text>
-          <Text style={{ color: c.muted, fontWeight: "800" }}>
-            💬 {compactNum(p.post.commentCount)}
-          </Text>
-          {!!p.post.durationSec && (
-            <Text style={{ color: c.muted, fontWeight: "800" }}>
-              ⏱ {Math.round(p.post.durationSec / 60)}m
+          {/* Snapshot lines */}
+          {top.length > 0 ? (
+            <View style={{ gap: 4 }}>
+              {top.map((line, i) => (
+                <Text style={{ color: c.text, ...FR.type.body }}>
+                 {typeof line === "string"
+                  ? line
+                  : `${line.exerciseName} — ${line.bestSet ? `${line.bestSet.weightLabel} x${line.bestSet.reps}${line.bestSet.e1rmLabel ? ` (${line.bestSet.e1rmLabel})` : ""}` : "—"}`}
+                </Text>
+              ))}
+            </View>
+          ) : (
+            <Text style={{ color: c.muted, ...FR.type.sub }}>
+              {p.post.exerciseCount ?? 0} exercises • {p.post.setCount ?? 0} sets • {p.post.durationSec ? `${Math.round(p.post.durationSec / 60)}m` : "—"}
             </Text>
           )}
-          {!!p.post.exerciseCount && (
-            <Text style={{ color: c.muted, fontWeight: "800" }}>
-              🏋️ {p.post.exerciseCount} ex
-            </Text>
-          )}
-          {!!p.post.setCount && (
-            <Text style={{ color: c.muted, fontWeight: "800" }}>
-              ✅ {p.post.setCount} sets
-            </Text>
-          )}
-        </View>
 
-        {/* Reactions */}
-        <View style={{ flexDirection: "row", gap: 8 }}>
-          <EmoteButton postId={p.post.id} emote="like" active={my?.emote === "like"} />
-          <EmoteButton postId={p.post.id} emote="fire" active={my?.emote === "fire"} />
-          <EmoteButton postId={p.post.id} emote="crown" active={my?.emote === "crown"} />
-          <EmoteButton postId={p.post.id} emote="clap" active={my?.emote === "clap"} />
-        </View>
+          {/* Footer row */}
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: FR.space.x3 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: FR.space.x2 }}>
+              <EmoteButton postId={p.post.id} emote="like" active={my?.emote === "like"} />
+              <EmoteButton postId={p.post.id} emote="fire" active={my?.emote === "fire"} />
+              <EmoteButton postId={p.post.id} emote="crown" active={my?.emote === "crown"} />
+            </View>
 
-        {/* Footer placeholder */}
-        <Text style={{ color: c.muted, fontSize: 12 }}>
-          Comments + full post view next (tap-through screen).
-        </Text>
-      </View>
+            <Text style={{ color: c.muted, ...FR.type.sub }}>
+              {compactNum(p.post.likeCount)} likes • {compactNum(p.post.commentCount)} comments
+            </Text>
+          </View>
+        </Pressable>
+      </Link>
     );
   };
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: c.bg }} contentContainerStyle={{ padding: 16, gap: 12 }}>
-      <Text style={{ color: c.text, fontSize: 26, fontWeight: "900" }}>Friends</Text>
-      <Text style={{ color: c.muted, lineHeight: 18 }}>
-        Public workouts from the community (local-first mock for now).
-      </Text>
-
-      {posts.length === 0 ? (
-        <View
-          style={{
-            borderWidth: 1,
-            borderColor: c.border,
-            borderRadius: 14,
-            padding: 16,
-            backgroundColor: c.card,
-            gap: 8,
-          }}
-        >
-          <Text style={{ color: c.text, fontWeight: "900", fontSize: 16 }}>No posts yet</Text>
-          <Text style={{ color: c.muted, lineHeight: 18 }}>
-            Soon you’ll be able to post a workout when you finish, and it will show up here.
+    <View style={{ flex: 1, backgroundColor: c.bg }}>
+      <ScrollView
+        contentContainerStyle={{
+          padding: FR.space.x4,
+          gap: FR.space.x3,
+          paddingBottom: FR.space.x6,
+        }}
+      >
+        {/* Title */}
+        <View style={{ gap: 6 }}>
+          <Text style={{ color: c.text, ...FR.type.h1 }}>Feed</Text>
+          <Text style={{ color: c.muted, ...FR.type.sub }}>
+            Friends workouts, PRs, and streak fuel. Keep it tight, keep it real.
           </Text>
         </View>
-      ) : (
-        posts.map((p) => <PostCard key={p.id} post={p} />)
-      )}
-    </ScrollView>
+
+        {/* Mode toggle */}
+        <View style={{ flexDirection: "row", gap: FR.space.x2 }}>
+          <ToggleChip label="Public" active={mode === "public"} onPress={() => setMode("public")} />
+          <ToggleChip label="Friends" active={mode === "friends"} onPress={() => setMode("friends")} />
+          <Link href={"/friends" as any} asChild>
+            <Pressable
+              style={({ pressed }) => ({
+                marginLeft: "auto",
+                ...FR.pillButton({ card: c.card, border: c.border }),
+                paddingVertical: FR.space.x2,
+                opacity: pressed ? 0.7 : 1,
+              })}
+            >
+              <Text style={{ color: c.text, ...FR.type.body }}>Manage</Text>
+            </Pressable>
+          </Link>
+        </View>
+
+        {/* Posts */}
+        {posts.length === 0 ? (
+          <View style={{ ...FR.card({ card: c.card, border: c.border }), gap: 6 }}>
+            <Text style={{ color: c.text, ...FR.type.h3 }}>Nothing here yet</Text>
+            <Text style={{ color: c.muted, ...FR.type.sub }}>
+              Finish a workout and share it — your first post will show up here.
+            </Text>
+          </View>
+        ) : (
+          posts.map((p) => <PostCard key={p.id} post={p} />)
+        )}
+      </ScrollView>
+    </View>
   );
 }
