@@ -1,10 +1,39 @@
 // app/(tabs)/profile.tsx
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View, ActivityIndicator } from "react-native";
 import { Link } from "expo-router";
+import { useEffect, useState } from "react";
 import { useThemeColors } from "../../src/ui/theme";
 
 export default function ProfileTab() {
   const c = useThemeColors();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate brief initialization
+    // In the future, this will load user stats, settings, etc.
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Show loading spinner briefly
+  if (isLoading) {
+    return (
+      <View style={{ 
+        flex: 1, 
+        backgroundColor: c.bg, 
+        justifyContent: 'center', 
+        alignItems: 'center' 
+      }}>
+        <ActivityIndicator size="large" color={c.text} />
+        <Text style={{ color: c.muted, marginTop: 12, fontSize: 14 }}>
+          Loading profile...
+        </Text>
+      </View>
+    );
+  }
 
   const CardLink = (props: { href: string; title: string; subtitle: string }) => (
     <Link href={props.href as any} asChild>
