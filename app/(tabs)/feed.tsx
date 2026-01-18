@@ -139,7 +139,10 @@ export default function FeedTab() {
           {top.length > 0 ? (
             <View style={{ gap: 4 }}>
               {top.map((line, i) => (
-                <Text style={{ color: c.text, ...FR.type.body }}>
+                <Text 
+                  key={i}
+                  style={{ color: c.text, ...FR.type.body }}>
+
                  {typeof line === "string"
                   ? line
                   : `${line.exerciseName} — ${line.bestSet ? `${line.bestSet.weightLabel} x${line.bestSet.reps}${line.bestSet.e1rmLabel ? ` (${line.bestSet.e1rmLabel})` : ""}` : "—"}`}
