@@ -4,16 +4,28 @@ import type { Routine } from "./routinesModel";
 
 const KEY = "routines.v1";
 
+// Queue for sequential persistence (prevents race conditions)
+let persistQueue: Promise<void> = Promise.resolve();
+
 async function persistRoutines(routines: Routine[]) {
-  await AsyncStorage.setItem(KEY, JSON.stringify(routines));
+  persistQueue = persistQueue.then(async () => {
+    try {
+      await AsyncStorage.setItem(KEY, JSON.stringify(routines));
+    } catch (err) {
+      console.error('Failed to persist routines:', err);
+    }
+  });
+  
+  return persistQueue;
 }
 
 async function loadRoutines(): Promise<Routine[]> {
-  const raw = await AsyncStorage.getItem(KEY);
-  if (!raw) return [];
   try {
+    const raw = await AsyncStorage.getItem(KEY);
+    if (!raw) return [];
     return JSON.parse(raw) as Routine[];
-  } catch {
+  } catch (err) {
+    console.error('Failed to load routines:', err);
     return [];
   }
 }
@@ -33,14 +45,28 @@ async function ensureHydrated() {
   if (hydrating) return hydrating;
 
   hydrating = (async () => {
-    routines = await loadRoutines();
-    hydrated = true;
-    notify();
+    try {
+      routines = await loadRoutines();
+      hydrated = true;
+      notify();
+    } catch (err) {
+      console.error('Failed to hydrate routines store:', err);
+      routines = [];
+      hydrated = true;
+      notify();
+    }
   })().finally(() => {
     hydrating = null;
   });
 
   return hydrating;
+}
+
+/**
+ * Exported hydration function for eager loading
+ */
+export async function hydrateRoutinesStore(): Promise<void> {
+  return ensureHydrated();
 }
 
 export function getRoutines(): Routine[] {
@@ -53,20 +79,30 @@ export function getRoutineById(id: string): Routine | undefined {
 
 export function upsertRoutine(next: Routine) {
   const idx = routines.findIndex((r) => r.id === next.id);
-  if (idx >= 0) routines[idx] = next;
-  else routines.unshift(next);
+  if (idx >= 0) {
+    routines[idx] = next;
+  } else {
+    routines.unshift(next);
+  }
 
-  // fire-and-forget persistence; UI shouldn't stall
-  void persistRoutines(routines);
-
+  // Queue persistence (non-blocking)
+  persistRoutines(routines);
   notify();
 }
 
 export function deleteRoutine(id: string) {
   routines = routines.filter((r) => r.id !== id);
+  
+  // Queue persistence (non-blocking)
+  persistRoutines(routines);
+  notify();
+}
 
-  void persistRoutines(routines);
-
+export function clearRoutines() {
+  routines = [];
+  
+  // Queue persistence (non-blocking)
+  persistRoutines(routines);
   notify();
 }
 
@@ -80,7 +116,12 @@ export function useRoutines(): Routine[] {
 
   useEffect(() => {
     const unsub = subscribeRoutines(() => setData(getRoutines()));
-    void ensureHydrated(); // hydrate after subscribing so notify triggers UI refresh
+    
+    // Hydrate after subscribing so notify triggers UI refresh
+    ensureHydrated().catch((err) => {
+      console.error('Failed to hydrate in useRoutines:', err);
+    });
+    
     return unsub;
   }, []);
 
@@ -92,7 +133,11 @@ export function useRoutine(id: string): Routine | undefined {
 
   useEffect(() => {
     const unsub = subscribeRoutines(() => setR(getRoutineById(id)));
-    void ensureHydrated();
+    
+    ensureHydrated().catch((err) => {
+      console.error('Failed to hydrate in useRoutine:', err);
+    });
+    
     return unsub;
   }, [id]);
 
