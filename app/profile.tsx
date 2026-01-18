@@ -1,10 +1,40 @@
-import { View, Text } from "react-native";
+import { View, Text, ActivityIndicator } from "react-native";
+import { useEffect, useState } from "react";
 import { useThemeColors } from "../src/ui/theme";
-import { useWorkoutSessions } from "../src/lib/workoutStore";
+import { useWorkoutSessions, hydrateWorkoutStore } from "../src/lib/workoutStore";
 
 export default function Profile() {
   const c = useThemeColors();
   const sessions = useWorkoutSessions();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Hydrate workout data from AsyncStorage
+    hydrateWorkoutStore()
+      .catch((err) => {
+        console.error('Failed to load profile data:', err);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
+
+  // Show loading spinner while hydrating
+  if (isLoading) {
+    return (
+      <View style={{ 
+        flex: 1, 
+        backgroundColor: c.bg, 
+        justifyContent: 'center', 
+        alignItems: 'center' 
+      }}>
+        <ActivityIndicator size="large" color={c.text} />
+        <Text style={{ color: c.muted, marginTop: 12, fontSize: 14 }}>
+          Loading profile...
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg, padding: 16, gap: 12 }}>
