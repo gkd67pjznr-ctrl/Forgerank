@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import type { LoggedSet } from "../loggerTypes";
 import { lbToKg } from "../units";
+import { validateWeight, validateReps } from "../validators/workout";
 
 type Defaults = { weightLb: number; reps: number };
 
@@ -81,41 +82,87 @@ export function useLiveWorkoutSession(initial?: { weightLb?: number; reps?: numb
 
   const setWeightForSet = useCallback(
     (setId: string, text: string) => {
-      const parsed = Number(text);
-      if (!Number.isFinite(parsed)) return;
-      updateSet(setId, { weightKg: lbToKg(Math.max(0, parsed)) });
+      const result = validateWeight(text);
+      
+      if (!result.valid) {
+        console.warn('Invalid weight for set:', result.error);
+        // TODO: Show toast notification to user
+        return;
+      }
+      
+      if (result.value !== undefined) {
+        updateSet(setId, { weightKg: lbToKg(result.value) });
+      }
     },
     [updateSet]
   );
 
   const setRepsForSet = useCallback(
     (setId: string, text: string) => {
-      const parsed = Math.floor(Number(text));
-      if (!Number.isFinite(parsed)) return;
-      updateSet(setId, { reps: Math.max(0, parsed) });
+      const result = validateReps(text);
+      
+      if (!result.valid) {
+        console.warn('Invalid reps for set:', result.error);
+        // TODO: Show toast notification to user
+        return;
+      }
+      
+      if (result.value !== undefined) {
+        updateSet(setId, { reps: result.value });
+      }
     },
     [updateSet]
   );
 
   const onWeightText = useCallback((t: string) => {
     setWeightLbText(t);
-    const n = Number(t);
-    if (Number.isFinite(n)) setWeightLb(Math.max(0, n));
+    
+    const result = validateWeight(t);
+    if (result.valid && result.value !== undefined) {
+      setWeightLb(result.value);
+    }
   }, []);
 
   const onRepsText = useCallback((t: string) => {
     setRepsText(t);
-    const n = Math.floor(Number(t));
-    if (Number.isFinite(n)) setReps(Math.max(0, n));
+    
+    const result = validateReps(t);
+    if (result.valid && result.value !== undefined) {
+      setReps(result.value);
+    }
   }, []);
 
   const onWeightCommit = useCallback(() => {
-    setWeightLbText(weightLb.toFixed(1));
-  }, [weightLb]);
+    const result = validateWeight(weightLbText);
+    
+    if (!result.valid) {
+      console.warn('Invalid weight on commit:', result.error);
+      // Reset to last valid value
+      setWeightLbText(weightLb.toFixed(1));
+      return;
+    }
+    
+    if (result.value !== undefined) {
+      setWeightLb(result.value);
+      setWeightLbText(result.value.toFixed(1));
+    }
+  }, [weightLb, weightLbText]);
 
   const onRepsCommit = useCallback(() => {
-    setRepsText(String(reps));
-  }, [reps]);
+    const result = validateReps(repsText);
+    
+    if (!result.valid) {
+      console.warn('Invalid reps on commit:', result.error);
+      // Reset to last valid value
+      setRepsText(String(reps));
+      return;
+    }
+    
+    if (result.value !== undefined) {
+      setReps(result.value);
+      setRepsText(String(result.value));
+    }
+  }, [reps, repsText]);
 
   const decWeight = useCallback(() => {
     setWeightLb((w) => {
@@ -127,7 +174,7 @@ export function useLiveWorkoutSession(initial?: { weightLb?: number; reps?: numb
 
   const incWeight = useCallback(() => {
     setWeightLb((w) => {
-      const next = w + 2.5;
+      const next = Math.min(2000, w + 2.5); // Max 2000 lbs
       setWeightLbText(next.toFixed(1));
       return next;
     });
@@ -135,7 +182,7 @@ export function useLiveWorkoutSession(initial?: { weightLb?: number; reps?: numb
 
   const decReps = useCallback(() => {
     setReps((r) => {
-      const next = Math.max(0, r - 1);
+      const next = Math.max(1, r - 1); // Min 1 rep
       setRepsText(String(next));
       return next;
     });
@@ -143,7 +190,7 @@ export function useLiveWorkoutSession(initial?: { weightLb?: number; reps?: numb
 
   const incReps = useCallback(() => {
     setReps((r) => {
-      const next = r + 1;
+      const next = Math.min(100, r + 1); // Max 100 reps
       setRepsText(String(next));
       return next;
     });
