@@ -4,6 +4,12 @@ import { Link } from "expo-router";
 import { useEffect, useState } from "react";
 import { useThemeColors } from "../../src/ui/theme";
 
+<Link href="/dev/plan-creator" asChild>
+  <Pressable style={{ padding: 12, backgroundColor: '#FF6B6B' }}>
+    <Text style={{ color: '#fff' }}>🔧 Plan Creator (Dev)</Text>
+  </Pressable>
+</Link>
+
 export default function ProfileTab() {
   const c = useThemeColors();
   const [isLoading, setIsLoading] = useState(true);
