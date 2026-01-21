@@ -1,4 +1,8 @@
 // app/live-workout.tsx
+import { useWorkoutTimer } from "../src/lib/hooks/useWorkoutTimer";
+import { WorkoutTimerBar } from "../src/ui/components/LiveWorkout/WorkoutTimerBar";
+import { WorkoutTimerDetails } from "../src/ui/components/LiveWorkout/WorkoutTimerDetails";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { makeDesignSystem } from "../src/ui/designSystem";
@@ -96,6 +100,7 @@ export default function LiveWorkout() {
   const [exerciseBlocks, setExerciseBlocks] = useState<string[]>(() => (planMode ? plannedExerciseIds.slice() : []));
   const [focusMode, setFocusMode] = useState(false);
   const [restVisible, setRestVisible] = useState(false);
+  const [showTimerDetails, setShowTimerDetails] = useState(false);
 
   const randomHoldMs = randomHighlightDurationMs;
 
@@ -151,6 +156,14 @@ export default function LiveWorkout() {
     },
   });
 
+  // Workout timer
+  const timer = useWorkoutTimer({
+   exercises: plan?.exercises || [],
+   loggedSets: sets,
+   startedAtMs: (persisted as any)?.startedAtMs,
+  });
+
+  
   const selectedExerciseName = useMemo(() => exerciseName(selectedExerciseId), [selectedExerciseId]);
 
   // Wrapper to add set using both session and orchestrator
@@ -249,6 +262,18 @@ export default function LiveWorkout() {
       />
 
       <ScrollView contentContainerStyle={{ padding: PAD, gap: GAP, paddingBottom: 140 }}>
+       {/* Timer Bar - NEW */}
+       <WorkoutTimerBar 
+        timer={timer} 
+         onPressDetails={() => setShowTimerDetails(true)} 
+       />
+
+       {/* Timer Details Modal - NEW */}
+       <WorkoutTimerDetails
+        visible={showTimerDetails}
+        timer={timer}
+        onClose={() => setShowTimerDetails(false)}
+       />
         {/* Header card */}
         <View
           style={{
