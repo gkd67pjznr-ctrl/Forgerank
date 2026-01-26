@@ -5,8 +5,9 @@
 
 ## Document Info
 - **Created:** 2026-01-23
-- **Last Updated:** 2026-01-25 (SPEC-008 RLS policies completed)
+- **Last Updated:** 2026-01-25 (Post-Interview Restructure)
 - **Status:** Active
+- **Timeline:** 3+ months to v1
 
 ---
 
@@ -22,7 +23,7 @@
 
 # PHASE 0: STABILIZATION (Current)
 
-## 0.1 Code Audit - 2026-01-23
+## 0.1 Code Audit
 | Task | Status | Assigned | Notes |
 |------|--------|----------|-------|
 | Run app and document all crashes | [ ] | Claude | |
@@ -34,7 +35,7 @@
 | Test iOS thoroughly | [ ] | User | Expo Go |
 | Test Android | [ ] | User | Expo Go |
 
-## 0.2 Critical Bug Fixes - 2026-01-23
+## 0.2 Critical Bug Fixes
 | Task | Status | Assigned | Notes |
 |------|--------|----------|-------|
 | Fix app crashes | [ ] | Claude | After audit |
@@ -43,7 +44,7 @@
 | Fix data persistence issues | [ ] | Claude | |
 | Fix workout logging flow | [ ] | Claude | |
 
-## 0.3 Code Cleanup - 2026-01-23
+## 0.3 Code Cleanup
 | Task | Status | Assigned | Notes |
 |------|--------|----------|-------|
 | Remove dead/unused code | [ ] | Claude | |
@@ -52,103 +53,124 @@
 | Add missing error handling | [ ] | Claude | |
 | Standardize code patterns | [ ] | Claude | |
 
-## 0.4 Documentation - 2026-01-23
+## 0.4 Zustand Migration Complete
 | Task | Status | Assigned | Notes |
 |------|--------|----------|-------|
-| Update CLAUDE.md with findings | [ ] | Claude | |
-| Document current bugs | [x] | Claude | In this file |
-| Create testing checklist | [ ] | Claude | |
-
-## 0.5 Zustand Migration - **[NEW 2026-01-23 12:15]**
-| Task | Status | Assigned | Notes |
-|------|--------|----------|-------|
-| Create Zustand store structure | [ ] | Claude | |
-| Migrate workoutStore | [ ] | Claude | |
 | Migrate currentSessionStore | [x] | Claude | SPEC-002 complete |
+| Migrate workoutStore | [ ] | Claude | |
 | Migrate routinesStore | [ ] | Claude | |
 | Migrate socialStore | [ ] | Claude | |
-| Migrate settings | [ ] | Claude | |
-| Set up AsyncStorage persist | [ ] | Claude | |
+| Migrate friendsStore | [ ] | Claude | |
+| Migrate feedStore | [ ] | Claude | |
+| Migrate chatStore | [ ] | Claude | |
+| Set up proper hydration flags | [ ] | Claude | |
 | Remove old module-level stores | [ ] | Claude | |
 | Update components to use new stores | [ ] | Claude | |
-| Test all store functionality | [ ] | Claude | |
+
+## 0.5 Error Handling
+| Task | Status | Assigned | Notes |
+|------|--------|----------|-------|
+| Add error boundary to root | [ ] | Claude | SPEC-001 |
+| Add per-tab error boundaries | [ ] | Claude | |
+| Add loading states everywhere | [ ] | Claude | |
+| Add empty states everywhere | [ ] | Claude | |
+| Add error states everywhere | [ ] | Claude | |
 
 ---
 
-# PHASE 1: CORE WORKOUT EXPERIENCE
+# PHASE 1: CORE WORKOUT EXPERIENCE (Month 1-2)
 
-## 1.1 Routine Workflow - 2026-01-23
+## 1.1 Set Input Polish
+| Task | Status | Assigned | Notes |
+|------|--------|----------|-------|
+| Implement quick number pad | [ ] | Claude | Calculator-style |
+| Implement stepper +/- buttons | [ ] | Claude | |
+| Implement auto-fill from last workout | [ ] | Claude | Smart defaults |
+| Add input validation | [ ] | Claude | SPEC-003 |
+| Add toast feedback for validation | [ ] | Claude | |
+
+## 1.2 Routine-Based Workflow
 | Task | Status | Assigned | Notes |
 |------|--------|----------|-------|
 | Design routine selection UI | [ ] | Claude | |
 | Implement routine list screen | [ ] | Claude | |
-| Add "Start Workout" from routine | [ ] | Claude | |
+| Add "Start Workout" from routine | [ ] | Claude | SPEC-010 |
 | Workout screen shows routine exercises | [ ] | Claude | |
-| Set completion tracking | [ ] | Claude | |
+| Set completion tracking per exercise | [ ] | Claude | |
 | Exercise completion tracking | [ ] | Claude | |
 | Finish workout summary | [ ] | Claude | |
 | Save completed workout | [ ] | Claude | |
 
-## 1.2 Exercise/Set Logging - 2026-01-23
+## 1.3 Rest Timer Enhancement
 | Task | Status | Assigned | Notes |
 |------|--------|----------|-------|
-| Weight input (keyboard optimized) | [ ] | Claude | |
-| Reps input | [ ] | Claude | |
-| Set type selection (warmup/working) | [ ] | Claude | |
-| Quick-log previous weight | [ ] | Claude | |
-| Delete set | [ ] | Claude | |
-| Edit logged set | [ ] | Claude | |
+| Auto-start timer after set | [ ] | Claude | |
+| Push notification when timer done | [ ] | Claude | Even when backgrounded |
+| Add sound effects | [ ] | Claude | Audio cues |
+| Add skip timer button | [ ] | Claude | |
+| Add +30s button | [ ] | Claude | |
+| Circular progress UI | [ ] | Claude | |
 
-## 1.3 Rest Timer - 2026-01-23
+## 1.4 PR Detection & Celebration
 | Task | Status | Assigned | Notes |
 |------|--------|----------|-------|
-| Timer auto-start after set | [ ] | Claude | |
-| Configurable default duration | [ ] | Claude | |
-| Visual countdown | [ ] | Claude | |
-| Haptic notification | [ ] | Claude | |
-| Audio notification (optional) | [ ] | Claude | |
-| Skip timer button | [ ] | Claude | |
-| Add time button | [ ] | Claude | |
+| Validate PR detection logic | [ ] | Claude | Test edge cases |
+| Design subtle celebration toast | [ ] | Claude | Not full-screen |
+| Add sound effects for PRs | [ ] | Claude | |
+| Add haptic feedback | [ ] | Claude | |
+| Add one-tap share to feed | [ ] | Claude | |
+| Add personalized cue messages | [ ] | Claude | From personality |
+
+## 1.5 Exercise Library
+| Task | Status | Assigned | Notes |
+|------|--------|----------|-------|
+| Audit current exercise list | [ ] | Claude | |
+| Add muscle group mappings | [ ] | Claude | Primary/secondary/tertiary |
+| Add exercise search | [ ] | Claude | |
+| Add exercise categories | [ ] | Claude | |
+| Add exercise details view | [ ] | Claude | |
 
 ---
 
-# PHASE 2: BACKEND (SUPABASE)
+# PHASE 2: BACKEND & AUTH (Month 2-3)
 
-## 2.1 Project Setup - 2026-01-23
+## 2.1 Supabase Setup
 | Task | Status | Assigned | Notes |
 |------|--------|----------|-------|
-| Create Supabase project | [ ] | User | Needs account |
-| Install Supabase client | [ ] | Claude | |
-| Configure environment variables | [ ] | Claude | |
-| Set up development environment | [ ] | Claude | |
+| Create Supabase project | [x] | User | SPEC-004 complete |
+| Install Supabase client | [x] | Claude | |
+| Configure environment variables | [x] | Claude | |
+| Health check function | [x] | Claude | |
 
-## 2.2 Database Schema - 2026-01-23
+## 2.2 Database Schema
 | Task | Status | Assigned | Notes |
 |------|--------|----------|-------|
-| Design users table | [ ] | Claude | |
+| Design users table | [ ] | Claude | SPEC-005 |
 | Design workouts table | [ ] | Claude | |
 | Design workout_sets table | [ ] | Claude | |
 | Design routines table | [ ] | Claude | |
-| Design exercises table | [ ] | Claude | |
 | Design friendships table | [ ] | Claude | |
 | Design posts table | [ ] | Claude | |
 | Design reactions table | [ ] | Claude | |
+| Design comments table | [ ] | Claude | |
+| Design user_levels table | [ ] | Claude | XP/currency |
+| Design streak_data table | [ ] | Claude | |
 | Write migration scripts | [ ] | Claude | |
 | Set up Row Level Security | [x] | Claude | SPEC-008 complete |
 
-## 2.3 Authentication - 2026-01-23
+## 2.3 Authentication
 | Task | Status | Assigned | Notes |
 |------|--------|----------|-------|
-| Email/password signup screen | [ ] | Claude | |
+| Email/password signup screen | [ ] | Claude | SPEC-006 |
 | Email/password login screen | [ ] | Claude | |
-| Google OAuth integration | [ ] | Claude | |
+| Google OAuth integration | [ ] | Claude | SPEC-007 |
 | Apple Sign In integration | [ ] | Claude | |
 | Auth state management | [ ] | Claude | |
 | Protected routes | [ ] | Claude | |
 | Logout functionality | [ ] | Claude | |
 | Password reset flow | [ ] | Claude | |
 
-## 2.4 Data Sync - 2026-01-23
+## 2.4 Data Sync
 | Task | Status | Assigned | Notes |
 |------|--------|----------|-------|
 | Migrate workoutStore to Supabase | [ ] | Claude | |
@@ -159,163 +181,221 @@
 
 ---
 
-# PHASE 2.5: ENHANCED FEATURES
+# PHASE 3: SOCIAL FEATURES (Month 3-4)
 
-## 2.5 Analytics & Progress Tracking - **[NEW 2026-01-25]**
-| Task | Status | Assigned | Notes | SPEC |
-|------|--------|----------|-------|-----|
-| Progress dashboard design | [ ] | Claude | | SPEC-011 |
-| Weight progression charts | [ ] | Claude | Line chart per exercise | SPEC-011 |
-| Volume tracking charts | [ ] | Claude | Weekly/monthly | SPEC-011 |
-| Personal records dashboard | [ ] | Claude | All PRs by exercise | SPEC-011 |
-| Workout frequency calendar | [ ] | Claude | GitHub-style heatmap | SPEC-011 |
-| Export data functionality | [ ] | Claude | CSV/JSON export | SPEC-011 |
+## 3.1 Friends System
+| Task | Status | Assigned | Notes |
+|------|--------|----------|-------|
+| Username search UI | [ ] | Claude | |
+| Send friend request | [ ] | Claude | |
+| Accept/decline requests UI | [ ] | Claude | |
+| Friends list (from Supabase) | [ ] | Claude | |
+| Unfriend functionality | [ ] | Claude | |
+| Block user functionality | [ ] | Claude | |
+| QR code friend add | [ ] | Claude | P1 |
+| Suggested users algorithm | [ ] | Claude | P1 |
 
-## 2.6 Notifications System - **[NEW 2026-01-25]**
-| Task | Status | Assigned | Notes | SPEC |
-|------|--------|----------|-------|-----|
-| Configure expo-notifications | [ ] | Claude | | SPEC-012 |
-| Supabase push integration | [ ] | Claude | | SPEC-012 |
-| Rest timer notifications | [ ] | Claude | Local notifications | SPEC-012 |
-| Workout reminders | [ ] | Claude | Scheduled notifications | SPEC-012 |
-| PR celebration notifications | [ ] | Claude | Push notification | SPEC-012 |
-| Notification settings screen | [ ] | Claude | Per-type toggles | SPEC-012 |
-| Notification center/history | [ ] | Claude | | SPEC-012 |
+## 3.2 Social Feed
+| Task | Status | Assigned | Notes |
+|------|--------|----------|-------|
+| Global feed tab | [ ] | Claude | |
+| Friends feed tab | [ ] | Claude | |
+| Post workout to Supabase | [ ] | Claude | |
+| Post with caption/notes | [ ] | Claude | |
+| Post with optional photo | [ ] | Claude | |
+| Body model default image | [ ] | Claude | |
+| Real-time feed updates | [ ] | Claude | |
+| Reactions (from Supabase) | [ ] | Claude | |
+| Comments on posts | [ ] | Claude | P1 |
+| Privacy enforcement | [ ] | Claude | Public by default |
 
-## 2.7 Timer & Rest System - **[NEW 2026-01-25]**
-| Task | Status | Assigned | Notes | SPEC |
-|------|--------|----------|-------|-----|
-| Enhanced rest timer UI | [ ] | Claude | Circular progress | SPEC-013 |
-| Interval timer mode | [ ] | Claude | Work/rest intervals | SPEC-013 |
-| Interval presets | [ ] | Claude | Save/load configurations | SPEC-013 |
-| Stopwatch mode | [ ] | Claude | Lap functionality | SPEC-013 |
-| Background timer display | [ ] | Claude | Modal overlay | SPEC-013 |
-
-## 2.8 Body Metrics Tracking - **[NEW 2026-01-25]**
-| Task | Status | Assigned | Notes | SPEC |
-|------|--------|----------|-------|-----|
-| Body weight logging | [ ] | Claude | With date/notes | SPEC-014 |
-| Body measurements form | [ ] | Claude | Chest/waist/etc | SPEC-014 |
-| Progress photo upload | [ ] | Claude | Supabase Storage | SPEC-014 |
-| Photo gallery view | [ ] | Claude | Grid with filters | SPEC-014 |
-| Photo comparison slider | [ ] | Claude | Before/after | SPEC-014 |
-| Metrics timeline charts | [ ] | Claude | Weight/trends | SPEC-014 |
-
-## 2.9 Deload & Peaking Cycles - **[NEW 2026-01-25]**
-| Task | Status | Assigned | Notes | SPEC |
-|------|--------|----------|-------|-----|
-| Training stress calculation | [ ] | Claude | Daily/weekly load | SPEC-015 |
-| Fatigue score tracking | [ ] | Claude | Acute/chronic | SPEC-015 |
-| Deload recommendations | [ ] | Claude | Auto-suggest | SPEC-015 |
-| Deload week generator | [ ] | Claude | Modify routines | SPEC-015 |
-| Peaking cycle builder | [ ] | Claude | Taper for competition | SPEC-015 |
-| Cycle phase dashboard | [ ] | Claude | Current phase display | SPEC-015 |
-
-## 2.10 Equipment Filtering - **[NEW 2026-01-25]**
-| Task | Status | Assigned | Notes | SPEC |
-|------|--------|----------|-------|-----|
-| Equipment type definitions | [ ] | Claude | Barbell/dumbbells/etc | SPEC-017 |
-| Equipment inventory screen | [ ] | Claude | User's available gear | SPEC-017 |
-| Gym/home mode toggle | [ ] | Claude | Filter exercises | SPEC-017 |
-| Equipment filter presets | [ ] | Claude | Quick filters | SPEC-017 |
-| Substitute exercise suggestions | [ ] | Claude | Similar movements | SPEC-017 |
-
-## 2.11 Theming System - **[NEW 2026-01-25]**
-| Task | Status | Assigned | Notes | SPEC |
-|------|--------|----------|-------|-----|
-| Theme provider setup | [ ] | Claude | React Context | SPEC-018 |
-| Dark mode implementation | [ ] | Claude | Full dark theme | SPEC-018 |
-| Color theme variants | [ ] | Claude | Blue/green/purple | SPEC-018 |
-| Theme settings screen | [ ] | Claude | Theme picker | SPEC-018 |
-| High-contrast mode | [ ] | Claude | Accessibility | SPEC-018 |
-
-## 2.12 Billing & Payments - **[NEW 2026-01-25]**
-| Task | Status | Assigned | Notes | SPEC |
-|------|--------|----------|-------|-----|
-| Stripe integration | [ ] | Claude | Web payments | SPEC-019 |
-| iOS StoreKit IAP | [ ] | Claude | Native subscriptions | SPEC-019 |
-| Android Play Billing IAP | [ ] | Claude | Native subscriptions | SPEC-019 |
-| Subscription tier definition | [ ] | Claude | Free/Pro/Elite | SPEC-019 |
-| Subscription management UI | [ ] | Claude | View/cancel plans | SPEC-019 |
-| Free trial implementation | [ ] | Claude | 7-day trial | SPEC-019 |
-| Receipt validation | [ ] | Claude | Apple/Google | SPEC-019 |
-
-## 2.13 Social Feed - **[NEW 2026-01-25]**
-| Task | Status | Assigned | Notes | SPEC |
-|------|--------|----------|-------|-----|
-| Friend system (Supabase) | [ ] | Claude | Requests/accept | SPEC-016 |
-| Activity feed (real-time) | [ ] | Claude | Supabase real-time | SPEC-016 |
-| Like/unlike activities | [ ] | Claude | | SPEC-016 |
-| Comments on workouts | [ ] | Claude | | SPEC-016 |
-| Workout sharing toggle | [ ] | Claude | Privacy controls | SPEC-016 |
-| User search/discovery | [ ] | Claude | Find friends | SPEC-016 |
+## 3.3 Leaderboards
+| Task | Status | Assigned | Notes |
+|------|--------|----------|-------|
+| Friends leaderboard UI | [ ] | Claude | |
+| Per-exercise rankings | [ ] | Claude | |
+| Overall Forgerank ranking | [ ] | Claude | |
+| Volume/consistency ranking | [ ] | Claude | P1 |
+| User level ranking | [ ] | Claude | P1 |
+| Time filters | [ ] | Claude | Week/month/all |
 
 ---
 
-# PHASE 3: SOCIAL FEATURES
+# PHASE 4: PERSONALITY & GAMIFICATION (Month 4-5)
 
-## 3.1 Friends - 2026-01-23
+## 4.1 Cue System / Gym Buddy
 | Task | Status | Assigned | Notes |
 |------|--------|----------|-------|
-| User search endpoint | [ ] | Claude | |
-| User search UI | [ ] | Claude | |
-| Send friend request | [ ] | Claude | |
-| Friend request notifications | [ ] | Claude | |
-| Accept/decline requests | [ ] | Claude | |
-| Friends list (from Supabase) | [ ] | Claude | |
-| Unfriend functionality | [ ] | Claude | |
+| Design personality data structure | [ ] | Claude | |
+| Create default personality | [ ] | Claude | |
+| Create 3-5 starter personalities | [ ] | Claude | |
+| Personality picker in settings | [ ] | Claude | |
+| Personality picker in onboarding | [ ] | Claude | |
+| PR cue messages by personality | [ ] | Claude | |
+| Rank-up cue messages | [ ] | Claude | |
+| Streak milestone cues | [ ] | Claude | |
+| Optional audio cues | [ ] | Claude | P1 |
 
-## 3.2 Social Feed - 2026-01-23
+## 4.2 User Level / XP System
 | Task | Status | Assigned | Notes |
 |------|--------|----------|-------|
-| Post workout to Supabase | [ ] | Claude | |
-| Fetch friends' posts | [ ] | Claude | |
-| Real-time feed updates | [ ] | Claude | |
-| Reactions (from Supabase) | [ ] | Claude | |
-| Privacy enforcement | [ ] | Claude | |
+| XP calculation logic | [ ] | Claude | |
+| Level thresholds | [ ] | Claude | |
+| XP bar UI | [ ] | Claude | |
+| Level-up celebration | [ ] | Claude | Animation |
+| Currency earning logic | [ ] | Claude | |
+
+## 4.3 Streak System
+| Task | Status | Assigned | Notes |
+|------|--------|----------|-------|
+| Streak counter logic | [ ] | Claude | |
+| 5-day break threshold | [ ] | Claude | |
+| Visual streak calendar | [ ] | Claude | GitHub-style |
+| Streak color progression | [ ] | Claude | Changes with length |
+| Streak animation in summary | [ ] | Claude | |
+| Streak milestone rewards | [ ] | Claude | Currency |
+
+## 4.4 Body Model
+| Task | Status | Assigned | Notes |
+|------|--------|----------|-------|
+| 2D body illustration asset | [ ] | Design | Need to create/source |
+| Male/female variants | [ ] | Design | |
+| Muscle subdivision regions | [ ] | Claude | Upper chest, rear delts, etc. |
+| Volume-based coloring logic | [ ] | Claude | |
+| Integration with exercise data | [ ] | Claude | Primary/secondary muscles |
+
+---
+
+# PHASE 5: POLISH & LAUNCH (Month 5+)
+
+## 5.1 Visual Design Overhaul
+| Task | Status | Assigned | Notes |
+|------|--------|----------|-------|
+| Dark gradient backgrounds | [ ] | Claude | Pure-inspired |
+| Bold typography refinement | [ ] | Claude | |
+| Reduce UI chrome | [ ] | Claude | More negative space |
+| Mysterious/exclusive vibe | [ ] | Claude | |
+| Design system update | [ ] | Claude | |
+
+## 5.2 Animations
+| Task | Status | Assigned | Notes |
+|------|--------|----------|-------|
+| PR celebration animation | [ ] | Claude | Subtle but satisfying |
+| Rank-up animation | [ ] | Claude | |
+| Streak animation | [ ] | Claude | |
+| Level-up animation | [ ] | Claude | |
+| Screen transition polish | [ ] | Claude | |
+
+## 5.3 Onboarding
+| Task | Status | Assigned | Notes |
+|------|--------|----------|-------|
+| Welcome screens | [ ] | Claude | |
+| Name input | [ ] | Claude | |
+| Bodyweight input | [ ] | Claude | |
+| Experience level selection | [ ] | Claude | |
+| Personality picker | [ ] | Claude | |
+
+## 5.4 Notifications
+| Task | Status | Assigned | Notes |
+|------|--------|----------|-------|
+| Configure expo-notifications | [ ] | Claude | |
+| Rest timer notifications | [ ] | Claude | Local |
+| Streak warning notifications | [ ] | Claude | |
+| Rest day reminders | [ ] | Claude | |
+| Notification settings screen | [ ] | Claude | |
+
+## 5.5 Testing & QA
+| Task | Status | Assigned | Notes |
+|------|--------|----------|-------|
+| Unit tests for scoring | [ ] | Claude | 100% coverage |
+| Unit tests for PR detection | [ ] | Claude | 100% coverage |
+| Integration tests for workout flow | [ ] | Claude | |
+| E2E tests | [ ] | Claude | |
+| Performance profiling | [ ] | Claude | |
+| Beta testing | [ ] | User | 5-10 users |
 
 ---
 
 # IMMEDIATE NEXT ACTIONS
 
-## Right Now - 2026-01-23
-1. [ ] Start code audit
-2. [ ] Run app in Expo Go, document issues
-3. [ ] Create bug report from findings
+## Right Now
+1. [ ] Complete code audit
+2. [ ] Fix critical bugs from audit
+3. [ ] Complete Zustand migration
+4. [ ] Add error boundaries
 
 ---
 
 # TESTING CHECKPOINTS
 
-## Expo Go Test #1 - After Phase 0
-**When:** After stabilization complete
-**Test:**
+## Checkpoint #1 - After Phase 0
 - [ ] App launches without crash
 - [ ] All navigation works
-- [ ] Can create routine
-- [ ] Can start workout from routine
-- [ ] Can log sets
-- [ ] Can finish workout
+- [ ] Can log a workout
 - [ ] Data persists after app close
 
-## Expo Go Test #2 - After Phase 1
-**When:** After core workout experience
-**Test:**
-- [ ] Full workout flow (routine → log → finish)
+## Checkpoint #2 - After Phase 1
+- [ ] Can start workout from routine
+- [ ] Set logging feels smooth
 - [ ] PR detection works
-- [ ] Rest timer works
-- [ ] All buttons functional
+- [ ] Rest timer works with notifications
 
-## Expo Go Test #3 - After Phase 2
-**When:** After backend integration
-**Test:**
-- [ ] Can sign up
-- [ ] Can log in
-- [ ] Data syncs across sessions
-- [ ] Offline workout saved
-- [ ] Online sync works
+## Checkpoint #3 - After Phase 2
+- [ ] Can sign up and log in
+- [ ] Data syncs to cloud
+- [ ] Works offline, syncs when online
+
+## Checkpoint #4 - After Phase 3
+- [ ] Can add friends
+- [ ] Feed shows friends' workouts
+- [ ] Can react to posts
+- [ ] Leaderboards work
+
+## Checkpoint #5 - After Phase 4
+- [ ] Personality system works
+- [ ] XP/levels working
+- [ ] Streaks tracking
+- [ ] Currency earning
+
+## Pre-Launch
+- [ ] Full regression test
+- [ ] Performance acceptable
+- [ ] Both iOS and Android working
+- [ ] Aesthetic meets vision
+- [ ] Beta feedback incorporated
 
 ---
 
-**End of TODO List v1.0**
+# SPEC MAPPING
+
+| SPEC | Title | Status | Phase |
+|------|-------|--------|-------|
+| SPEC-001 | Error Boundary Enhancement | Pending | 0 |
+| SPEC-002 | Session Persistence Fix | Complete | 0 |
+| SPEC-003 | Input Validation with Toast | Pending | 1 |
+| SPEC-004 | Supabase Project Setup | Complete | 2 |
+| SPEC-005 | Database Schema Design | Pending | 2 |
+| SPEC-006 | Auth Screens (Email/Password) | Pending | 2 |
+| SPEC-007 | OAuth Integration | Pending | 2 |
+| SPEC-008 | Row Level Security | Complete | 2 |
+| SPEC-009 | Zustand Migration Complete | Pending | 0 |
+| SPEC-010 | Routine-Based Workout Flow | Pending | 1 |
+
+---
+
+# DEPENDENCIES
+
+## Technical Dependencies
+- Supabase project (Phase 2+)
+- Body model illustration asset (Phase 4)
+- Sound effects assets (Phase 1, 4)
+
+## Design Dependencies
+- Pure-inspired design direction approval
+- Personality voice scripts/content
+- Body model artwork
+
+---
+
+**End of TODO List v2.0**
 *Updated as tasks are completed or added.*
