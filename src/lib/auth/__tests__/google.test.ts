@@ -51,18 +51,24 @@ describe('Google OAuth', () => {
   });
 
   describe('isGoogleAuthAvailable', () => {
+    const originalOS = Platform.OS;
+
+    afterEach(() => {
+      Object.defineProperty(Platform, 'OS', { value: originalOS, writable: true });
+    });
+
     it('should return true on iOS', () => {
-      jest.spyOn(Platform, 'OS', 'get').mockReturnValue('ios');
+      Object.defineProperty(Platform, 'OS', { value: 'ios', writable: true });
       expect(isGoogleAuthAvailable()).toBe(true);
     });
 
     it('should return true on Android', () => {
-      jest.spyOn(Platform, 'OS', 'get').mockReturnValue('android');
+      Object.defineProperty(Platform, 'OS', { value: 'android', writable: true });
       expect(isGoogleAuthAvailable()).toBe(true);
     });
 
     it('should return true on web', () => {
-      jest.spyOn(Platform, 'OS', 'get').mockReturnValue('web');
+      Object.defineProperty(Platform, 'OS', { value: 'web', writable: true });
       expect(isGoogleAuthAvailable()).toBe(true);
     });
   });

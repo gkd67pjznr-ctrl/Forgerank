@@ -2,6 +2,24 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Work Session Protocol
+
+**IMPORTANT:** Before starting any work, follow the workflow defined in `docs/CLAUDE_WORKFLOW.md`:
+
+1. **Session Startup** - Run status check, assess priorities, confirm task with user
+2. **The Work Loop** - Build → Test → Fix → Test → Document → Score
+3. **Completion Scoring** - Every task scored 0-100% against defined metrics
+4. **Quality Gates** - Tests must pass, score >= 70% for acceptable
+
+Shortcut triggers:
+- "Let's work" → Full startup protocol
+- "What should we do?" → Priority assessment
+- "Start [task]" → Jump to specific task
+
+See `docs/CLAUDE_WORKFLOW.md` for full protocol details.
+
+---
+
 ## Project Overview
 
 Forgerank is a React Native workout tracking app built with Expo. Key features:

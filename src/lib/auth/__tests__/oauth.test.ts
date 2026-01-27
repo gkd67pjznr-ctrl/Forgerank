@@ -17,6 +17,8 @@ import {
 jest.mock('expo-constants', () => ({
   expoConfig: {
     extra: {
+      supabaseUrl: 'https://test-project.supabase.co',
+      supabaseAnonKey: 'test-anon-key',
       googleClientId: 'test-google-client-id',
     },
   },

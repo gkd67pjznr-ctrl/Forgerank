@@ -43,10 +43,12 @@ export function createQueuedAsyncStorage(): StateStorage {
           await AsyncStorage.setItem(name, value);
         } catch (error) {
           // Enhanced error boundary with detailed logging for debugging
+          // Safely convert value to string for preview (value might be object or undefined)
+          const valueStr = typeof value === 'string' ? value : JSON.stringify(value) ?? '';
           const errorDetails = {
             key: name,
-            valueLength: value?.length ?? 0,
-            valuePreview: value?.substring(0, 100) ?? '',
+            valueLength: valueStr?.length ?? 0,
+            valuePreview: valueStr?.substring?.(0, 100) ?? String(value)?.substring(0, 100) ?? '',
             error: error instanceof Error ? error.message : String(error),
             stack: error instanceof Error ? error.stack : undefined,
             timestamp: new Date().toISOString(),

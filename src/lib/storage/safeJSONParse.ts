@@ -141,9 +141,10 @@ export function safeJSONStringify(value: unknown, fallback: string = '{}'): stri
  * Parse array with type safety
  *
  * Specialized version for arrays that ensures the result is always an array.
+ * Returns empty array if parsing fails OR if parsed value is not an array.
  *
  * @param raw - JSON string containing an array
- * @returns Parsed array or empty array on error
+ * @returns Parsed array or empty array on error/non-array
  *
  * @example
  * ```ts
@@ -152,16 +153,22 @@ export function safeJSONStringify(value: unknown, fallback: string = '{}'): stri
  * ```
  */
 export function safeJSONParseArray<T>(raw: string | null | undefined): T[] {
-  return safeJSONParse<T[]>(raw, []);
+  const parsed = safeJSONParse<unknown>(raw, null);
+  // Return empty array if parsed value is not an array
+  if (!Array.isArray(parsed)) {
+    return [];
+  }
+  return parsed as T[];
 }
 
 /**
  * Parse record (object) with type safety
  *
  * Specialized version for records/objects that ensures the result is always an object.
+ * Returns empty object if parsing fails OR if parsed value is not a plain object.
  *
  * @param raw - JSON string containing an object
- * @returns Parsed record or empty object on error
+ * @returns Parsed record or empty object on error/non-object
  *
  * @example
  * ```ts
@@ -170,5 +177,10 @@ export function safeJSONParseArray<T>(raw: string | null | undefined): T[] {
  * ```
  */
 export function safeJSONParseRecord<T>(raw: string | null | undefined): Record<string, T> {
-  return safeJSONParse<Record<string, T>>(raw, {});
+  const parsed = safeJSONParse<unknown>(raw, null);
+  // Return empty object if parsed value is not a plain object (exclude arrays, null)
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    return {};
+  }
+  return parsed as Record<string, T>;
 }

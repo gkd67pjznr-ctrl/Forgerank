@@ -1,9 +1,6 @@
 // src/lib/supabase/__tests__/client.test.ts
 // Characterization tests for Supabase client initialization and health check
 
-import Constants from 'expo-constants';
-import { supabase, healthCheck, HealthCheckResult } from '../client';
-
 // Mock expo-constants
 jest.mock('expo-constants', () => ({
   expoConfig: {
@@ -15,9 +12,28 @@ jest.mock('expo-constants', () => ({
 }));
 
 // Mock @supabase/supabase-js
-jest.mock('@supabase/supabase-js', () => ({
-  createClient: jest.fn(),
-}));
+jest.mock('@supabase/supabase-js', () => {
+  return {
+    createClient: jest.fn(() => ({
+      from: jest.fn(() => ({
+        select: jest.fn(),
+        insert: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+      })),
+      rpc: jest.fn(),
+      auth: {
+        signUp: jest.fn(),
+        signIn: jest.fn(),
+        signOut: jest.fn(),
+        onAuthStateChange: jest.fn(),
+      },
+    })),
+  };
+});
+
+import Constants from 'expo-constants';
+import { supabase, healthCheck, HealthCheckResult } from '../client';
 
 const { createClient } = require('@supabase/supabase-js');
 
@@ -132,12 +148,15 @@ describe('Supabase Client', () => {
   });
 
   describe('health check function behavior', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('should characterize: healthCheck returns correct structure on success', async () => {
-      // Mock successful RPC call
-      const mockRpc = jest.fn().mockResolvedValue({
+      // Mock successful RPC call - use the supabase client from import
+      (supabase.rpc as jest.Mock).mockResolvedValue({
         error: { message: 'table "nonexistent_table_for_health_check" does not exist' },
       });
-      supabase.rpc = mockRpc;
 
       const result = await healthCheck();
 
@@ -149,10 +168,9 @@ describe('Supabase Client', () => {
     });
 
     it('should characterize: healthCheck returns connected status on successful connection', async () => {
-      const mockRpc = jest.fn().mockResolvedValue({
+      (supabase.rpc as jest.Mock).mockResolvedValue({
         error: { message: 'table does not exist' },
       });
-      supabase.rpc = mockRpc;
 
       const result = await healthCheck();
 
@@ -162,8 +180,7 @@ describe('Supabase Client', () => {
     });
 
     it('should characterize: healthCheck returns error status on connection failure', async () => {
-      const mockRpc = jest.fn().mockRejectedValue(new Error('Network error'));
-      supabase.rpc = mockRpc;
+      (supabase.rpc as jest.Mock).mockRejectedValue(new Error('Network error'));
 
       const result = await healthCheck();
 
@@ -173,10 +190,9 @@ describe('Supabase Client', () => {
     });
 
     it('should characterize: healthCheck handles authentication errors', async () => {
-      const mockRpc = jest.fn().mockResolvedValue({
+      (supabase.rpc as jest.Mock).mockResolvedValue({
         error: { message: 'Invalid API key' },
       });
-      supabase.rpc = mockRpc;
 
       const result = await healthCheck();
 
@@ -185,14 +201,13 @@ describe('Supabase Client', () => {
     });
 
     it('should characterize: healthCheck calls Supabase RPC function', async () => {
-      const mockRpc = jest.fn().mockResolvedValue({
+      (supabase.rpc as jest.Mock).mockResolvedValue({
         error: { message: 'table does not exist' },
       });
-      supabase.rpc = mockRpc;
 
       await healthCheck();
 
-      expect(mockRpc).toHaveBeenCalledWith('get_table_columns', {
+      expect(supabase.rpc).toHaveBeenCalledWith('get_table_columns', {
         table_name: 'nonexistent_table_for_health_check',
       });
     });
