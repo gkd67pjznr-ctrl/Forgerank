@@ -3,7 +3,11 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { StateStorage } from 'zustand/middleware';
+import { createJSONStorage } from 'zustand/middleware';
 import { getGlobalPersistQueue } from '../../utils/PersistQueue';
+
+// Declare __DEV__ for TypeScript
+declare const __DEV__: boolean | undefined;
 
 /**
  * Create a Zustand storage adapter that queues AsyncStorage writes.
@@ -24,7 +28,7 @@ export function createQueuedAsyncStorage(): StateStorage {
         return await AsyncStorage.getItem(name);
       } catch (error) {
         // Enhanced error boundary with detailed logging
-        console.error('[createQueuedAsyncStorage] Failed to get item:', {
+        if (__DEV__) console.error('[createQueuedAsyncStorage] Failed to get item:', {
           key: name,
           error: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
@@ -43,17 +47,16 @@ export function createQueuedAsyncStorage(): StateStorage {
           await AsyncStorage.setItem(name, value);
         } catch (error) {
           // Enhanced error boundary with detailed logging for debugging
-          // Safely convert value to string for preview (value might be object or undefined)
-          const valueStr = typeof value === 'string' ? value : JSON.stringify(value) ?? '';
+          const valueStr = String(value ?? '');
           const errorDetails = {
             key: name,
-            valueLength: valueStr?.length ?? 0,
-            valuePreview: valueStr?.substring?.(0, 100) ?? String(value)?.substring(0, 100) ?? '',
+            valueLength: valueStr.length,
+            valuePreview: valueStr.substring(0, 100),
             error: error instanceof Error ? error.message : String(error),
             stack: error instanceof Error ? error.stack : undefined,
             timestamp: new Date().toISOString(),
           };
-          console.error('[createQueuedAsyncStorage] Failed to set item:', errorDetails);
+          if (__DEV__) console.error('[createQueuedAsyncStorage] Failed to set item:', errorDetails);
           throw error; // Re-throw to allow caller to handle
         }
       });
@@ -69,7 +72,7 @@ export function createQueuedAsyncStorage(): StateStorage {
           await AsyncStorage.removeItem(name);
         } catch (error) {
           // Enhanced error boundary with detailed logging
-          console.error('[createQueuedAsyncStorage] Failed to remove item:', {
+          if (__DEV__) console.error('[createQueuedAsyncStorage] Failed to remove item:', {
             key: name,
             error: error instanceof Error ? error.message : String(error),
             stack: error instanceof Error ? error.stack : undefined,
@@ -86,20 +89,8 @@ export function createQueuedAsyncStorage(): StateStorage {
  * Create a JSON storage adapter with queued AsyncStorage writes.
  * This is the drop-in replacement for zustand/middleware's createJSONStorage.
  *
- * Usage:
- * ```ts
- * import { persist, createJSONStorage } from 'zustand/middleware';
- * import { createQueuedAsyncStorage } from './storage/createQueuedAsyncStorage';
- *
- * persist(
- *   (set, get) => ({ ... }),
- *   {
- *     name: 'my-storage',
- *     storage: createJSONStorage(() => createQueuedAsyncStorage()),
- *   }
- * )
- * ```
+ * Wraps the queued AsyncStorage with JSON serialization/deserialization.
  */
 export function createQueuedJSONStorage() {
-  return createQueuedAsyncStorage();
+  return createJSONStorage(() => createQueuedAsyncStorage());
 }

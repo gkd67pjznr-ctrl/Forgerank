@@ -64,6 +64,17 @@ describe('authStore', () => {
     });
   });
 
+  // Helper function to create supabase chain mock
+  function createSupabaseChainMock(data: any, error: any) {
+    return {
+      select: jest.fn(() => ({
+        eq: jest.fn(() => ({
+          single: jest.fn(() => ({ data, error })),
+        })),
+      })),
+    };
+  }
+
   describe('signUp', () => {
     const { supabase } = require('../../supabase/client');
 
@@ -73,16 +84,7 @@ describe('authStore', () => {
         error: null,
       });
 
-      supabase.from.mockReturnValue({
-        select: jest.fn(() => ({
-          eq: jest.fn(() => ({
-            single: jest.fn(() => ({
-              data: mockDatabaseUser,
-              error: null,
-            }),
-          })),
-        })),
-      });
+      supabase.from.mockReturnValue(createSupabaseChainMock(mockDatabaseUser, null));
 
       const { result } = renderHook(() => useAuthStore());
 

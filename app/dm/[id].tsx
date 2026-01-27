@@ -1,7 +1,7 @@
 // app/dm/[id].tsx
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Platform, Pressable, ScrollView, Text, TextInput, View, KeyboardAvoidingView } from "react-native";
 import {
     markThreadRead,
     sendMessage,
@@ -148,7 +148,11 @@ export default function DMThreadScreen() {
         }}
       />
 
-      <View style={{ flex: 1, backgroundColor: c.bg }}>
+      <KeyboardAvoidingView
+        style={{ flex: 1, backgroundColor: c.bg }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        enabled
+      >
         {/* Messages */}
         <ScrollView
           ref={scrollerRef}
@@ -283,7 +287,7 @@ export default function DMThreadScreen() {
             </Pressable>
           </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </>
   );
 }

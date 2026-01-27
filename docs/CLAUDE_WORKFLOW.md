@@ -14,6 +14,7 @@ When a new session begins, Claude will:
 ```
 1. Read docs/progress.md - current state
 2. Read docs/FEATURE-MASTER.md - feature status
+3. Read all files in docs/features
 3. Run `npm test` - verify test suite passes
 4. Check for any blocking issues
 ```

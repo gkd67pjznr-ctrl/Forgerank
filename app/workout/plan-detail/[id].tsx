@@ -1,11 +1,11 @@
 import { View, Text, Pressable, ScrollView, ActivityIndicator, Alert } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams, type Href } from "expo-router";
 import { useState, useEffect } from "react";
 import { useThemeColors } from "../../../src/ui/theme";
 import { FR } from "../../../src/ui/forgerankStyle";
 import { usePlan, hydratePremadePlansStore } from "../../../src/lib/premadePlans/store";
 import { startPremadePlan, formatProgress } from "../../../src/lib/premadePlans/planToRoutine";
-import { setCurrentPlan } from "../../../src/lib/workoutPlanStore";
+import { setCurrentPlan, makePlanFromRoutine } from "../../../src/lib/workoutPlanStore";
 import { EXERCISES_V1 } from "../../../src/data/exercises";
 import { makeDesignSystem } from "../../../src/ui/designSystem";
 import { getCategoryInfo } from "../../../src/lib/premadePlans/categories";
@@ -52,20 +52,18 @@ export default function PlanDetail() {
               const { routine, progress } = startPremadePlan(plan);
 
               // Set as current plan for live workout
-              const workoutPlan = {
-                id: routine.id,
+              const workoutPlan = makePlanFromRoutine({
                 routineId: routine.id,
                 routineName: routine.name,
-                exercises: routine.exercises.map((ex, idx) => ({
+                exercises: routine.exercises.map((ex) => ({
                   exerciseId: ex.exerciseId,
                   targetSets: ex.targetSets,
                   targetRepsMin: ex.targetRepsMin,
                   targetRepsMax: ex.targetRepsMax,
                 })),
-                currentExerciseIndex: 0,
-              };
+              });
 
-              setCurrentPlan(workoutPlan as any);
+              setCurrentPlan(workoutPlan);
 
               const formatted = formatProgress(progress);
 
@@ -75,11 +73,11 @@ export default function PlanDetail() {
                 [
                   {
                     text: "View Routines",
-                    onPress: () => router.push("/routines" as any),
+                    onPress: () => router.push("/routines" as Href),
                   },
                   {
                     text: "Start Workout",
-                    onPress: () => router.push("/live-workout" as any),
+                    onPress: () => router.push("/live-workout" as Href),
                   },
                 ]
               );

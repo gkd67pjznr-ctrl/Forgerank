@@ -40,62 +40,6 @@ interface FeedState {
   setHydrated: (value: boolean) => void;
 }
 
-// Mock seed data for fresh installs
-function seedMockFeed(): { posts: FeedPost[]; likesByPostId: Record<string, Record<string, boolean>> } {
-  const now = Date.now();
-  const ME: ID = "u_demo_me";
-
-  const posts: FeedPost[] = [
-    {
-      id: "p_1" as ID,
-      authorUserId: "u_demo_4" as ID,
-      createdAtMs: now - 1000 * 60 * 12,
-      text: "Zone 2 + mobility. I'm trying to become unbreakable 😤",
-      visibility: "public",
-      baseLikeCount: 14,
-      baseCommentCount: 2,
-    },
-    {
-      id: "p_2" as ID,
-      authorUserId: "u_demo_1" as ID,
-      createdAtMs: now - 1000 * 60 * 42,
-      text: "Leg day. Again. Someone stop me.",
-      visibility: "public",
-      baseLikeCount: 28,
-      baseCommentCount: 6,
-    },
-    {
-      id: "p_3" as ID,
-      authorUserId: "u_demo_3" as ID,
-      createdAtMs: now - 1000 * 60 * 90,
-      text: "Bench felt light today. The arc is real.",
-      visibility: "friends",
-      baseLikeCount: 9,
-      baseCommentCount: 1,
-    },
-    {
-      id: "p_4" as ID,
-      authorUserId: "u_demo_2" as ID,
-      createdAtMs: now - 1000 * 60 * 180,
-      text: "Caffeine + heavy singles = spiritual experience.",
-      visibility: "public",
-      baseLikeCount: 21,
-      baseCommentCount: 3,
-    },
-    {
-      id: "p_5" as ID,
-      authorUserId: ME,
-      createdAtMs: now - 1000 * 60 * 260,
-      text: "Ship it. Small wins stack.",
-      visibility: "friends",
-      baseLikeCount: 3,
-      baseCommentCount: 0,
-    },
-  ];
-
-  return { posts, likesByPostId: {} };
-}
-
 /**
  * Visibility rules (viewing):
  * - public: anyone can view
@@ -208,13 +152,6 @@ export const useFeedStore = create<FeedState>()(
             }
           }
 
-          // Seed mock data if empty
-          if (state && state.posts.length === 0) {
-            const mockData = seedMockFeed();
-            state.posts = mockData.posts;
-            state.likesByPostId = mockData.likesByPostId;
-          }
-
           state?.setHydrated(true);
         }).catch((err) => {
           logError({ context: 'FeedStore', error: err, userMessage: 'Failed to load feed data' });
@@ -308,6 +245,10 @@ export const areFriends = checkAreFriends;
 // ============================================================================
 // Imperative action wrappers for non-React code
 // ============================================================================
+
+export function createPost(opts: { authorUserId: ID; text: string; visibility?: PostVisibility }): FeedPost {
+  return useFeedStore.getState().createPost(opts);
+}
 
 export function toggleLike(postId: string, userId: string): { ok: boolean; reason?: string } {
   return useFeedStore.getState().toggleLike(postId, userId);

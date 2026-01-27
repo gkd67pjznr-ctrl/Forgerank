@@ -3,6 +3,7 @@ import { View, Text, TextInput, Pressable, ScrollView, Alert } from "react-nativ
 import { useRouter } from "expo-router";
 import { useThemeColors } from "../../src/ui/theme";
 import { FR } from "../../src/ui/forgerankStyle";
+import { KeyboardAwareScrollView } from "../../src/ui/components/KeyboardAwareScrollView";
 import type { PlanCategory, PlanDifficulty, PremadePlan, PlanExercise } from "../../src/lib/premadePlans/types";
 import { addPlan } from "../../src/lib/premadePlans/store";
 import { EXERCISES_V1 } from "../../src/data/exercises";
@@ -125,7 +126,7 @@ export default function PlanCreator() {
   };
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: c.bg }}>
+    <KeyboardAwareScrollView style={{ flex: 1, backgroundColor: c.bg }}>
       <View style={{ padding: FR.space.x4, gap: FR.space.x4 }}>
         {/* Header */}
         <View>
@@ -483,6 +484,6 @@ export default function PlanCreator() {
           </Pressable>
         </View>
       </View>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }

@@ -1,7 +1,7 @@
 // app/post/[id].tsx
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
 import type { EmoteId } from "../../src/lib/socialModel";
 import {
     addComment,
@@ -11,6 +11,7 @@ import {
     usePostComments,
 } from "../../src/lib/stores/socialStore";
 import { useThemeColors } from "../../src/ui/theme";
+import { KeyboardAwareScrollView } from "../../src/ui/components/KeyboardAwareScrollView";
 
 const MY_USER_ID = "u_demo_me"; // v1 placeholder (later: auth)
 const MY_NAME = "You";
@@ -95,7 +96,7 @@ export default function PostDetailScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Post" }} />
-      <ScrollView style={{ flex: 1, backgroundColor: c.bg }} contentContainerStyle={{ padding: 16, gap: 12 }}>
+      <KeyboardAwareScrollView style={{ flex: 1, backgroundColor: c.bg }} contentContainerStyle={{ padding: 16, gap: 12 }}>
         {!post ? (
           <View
             style={{
@@ -252,7 +253,7 @@ export default function PostDetailScreen() {
             </View>
           </>
         )}
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </>
   );
 }

@@ -25,6 +25,9 @@ import { render, waitFor, fireEvent, act } from '@testing-library/react-native';
 import { TextInput } from 'react-native';
 import { Animated } from 'react-native';
 
+// @ts-ignore - UNSAFE_UNSAFE_getAllByType exists but may not be in types
+const { UNSAFE_UNSAFE_getAllByType } = render;
+
 // Mock expo-haptics for haptic feedback
 jest.mock('expo-haptics', () => ({
   notificationAsync: jest.fn().mockResolvedValue(undefined),
@@ -160,7 +163,7 @@ function ValidationFlowIntegration(): ReactElement {
   );
 
   return (
-    <>
+    <React.Fragment>
       <QuickAddSetCard
         weightLb={session.weightLb}
         reps={session.reps}
@@ -182,7 +185,7 @@ function ValidationFlowIntegration(): ReactElement {
         type={toast.type}
         onDismiss={dismiss}
       />
-    </>
+    </React.Fragment>
   );
 }
 
@@ -198,12 +201,12 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
 
   describe('Test Requirement 1: Invalid Weight Triggers Error Toast with Haptics', () => {
     it('should show error toast when user types weight exceeding 2000 lbs', async () => {
-      const { getByText, getByPlaceholderText, getAllByType } = render(
+      const { getByText, getByPlaceholderText, UNSAFE_getAllByType } = render(
         <ValidationFlowIntegration />
       );
 
       // Find weight input (first TextInput)
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
 
       // Type invalid weight (exceeds 2000 lbs)
@@ -225,9 +228,9 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
     });
 
     it('should show error toast when user types negative weight', async () => {
-      const { getByText, getAllByType } = render(<ValidationFlowIntegration />);
+      const { getByText, UNSAFE_getAllByType } = render(<ValidationFlowIntegration />);
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
 
       // Type invalid weight (negative)
@@ -249,9 +252,9 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
     });
 
     it('should show error toast when user types non-numeric weight', async () => {
-      const { getByText, getAllByType } = render(<ValidationFlowIntegration />);
+      const { getByText, UNSAFE_getAllByType } = render(<ValidationFlowIntegration />);
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
 
       // Type invalid weight (not a number)
@@ -273,9 +276,9 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
     });
 
     it('should show error toast when user types invalid reps (below 1)', async () => {
-      const { getByText, getAllByType } = render(<ValidationFlowIntegration />);
+      const { getByText, UNSAFE_getAllByType } = render(<ValidationFlowIntegration />);
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const repsInput = textInputs[1];
 
       // Type invalid reps (0)
@@ -297,9 +300,9 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
     });
 
     it('should show error toast when user types invalid reps (exceeds 100)', async () => {
-      const { getByText, getAllByType } = render(<ValidationFlowIntegration />);
+      const { getByText, UNSAFE_getAllByType } = render(<ValidationFlowIntegration />);
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const repsInput = textInputs[1];
 
       // Type invalid reps (exceeds 100)
@@ -323,11 +326,11 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
 
   describe('Test Requirement 2: Toast Disappears on Correction', () => {
     it('should dismiss error toast when user corrects invalid weight to valid value', async () => {
-      const { getByText, queryByText, getAllByType } = render(
+      const { getByText, queryByText, UNSAFE_getAllByType } = render(
         <ValidationFlowIntegration />
       );
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
 
       // Type invalid weight
@@ -354,11 +357,11 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
     });
 
     it('should dismiss error toast when user corrects invalid reps to valid value', async () => {
-      const { getByText, queryByText, getAllByType } = render(
+      const { getByText, queryByText, UNSAFE_getAllByType } = render(
         <ValidationFlowIntegration />
       );
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const repsInput = textInputs[1];
 
       // Type invalid reps
@@ -387,9 +390,9 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
 
   describe('Test Requirement 3: Valid Input Shows Success Toast', () => {
     it('should show success toast when user logs set with valid weight and reps', async () => {
-      const { getByText, getAllByType } = render(<ValidationFlowIntegration />);
+      const { getByText, UNSAFE_getAllByType } = render(<ValidationFlowIntegration />);
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
       const repsInput = textInputs[1];
 
@@ -422,9 +425,9 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
     });
 
     it('should show success toast with valid minimum weight and reps (1 rep, 0 lbs)', async () => {
-      const { getByText, getAllByType } = render(<ValidationFlowIntegration />);
+      const { getByText, UNSAFE_getAllByType } = render(<ValidationFlowIntegration />);
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
       const repsInput = textInputs[1];
 
@@ -451,9 +454,9 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
     });
 
     it('should show success toast with valid maximum weight and reps (2000 lbs, 100 reps)', async () => {
-      const { getByText, getAllByType } = render(<ValidationFlowIntegration />);
+      const { getByText, UNSAFE_getAllByType } = render(<ValidationFlowIntegration />);
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
       const repsInput = textInputs[1];
 
@@ -482,11 +485,11 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
 
   describe('Test Requirement 4: Toast Auto-Dismisses After 3 Seconds', () => {
     it('should auto-dismiss error toast after 3000ms', async () => {
-      const { getByText, queryByText, getAllByType } = render(
+      const { getByText, queryByText, UNSAFE_getAllByType } = render(
         <ValidationFlowIntegration />
       );
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
 
       // Trigger error toast
@@ -512,11 +515,11 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
     });
 
     it('should auto-dismiss success toast after 3000ms', async () => {
-      const { getByText, queryByText, getAllByType } = render(
+      const { getByText, queryByText, UNSAFE_getAllByType } = render(
         <ValidationFlowIntegration />
       );
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
       const repsInput = textInputs[1];
 
@@ -548,9 +551,9 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
     });
 
     it('should not dismiss toast before 3000ms', async () => {
-      const { getByText, getAllByType } = render(<ValidationFlowIntegration />);
+      const { getByText, UNSAFE_getAllByType } = render(<ValidationFlowIntegration />);
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
 
       // Trigger error toast
@@ -576,11 +579,11 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
 
   describe('Test Requirement 5: Multiple Validation Errors Show Sequentially', () => {
     it('should show multiple error toasts one after another for different validation errors', async () => {
-      const { getByText, queryByText, getAllByType } = render(
+      const { getByText, queryByText, UNSAFE_getAllByType } = render(
         <ValidationFlowIntegration />
       );
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
 
       // First error: weight exceeds max
@@ -638,9 +641,9 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
     });
 
     it('should handle rapid sequential validation errors', async () => {
-      const { getByText, getAllByType } = render(<ValidationFlowIntegration />);
+      const { getByText, UNSAFE_getAllByType } = render(<ValidationFlowIntegration />);
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
 
       // Rapidly trigger different errors
@@ -679,11 +682,11 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
     });
 
     it('should transition from error to success toast', async () => {
-      const { getByText, queryByText, getAllByType } = render(
+      const { getByText, queryByText, UNSAFE_getAllByType } = render(
         <ValidationFlowIntegration />
       );
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
       const repsInput = textInputs[1];
 
@@ -735,9 +738,9 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
 
   describe('Haptic Feedback Integration', () => {
     it('should trigger error haptic for weight validation errors', async () => {
-      const { getAllByType } = render(<ValidationFlowIntegration />);
+      const { UNSAFE_getAllByType } = render(<ValidationFlowIntegration />);
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
 
       await act(async () => {
@@ -753,9 +756,9 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
     });
 
     it('should trigger error haptic for reps validation errors', async () => {
-      const { getAllByType } = render(<ValidationFlowIntegration />);
+      const { UNSAFE_getAllByType } = render(<ValidationFlowIntegration />);
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const repsInput = textInputs[1];
 
       await act(async () => {
@@ -771,9 +774,9 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
     });
 
     it('should trigger success haptic when set is logged', async () => {
-      const { getByText, getAllByType } = render(<ValidationFlowIntegration />);
+      const { getByText, UNSAFE_getAllByType } = render(<ValidationFlowIntegration />);
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
       const repsInput = textInputs[1];
 
@@ -800,9 +803,9 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
         new Error('Haptic unavailable')
       );
 
-      const { getByText, getAllByType } = render(<ValidationFlowIntegration />);
+      const { getByText, UNSAFE_getAllByType } = render(<ValidationFlowIntegration />);
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
 
       // Should not throw despite haptic error
@@ -820,9 +823,9 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
 
   describe('Input State Management', () => {
     it('should preserve valid input state after validation error is corrected', async () => {
-      const { getByText, getAllByType } = render(<ValidationFlowIntegration />);
+      const { getByText, UNSAFE_getAllByType } = render(<ValidationFlowIntegration />);
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
 
       // Type invalid weight
@@ -849,9 +852,9 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
     });
 
     it('should reset input to last valid value on validation error', async () => {
-      const { getByText, getAllByType } = render(<ValidationFlowIntegration />);
+      const { getByText, UNSAFE_getAllByType } = render(<ValidationFlowIntegration />);
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
 
       // Start with valid weight
@@ -874,11 +877,11 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
     });
 
     it('should handle decimal inputs correctly', async () => {
-      const { getByText, queryByText, getAllByType } = render(
+      const { getByText, queryByText, UNSAFE_getAllByType } = render(
         <ValidationFlowIntegration />
       );
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
 
       // Type valid decimal weight
@@ -895,9 +898,9 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
 
   describe('Edge Cases and Boundary Conditions', () => {
     it('should handle empty weight input gracefully', async () => {
-      const { getAllByType } = render(<ValidationFlowIntegration />);
+      const { UNSAFE_getAllByType } = render(<ValidationFlowIntegration />);
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
 
       // Type empty input
@@ -911,9 +914,9 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
     });
 
     it('should handle empty reps input gracefully', async () => {
-      const { getAllByType } = render(<ValidationFlowIntegration />);
+      const { UNSAFE_getAllByType } = render(<ValidationFlowIntegration />);
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const repsInput = textInputs[1];
 
       // Type empty input
@@ -927,9 +930,9 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
     });
 
     it('should handle boundary values (2000 lbs)', async () => {
-      const { queryByText, getAllByType } = render(<ValidationFlowIntegration />);
+      const { queryByText, UNSAFE_getAllByType } = render(<ValidationFlowIntegration />);
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
 
       // Type exact boundary value
@@ -943,9 +946,9 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
     });
 
     it('should handle boundary values (100 reps)', async () => {
-      const { queryByText, getAllByType } = render(<ValidationFlowIntegration />);
+      const { queryByText, UNSAFE_getAllByType } = render(<ValidationFlowIntegration />);
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const repsInput = textInputs[1];
 
       // Type exact boundary value
@@ -959,9 +962,9 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
     });
 
     it('should reject values just above boundaries', async () => {
-      const { getByText, getAllByType } = render(<ValidationFlowIntegration />);
+      const { getByText, UNSAFE_getAllByType } = render(<ValidationFlowIntegration />);
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
       const repsInput = textInputs[1];
 
@@ -1011,7 +1014,7 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
         }
 
         return (
-          <>
+          <React.Fragment>
             <QuickAddSetCard
               weightLb={session.weightLb}
               reps={session.reps}
@@ -1033,13 +1036,13 @@ describe('Validation Flow - End-to-End Integration Tests', () => {
               type={toast.type}
               onDismiss={dismiss}
             />
-          </>
+          </React.Fragment>
         );
       };
 
-      const { getByText, getAllByType } = render(<TestWrapper />);
+      const { getByText, UNSAFE_getAllByType } = render(<TestWrapper />);
 
-      const textInputs = getAllByType(TextInput);
+      const textInputs = UNSAFE_getAllByType(TextInput);
       const weightInput = textInputs[0];
       const repsInput = textInputs[1];
 

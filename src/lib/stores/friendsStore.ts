@@ -23,20 +23,6 @@ interface FriendsState {
   setHydrated: (value: boolean) => void;
 }
 
-// Mock seed data for fresh installs
-function seedMockFriends(): FriendEdge[] {
-  const now = Date.now();
-  const me: ID = "u_demo_me";
-
-  return [
-    { userId: me, otherUserId: "u_demo_1", status: "friends", updatedAtMs: now - 1000 * 60 * 60 },
-    { userId: "u_demo_1", otherUserId: me, status: "friends", updatedAtMs: now - 1000 * 60 * 60 },
-    { userId: me, otherUserId: "u_demo_3", status: "requested", updatedAtMs: now - 1000 * 60 * 20 },
-    { userId: "u_demo_3", otherUserId: me, status: "pending", updatedAtMs: now - 1000 * 60 * 20 },
-    { userId: me, otherUserId: "u_demo_spam", status: "blocked", updatedAtMs: now - 1000 * 60 * 5 },
-  ];
-}
-
 export const useFriendsStore = create<FriendsState>()(
   persist(
     (set, get) => ({
@@ -132,11 +118,6 @@ export const useFriendsStore = create<FriendsState>()(
                 logError({ context: 'FriendsStore', error: err, userMessage: 'Failed to remove old friends data' });
               });
             }
-          }
-
-          // Seed mock data if empty
-          if (state && state.edges.length === 0) {
-            state.edges = seedMockFriends();
           }
 
           state?.setHydrated(true);

@@ -1,6 +1,6 @@
 // app/(tabs)/profile.tsx
 import { Pressable, ScrollView, Text, View, ActivityIndicator, Modal, TextInput, Alert } from "react-native";
-import { Link } from "expo-router";
+import { Link, type Href } from "expo-router";
 import { useEffect, useState } from "react";
 import { useThemeColors } from "../../src/ui/theme";
 import { useDevMode } from "../../src/lib/devMode";
@@ -71,7 +71,7 @@ export default function ProfileTab() {
   }
 
   const CardLink = (props: { href: string; title: string; subtitle: string }) => (
-    <Link href={props.href as any} asChild>
+    <Link href={props.href as Href} asChild>
       <Pressable
         style={{
           borderWidth: 1,

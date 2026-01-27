@@ -12,30 +12,23 @@ jest.mock('expo-constants', () => ({
 }));
 
 // Mock @supabase/supabase-js
-jest.mock('@supabase/supabase-js', () => {
-  return {
-    createClient: jest.fn(() => ({
-      from: jest.fn(() => ({
-        select: jest.fn(),
-        insert: jest.fn(),
-        update: jest.fn(),
-        delete: jest.fn(),
-      })),
-      rpc: jest.fn(),
-      auth: {
-        signUp: jest.fn(),
-        signIn: jest.fn(),
-        signOut: jest.fn(),
-        onAuthStateChange: jest.fn(),
-      },
-    })),
-  };
-});
+jest.mock('@supabase/supabase-js', () => ({
+  createClient: jest.fn(() => ({
+    from: jest.fn(),
+    auth: {
+      signUp: jest.fn(),
+      signInWithPassword: jest.fn(),
+      signOut: jest.fn(),
+      onAuthStateChange: jest.fn(),
+    },
+    storage: {
+      bucket: jest.fn(),
+    },
+  })),
+}));
 
 import Constants from 'expo-constants';
 import { supabase, healthCheck, HealthCheckResult } from '../client';
-
-const { createClient } = require('@supabase/supabase-js');
 
 describe('Supabase Client', () => {
   describe('environment variable access via Constants.expoConfig.extra', () => {

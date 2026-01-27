@@ -1,42 +1,55 @@
 // app/live-workout.tsx
-import { useWorkoutTimer } from "../src/lib/hooks/useWorkoutTimer";
-import { WorkoutTimerBar } from "../src/ui/components/LiveWorkout/WorkoutTimerBar";
-import { WorkoutTimerDetails } from "../src/ui/components/LiveWorkout/WorkoutTimerDetails";
-
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
+
 import { makeDesignSystem } from "../src/ui/designSystem";
 import { FR } from "../src/ui/forgerankStyle";
 import { useThemeColors } from "../src/ui/theme";
 
-import { EXERCISES_V1 } from "../src/data/exercises";
-import type { UnitSystem } from "../src/lib/buckets";
-import type { LoggedSet } from "../src/lib/loggerTypes";
-import { randomHighlightDurationMs } from "../src/lib/perSetCue";
-import { getSettings } from "../src/lib/stores"; // [MIGRATED 2026-01-23] Using Zustand
+import { getSettings } from "../src/lib/stores";
 import { useCurrentPlan } from "../src/lib/workoutPlanStore";
 
+// Components
 import { ExerciseBlocksCard } from "../src/ui/components/LiveWorkout/ExerciseBlocksCard";
 import { ExercisePicker } from "../src/ui/components/LiveWorkout/ExercisePicker";
 import { InstantCueToast } from "../src/ui/components/LiveWorkout/InstantCueToast";
 import { QuickAddSetCard } from "../src/ui/components/LiveWorkout/QuickAddSetCard";
 import { RestTimerOverlay } from "../src/ui/components/RestTimerOverlay";
 import { ValidationToast } from "../src/ui/components/LiveWorkout/ValidationToast";
-import { useValidationToast } from "../src/lib/hooks/useValidationToast";
+import { WorkoutTimerBar } from "../src/ui/components/LiveWorkout/WorkoutTimerBar";
+import { WorkoutTimerDetails } from "../src/ui/components/LiveWorkout/WorkoutTimerDetails";
 
-// [MIGRATED 2026-01-23] Using Zustand stores
+// New extracted components
+import { WorkoutHeader } from "../src/ui/components/LiveWorkout/WorkoutHeader";
+import { WorkoutControls } from "../src/ui/components/LiveWorkout/WorkoutControls";
+import { SelectedExerciseCard } from "../src/ui/components/LiveWorkout/SelectedExerciseCard";
+import { WorkoutActions } from "../src/ui/components/LiveWorkout/WorkoutActions";
+import { RecapCues } from "../src/ui/components/LiveWorkout/RecapCues";
+
+// Hooks
+import { useValidationToast } from "../src/lib/hooks/useValidationToast";
+import { useExercisePickerState } from "../src/lib/hooks/useExercisePickerState";
+import { useLiveWorkoutSession } from "../src/lib/hooks/useLiveWorkoutSession";
+import { useWorkoutOrchestrator } from "../src/lib/hooks/useWorkoutOrchestrator";
+import { useWorkoutTimer } from "../src/lib/hooks/useWorkoutTimer";
+
+// Stores
 import {
   ensureCurrentSession,
   updateCurrentSession,
   useCurrentSession,
 } from "../src/lib/stores";
-import { useLiveWorkoutSession } from "../src/lib/hooks/useLiveWorkoutSession";
-import { useWorkoutOrchestrator } from "../src/lib/hooks/useWorkoutOrchestrator";
-import { calculatePlanProgress, formatProgressPercent } from "../src/lib/utils/routineProgress";
 
-function exerciseName(exerciseId: string) {
-  return EXERCISES_V1.find((e) => e.id === exerciseId)?.name ?? exerciseId;
-}
+// Utils
+import { randomHighlightDurationMs } from "../src/lib/perSetCue";
+
+// Constants
+const DEFAULT_REST_SECONDS = 90;
+const DEFAULT_TARGET_REPS_MIN = 8;
+const DEFAULT_TARGET_REPS_MAX = 12;
+const SCROLL_BOTTOM_PADDING = 140;
+const SPEECH_RATE = 1.05;
+const SPEECH_PITCH = 1.1;
 
 // Optional runtime requires (no-op if not installed)
 let Haptics: any = null;
@@ -62,7 +75,7 @@ function onRestTimerDoneFeedback() {
 
   if (s.soundsEnabled && Speech) {
     Speech.stop?.();
-    Speech.speak?.("Rest over.", { rate: 1.05, pitch: 1.1 });
+    Speech.speak?.("Rest over.", { rate: SPEECH_RATE, pitch: SPEECH_PITCH });
   }
 }
 
@@ -85,84 +98,40 @@ export default function LiveWorkout() {
   // Unified spacing/radii via FR
   const PAD = FR.space.x4;
   const GAP = FR.space.x3;
-  const CARD_R = FR.radius.card;
-  const PILL_R = FR.radius.pill;
 
-  const unit: UnitSystem = "lb";
-
+  // Plan data
   const plan = useCurrentPlan();
-  const planMode = !!plan && plan.exercises.length > 0;
 
-  const plannedExerciseIds = plan?.exercises.map((x) => x.exerciseId) ?? [];
-  const currentPlannedExerciseId = planMode ? plan!.exercises[plan!.currentExerciseIndex]?.exerciseId : null;
-
+  // Persisted session state
   const persisted = useCurrentSession();
   const initializedRef = useRef(false);
 
-  const [pickerMode, setPickerMode] = useState<null | "changeSelected" | "addBlock">(null);
-  const [selectedExerciseId, setSelectedExerciseId] = useState(currentPlannedExerciseId ?? EXERCISES_V1[0].id);
-  const [exerciseBlocks, setExerciseBlocks] = useState<string[]>(() => (planMode ? plannedExerciseIds.slice() : []));
+  // Focus mode and rest timer state
   const [focusMode, setFocusMode] = useState(false);
   const [restVisible, setRestVisible] = useState(false);
   const [showTimerDetails, setShowTimerDetails] = useState(false);
 
-  const randomHoldMs = randomHighlightDurationMs;
+  // Exercise picker state - extracted to custom hook
+  const pickerState = useExercisePickerState({
+    plan,
+    persisted,
+  });
 
-  // Initialize session on mount
-  useEffect(() => {
-    if (initializedRef.current) return;
-    if (persisted) {
-      initializedRef.current = true;
-      setSelectedExerciseId(persisted.selectedExerciseId ?? selectedExerciseId);
-      setExerciseBlocks(persisted.exerciseBlocks?.length ? persisted.exerciseBlocks : exerciseBlocks);
-      return;
-    }
-
-    const first = currentPlannedExerciseId ?? EXERCISES_V1[0]?.id ?? "unknown";
-    ensureCurrentSession({
-      selectedExerciseId: first,
-      exerciseBlocks: planMode ? plannedExerciseIds.slice() : first ? [first] : [],
-    });
-    initializedRef.current = true;
-  }, [persisted, planMode, currentPlannedExerciseId, selectedExerciseId, exerciseBlocks, plannedExerciseIds]);
-
-  // Sync selected exercise with plan
-  useEffect(() => {
-    if (planMode && currentPlannedExerciseId) {
-      setSelectedExerciseId(currentPlannedExerciseId);
-      updateCurrentSession((s: any) => ({ ...s, selectedExerciseId: currentPlannedExerciseId }));
-    }
-  }, [planMode, currentPlannedExerciseId]);
-
-  // Sync exercise blocks with plan
-  useEffect(() => {
-    if (!planMode) return;
-    setExerciseBlocks((prev) => (prev.length ? prev : plannedExerciseIds.slice()));
-  }, [planMode, plannedExerciseIds]);
-
-  // Persist UI state
-  useEffect(() => {
-    updateCurrentSession((s: any) => ({ ...s, selectedExerciseId, exerciseBlocks }));
-  }, [selectedExerciseId, exerciseBlocks]);
-
-  // Validation toast for error/success feedback (DDD SPEC-003)
+  // Validation toast for error/success feedback
   const { toast, showError, showSuccess, dismiss } = useValidationToast();
 
   // Session with validation callbacks
-  const session = useLiveWorkoutSession(
-    undefined,
-    {
-      onError: showError,
-      onSuccess: showSuccess,
-    }
-  );
+  const session = useLiveWorkoutSession(undefined, {
+    onError: showError,
+    onSuccess: showSuccess,
+  });
 
   // Workout orchestrator with haptic/sound callbacks
   const orchestrator = useWorkoutOrchestrator({
     plan: plan ?? null,
-    unit,
+    unit: "lb" as const,
     onHaptic: (type) => {
-      if (type === 'pr') hapticPR();
+      if (type === "pr") hapticPR();
       else hapticLight();
     },
     onSound: (type) => {
@@ -170,79 +139,7 @@ export default function LiveWorkout() {
     },
   });
 
-  const selectedExerciseName = useMemo(() => exerciseName(selectedExerciseId), [selectedExerciseId]);
-
-  // Add set to the workout - uses the session's addSet function
-  function addSetInternal(exerciseId: string, source: "quick" | "block") {
-    // Call the session's addSet function
-    const result = session.addSet(exerciseId);
-
-    // Use orchestrator for PR detection
-    orchestrator.addSetForExercise(exerciseId, result.weightLb, result.reps);
-
-    // Update selected exercise if from quick add
-    if (source === "quick") {
-      setSelectedExerciseId(exerciseId);
-    }
-
-    // Show rest timer after adding a set
-    setRestVisible(true);
-  }
-
-  const addSet = () => addSetInternal(selectedExerciseId, "quick");
-  const addSetForExercise = (exerciseId: string) => addSetInternal(exerciseId, "block");
-
-  const handleSaveAsRoutine = () => {
-    orchestrator.saveAsRoutine(exerciseBlocks, session.sets);
-  };
-
-  const handleReset = () => {
-    initializedRef.current = false;
-    orchestrator.reset(plannedExerciseIds);
-    setRestVisible(false);
-    setFocusMode(false);
-  };
-
-  // FIX: Only allow adding exercises in free workout mode
-  const handleAddExercise = () => {
-    if (planMode) {
-      // Don't allow adding exercises in plan mode
-      console.log("Cannot add exercises during a planned workout");
-      return;
-    }
-    setPickerMode("addBlock");
-  };
-
-  const allowedExerciseIds = planMode ? plannedExerciseIds : undefined;
-
-  if (pickerMode) {
-    return (
-      <ExercisePicker
-        visible
-        allowedExerciseIds={allowedExerciseIds}
-        selectedExerciseId={selectedExerciseId}
-        onSelect={(id) => {
-          if (pickerMode === "changeSelected") setSelectedExerciseId(id);
-          else {
-            setExerciseBlocks((prev) => (prev.includes(id) ? prev : [...prev, id]));
-            setSelectedExerciseId(id);
-          }
-          setPickerMode(null);
-        }}
-        onBack={() => setPickerMode(null)}
-      />
-    );
-  }
-
-  const sets = session.sets;
-
-  // Calculate workout progress (TAG-003: Overall Completion Percentage)
-  const progress = useMemo(
-    () => calculatePlanProgress(plan, sets),
-    [plan, sets]
-  );
-
-  // Build target sets map for exercise blocks (TAG-002: Exercise Progress Indicators)
+  // Build target sets map for exercise blocks
   const targetSetsByExerciseId = useMemo(
     () =>
       plan?.exercises.reduce<Record<string, number>>((acc, ex) => {
@@ -257,27 +154,87 @@ export default function LiveWorkout() {
     exercises: plan?.exercises ? plan.exercises.map(ex => ({
       exerciseId: ex.exerciseId,
       targetSets: ex.targetSets,
-      targetRepsMin: ex.targetRepsMin ?? 8,
-      targetRepsMax: ex.targetRepsMax ?? 12,
-      restSeconds: 90,
+      targetRepsMin: ex.targetRepsMin ?? DEFAULT_TARGET_REPS_MIN,
+      targetRepsMax: ex.targetRepsMax ?? DEFAULT_TARGET_REPS_MAX,
+      restSeconds: DEFAULT_REST_SECONDS,
     })) : [],
-    loggedSets: sets,
+    loggedSets: session.sets,
     startedAtMs: persisted?.startedAtMs,
   });
 
-  // Session provides properly typed isDone and toggleDone functions
-  const isDoneFn = session.isDone;
-  const toggleDone = session.toggleDone;
+  // Initialize session on mount
+  useEffect(() => {
+    if (initializedRef.current) return;
+    if (persisted) {
+      initializedRef.current = true;
+      return;
+    }
+
+    const first = pickerState.currentPlannedExerciseId ?? "bench";
+    ensureCurrentSession({
+      selectedExerciseId: first,
+      exerciseBlocks: pickerState.planMode ? pickerState.plannedExerciseIds.slice() : [first],
+    });
+    initializedRef.current = true;
+  }, [persisted, pickerState]);
+
+  // Persist UI state (selected exercise, exercise blocks)
+  useEffect(() => {
+    updateCurrentSession((s: any) => ({
+      ...s,
+      selectedExerciseId: pickerState.selectedExerciseId,
+      exerciseBlocks: pickerState.exerciseBlocks,
+    }));
+  }, [pickerState.selectedExerciseId, pickerState.exerciseBlocks]);
+
+  // Add set to the workout
+  function addSetInternal(exerciseId: string, source: "quick" | "block") {
+    const result = session.addSet(exerciseId);
+    orchestrator.addSetForExercise(exerciseId, result.weightLb, result.reps);
+
+    if (source === "quick") {
+      pickerState.setSelectedExerciseId(exerciseId);
+    }
+
+    setRestVisible(true);
+  }
+
+  const addSet = () => addSetInternal(pickerState.selectedExerciseId, "quick");
+  const addSetForExercise = (exerciseId: string) => addSetInternal(exerciseId, "block");
+
+  const handleSaveAsRoutine = () => {
+    orchestrator.saveAsRoutine(pickerState.exerciseBlocks, session.sets);
+  };
+
+  const handleReset = () => {
+    initializedRef.current = false;
+    orchestrator.reset(pickerState.plannedExerciseIds);
+    setRestVisible(false);
+    setFocusMode(false);
+  };
+
+  const allowedExerciseIds = pickerState.planMode ? pickerState.plannedExerciseIds : undefined;
+
+  if (pickerState.pickerMode) {
+    return (
+      <ExercisePicker
+        visible
+        allowedExerciseIds={allowedExerciseIds}
+        selectedExerciseId={pickerState.selectedExerciseId}
+        onSelect={pickerState.handleExerciseSelect}
+        onBack={pickerState.closePicker}
+      />
+    );
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <InstantCueToast
         cue={orchestrator.instantCue}
         onClear={orchestrator.clearInstantCue}
-        randomHoldMs={randomHoldMs}
+        randomHoldMs={randomHighlightDurationMs}
       />
 
-      {/* Validation Toast for error/success feedback (DDD SPEC-003) */}
       <ValidationToast
         visible={toast.visible}
         message={toast.message}
@@ -287,16 +244,16 @@ export default function LiveWorkout() {
 
       <RestTimerOverlay
         visible={restVisible}
-        initialSeconds={90}
+        initialSeconds={DEFAULT_REST_SECONDS}
         onClose={() => setRestVisible(false)}
         onDone={onRestTimerDoneFeedback}
       />
 
-      <ScrollView contentContainerStyle={{ padding: PAD, gap: GAP, paddingBottom: 140 }}>
+      <ScrollView contentContainerStyle={{ padding: PAD, gap: GAP, paddingBottom: SCROLL_BOTTOM_PADDING }}>
         {/* Timer Bar */}
-        <WorkoutTimerBar 
-          timer={timer} 
-          onPressDetails={() => setShowTimerDetails(true)} 
+        <WorkoutTimerBar
+          timer={timer}
+          onPressDetails={() => setShowTimerDetails(true)}
         />
 
         {/* Timer Details Modal */}
@@ -306,165 +263,46 @@ export default function LiveWorkout() {
           onClose={() => setShowTimerDetails(false)}
         />
 
-        {/* Header card */}
-        <View
-          style={{
-            borderWidth: 1,
-            borderColor: c.border,
-            backgroundColor: c.card,
-            borderRadius: CARD_R,
-            padding: FR.space.x4,
-            gap: FR.space.x2,
-          }}
-        >
-          <Text style={{ color: c.text, ...FR.type.h2 }}>
-            {planMode ? plan?.routineName ?? "Planned Workout" : "Free Workout"}
-          </Text>
-          <Text style={{ color: c.muted, ...FR.type.sub }}>
-            Sets logged: {sets.length} • Focus: {focusMode ? "On" : "Off"}
-          </Text>
+        {/* Header Card */}
+        <WorkoutHeader
+          plan={plan}
+          sets={session.sets}
+          focusMode={focusMode}
+        />
 
-          {/* Progress bar for planned workouts (TAG-003) */}
-          {planMode && progress.total > 0 && (
-            <View style={{ marginTop: FR.space.x1, gap: FR.space.x1 }}>
-              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                <Text style={{ color: c.muted, ...FR.type.sub }}>
-                  Progress
-                </Text>
-                <Text style={{ color: c.text, ...FR.type.sub, fontWeight: "900" }}>
-                  {progress.completed}/{progress.total} sets ({formatProgressPercent(progress.percent)})
-                </Text>
-              </View>
-              <View
-                style={{
-                  height: 6,
-                  backgroundColor: c.bg,
-                  borderRadius: 3,
-                  overflow: "hidden",
-                }}
-              >
-                <View
-                  style={{
-                    height: "100%",
-                    width: `${Math.min(progress.percent, 1) * 100}%`,
-                    backgroundColor: c.success,
-                    borderRadius: 3,
-                  }}
-                />
-              </View>
-            </View>
-          )}
-        </View>
+        {/* Top Controls */}
+        <WorkoutControls
+          planMode={pickerState.planMode}
+          focusMode={focusMode}
+          onAddExercise={pickerState.openPickerToAdd}
+          onToggleFocus={() => setFocusMode(v => !v)}
+          onChangeSelected={pickerState.openPickerToChange}
+        />
 
-        {/* Top controls - FIX: Hide +Exercise in plan mode */}
-        <View style={{ flexDirection: "row", gap: FR.space.x2 }}>
-          {!planMode && (
-            <Pressable
-              onPress={handleAddExercise}
-              style={({ pressed }) => ({
-                flex: 1,
-                paddingVertical: FR.space.x3,
-                paddingHorizontal: FR.space.x4,
-                borderRadius: PILL_R,
-                borderWidth: 1,
-                borderColor: c.border,
-                backgroundColor: c.card,
-                alignItems: "center",
-                justifyContent: "center",
-                opacity: pressed ? ds.rules.tapOpacity : 1,
-              })}
-            >
-              <Text style={{ color: c.text, ...FR.type.h3 }}>+ Exercise</Text>
-            </Pressable>
-          )}
-
-          <Pressable
-            onPress={() => setFocusMode((v) => !v)}
-            style={({ pressed }) => ({
-              paddingVertical: FR.space.x3,
-              paddingHorizontal: FR.space.x4,
-              borderRadius: PILL_R,
-              borderWidth: 1,
-              borderColor: c.border,
-              backgroundColor: focusMode ? c.bg : c.card,
-              alignItems: "center",
-              justifyContent: "center",
-              opacity: pressed ? ds.rules.tapOpacity : 1,
-            })}
-          >
-            <Text style={{ color: c.text, ...FR.type.h3 }}>{focusMode ? "Focus ✓" : "Focus"}</Text>
-          </Pressable>
-
-          {!planMode && (
-            <Pressable
-              onPress={() => setPickerMode("changeSelected")}
-              style={({ pressed }) => ({
-                paddingVertical: FR.space.x3,
-                paddingHorizontal: FR.space.x4,
-                borderRadius: PILL_R,
-                borderWidth: 1,
-                borderColor: c.border,
-                backgroundColor: c.card,
-                alignItems: "center",
-                justifyContent: "center",
-                opacity: pressed ? ds.rules.tapOpacity : 1,
-              })}
-            >
-              <Text style={{ color: c.text, ...FR.type.h3 }}>Pick</Text>
-            </Pressable>
-          )}
-        </View>
-
-        {/* Exercise blocks */}
+        {/* Exercise Blocks */}
         <ExerciseBlocksCard
-          exerciseIds={exerciseBlocks}
-          sets={sets}
-          targetSetsByExerciseId={planMode ? targetSetsByExerciseId : undefined}
-          focusedExerciseId={selectedExerciseId}
+          exerciseIds={pickerState.exerciseBlocks}
+          sets={session.sets}
+          targetSetsByExerciseId={pickerState.planMode ? targetSetsByExerciseId : undefined}
+          focusedExerciseId={pickerState.selectedExerciseId}
           focusMode={focusMode}
           onAddSetForExercise={addSetForExercise}
-          onJumpToExercise={(id: string) => setSelectedExerciseId(id)}
-          isDone={isDoneFn}
-          toggleDone={toggleDone}
+          onJumpToExercise={(id: string) => pickerState.setSelectedExerciseId(id)}
+          isDone={session.isDone}
+          toggleDone={session.toggleDone}
           setWeightForSet={session.setWeightForSet}
           setRepsForSet={session.setRepsForSet}
           kgToLb={session.kgToLb}
           estimateE1RMLb={session.estimateE1RMLb}
         />
 
-        {/* Quick add card - FIX: Only show in free workout mode */}
-        {!planMode && (
+        {/* Quick Add Section - free workout mode only */}
+        {!pickerState.planMode && (
           <>
-            <View
-              style={{
-                borderWidth: 1,
-                borderColor: c.border,
-                borderRadius: CARD_R,
-                padding: FR.space.x4,
-                backgroundColor: c.card,
-                gap: FR.space.x2,
-              }}
-            >
-              <Text style={{ color: c.muted, ...FR.type.sub }}>Selected Exercise (Quick Add)</Text>
-              <Text style={{ color: c.text, ...FR.type.h2 }}>{selectedExerciseName}</Text>
-
-              <Pressable
-                onPress={() => setPickerMode("changeSelected")}
-                style={({ pressed }) => ({
-                  paddingVertical: FR.space.x3,
-                  paddingHorizontal: FR.space.x4,
-                  borderRadius: PILL_R,
-                  borderWidth: 1,
-                  borderColor: c.border,
-                  backgroundColor: c.bg,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  opacity: pressed ? ds.rules.tapOpacity : 1,
-                })}
-              >
-                <Text style={{ color: c.text, ...FR.type.h3 }}>Change Selected</Text>
-              </Pressable>
-            </View>
+            <SelectedExerciseCard
+              selectedExerciseId={pickerState.selectedExerciseId}
+              onChangeSelected={pickerState.openPickerToChange}
+            />
 
             <QuickAddSetCard
               weightLb={session.weightLb}
@@ -484,92 +322,16 @@ export default function LiveWorkout() {
           </>
         )}
 
-        {/* Bottom actions */}
-        <View style={{ flexDirection: "row", gap: FR.space.x2 }}>
-          <Pressable
-            onPress={orchestrator.finishWorkout}
-            style={({ pressed }) => ({
-              flex: 1,
-              paddingVertical: FR.space.x3,
-              paddingHorizontal: FR.space.x4,
-              borderRadius: PILL_R,
-              borderWidth: 1,
-              borderColor: ds.tone.accent,
-              backgroundColor: ds.tone.accent,
-              alignItems: "center",
-              justifyContent: "center",
-              opacity: pressed ? ds.rules.tapOpacity : 1,
-            })}
-          >
-            <Text style={{ color: c.bg, ...FR.type.h3 }}>Finish Workout</Text>
-          </Pressable>
+        {/* Bottom Actions */}
+        <WorkoutActions
+          setsCount={session.sets.length}
+          onFinishWorkout={orchestrator.finishWorkout}
+          onSaveRoutine={handleSaveAsRoutine}
+          onReset={handleReset}
+        />
 
-          <Pressable
-            onPress={handleSaveAsRoutine}
-            disabled={sets.length === 0}
-            style={({ pressed }) => ({
-              flex: 1,
-              paddingVertical: FR.space.x3,
-              paddingHorizontal: FR.space.x4,
-              borderRadius: PILL_R,
-              borderWidth: 1,
-              borderColor: c.border,
-              backgroundColor: c.card,
-              alignItems: "center",
-              justifyContent: "center",
-              opacity: sets.length === 0 ? 0.5 : pressed ? ds.rules.tapOpacity : 1,
-            })}
-          >
-            <Text style={{ color: c.text, ...FR.type.h3 }}>Save Routine</Text>
-          </Pressable>
-
-          <Pressable
-            onPress={handleReset}
-            style={({ pressed }) => ({
-              paddingVertical: FR.space.x3,
-              paddingHorizontal: FR.space.x4,
-              borderRadius: PILL_R,
-              borderWidth: 1,
-              borderColor: c.border,
-              backgroundColor: c.card,
-              alignItems: "center",
-              justifyContent: "center",
-              opacity: pressed ? ds.rules.tapOpacity : 1,
-            })}
-          >
-            <Text style={{ color: c.text, ...FR.type.h3 }}>Reset</Text>
-          </Pressable>
-        </View>
-
-        {/* Recap cues */}
-        <View
-          style={{
-            borderWidth: 1,
-            borderColor: c.border,
-            borderRadius: CARD_R,
-            padding: FR.space.x4,
-            gap: FR.space.x2,
-            backgroundColor: c.card,
-          }}
-        >
-          <Text style={{ color: c.text, ...FR.type.h3 }}>Recap Cues</Text>
-
-          {orchestrator.recapCues.length === 0 ? (
-            <Text style={{ color: c.muted, ...FR.type.sub }}>Tap Finish Workout to generate recap cues.</Text>
-          ) : (
-            orchestrator.recapCues.map((cue, idx) => (
-              <Text
-                key={idx}
-                style={{
-                  color: c.text,
-                  ...(cue.intensity === "high" ? FR.type.h3 : FR.type.body),
-                }}
-              >
-                • {cue.message}
-              </Text>
-            ))
-          )}
-        </View>
+        {/* Recap Cues */}
+        <RecapCues cues={orchestrator.recapCues} />
       </ScrollView>
     </View>
   );

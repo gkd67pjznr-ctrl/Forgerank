@@ -79,59 +79,6 @@ export function getIsUserTyping(threadId: ID, userId: ID): boolean {
   return isTypingFresh(lastAt);
 }
 
-// Mock seed data for fresh installs
-function seedMockChat(): {
-  threads: ChatThread[];
-  messages: ChatMessage[];
-  reads: ReadState;
-} {
-  const now = Date.now();
-  const me: ID = "u_demo_me";
-
-  const t1: ChatThread = {
-    id: "dm_1" as ID,
-    type: "dm",
-    memberUserIds: [me, "u_demo_1" as ID], // Sarah
-    createdAtMs: now - 1000 * 60 * 60 * 24,
-    updatedAtMs: now - 1000 * 60 * 10,
-    canMessage: "friendsOnly",
-  };
-
-  const t2: ChatThread = {
-    id: "dm_2" as ID,
-    type: "dm",
-    memberUserIds: [me, "u_demo_3" as ID], // Mark (not friends in mock)
-    createdAtMs: now - 1000 * 60 * 60 * 12,
-    updatedAtMs: now - 1000 * 60 * 40,
-    canMessage: "friendsOnly",
-  };
-
-  const m1: ChatMessage = {
-    id: "m_1" as ID,
-    threadId: t1.id,
-    senderUserId: "u_demo_1" as ID,
-    text: "Yo — you lifting today?",
-    createdAtMs: now - 1000 * 60 * 12,
-  };
-
-  const m2: ChatMessage = {
-    id: "m_2" as ID,
-    threadId: t1.id,
-    senderUserId: me,
-    text: "Yeah. Hit legs. Regret incoming.",
-    createdAtMs: now - 1000 * 60 * 11,
-  };
-
-  return {
-    threads: [t1, t2],
-    messages: [m1, m2],
-    reads: {
-      [t1.id]: { [me]: now - 1000 * 60 * 11 },
-      [t2.id]: {},
-    },
-  };
-}
-
 export const useChatStore = create<ChatState>()(
   persist(
     (set, get) => {
@@ -254,14 +201,6 @@ export const useChatStore = create<ChatState>()(
                 logError({ context: 'ChatStore', error: err, userMessage: 'Failed to remove old chat data' });
               });
             }
-          }
-
-          // Seed mock data if empty
-          if (state && state.threads.length === 0) {
-            const mockData = seedMockChat();
-            state.threads = mockData.threads;
-            state.messages = mockData.messages;
-            state.reads = mockData.reads;
           }
 
           state?.setHydrated(true);

@@ -268,6 +268,17 @@ export function useAuth() {
 // ============================================================================
 
 /**
+ * Type for Supabase auth subscription
+ * Supabase returns { subscription: { unsubscribe } } structure
+ */
+type AuthSubscription = {
+  subscription: { unsubscribe: () => void };
+};
+
+/**
+ * Initialize the Supabase auth state listener
+
+/**
  * Initialize the Supabase auth state listener
  * Call this once in the root layout to sync auth state with the store
  *
@@ -318,7 +329,11 @@ export function setupAuthListener(
 
   // Return cleanup function
   return () => {
-    authListener?.unsubscribe();
+    // Supabase auth subscription returns { subscription: { unsubscribe } }
+    const subscription = (authListener as unknown as AuthSubscription | null)?.subscription;
+    if (subscription?.unsubscribe) {
+      subscription.unsubscribe();
+    }
   };
 }
 

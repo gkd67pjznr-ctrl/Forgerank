@@ -1,11 +1,12 @@
 // app/auth/login.tsx
 // Login screen with email, password, and OAuth (Google & Apple)
 import { useState } from "react";
-import { View, Text, TextInput, Pressable, ScrollView, Alert } from "react-native";
+import { View, Text, TextInput, Pressable, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useThemeColors } from "@/src/ui/theme";
 import { useAuth, useAuthLoading, useAuthError } from "@/src/lib/stores";
 import { OAuthButton } from "@/src/ui/components/OAuthButton";
+import { KeyboardAwareScrollView } from "@/src/ui/components/KeyboardAwareScrollView";
 import { useGoogleAuth } from "@/src/lib/auth/google";
 import { useAppleAuth } from "@/src/lib/auth/apple";
 import { getOAuthErrorMessage, type OAuthError } from "@/src/lib/auth/oauth";
@@ -158,7 +159,7 @@ export default function LoginScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={{
           padding: 24,
           gap: 24,
@@ -166,7 +167,6 @@ export default function LoginScreen() {
           justifyContent: "center",
           minHeight: "100%",
         }}
-        keyboardShouldPersistTaps="handled"
       >
         {/* Header */}
         <View style={{ gap: 8 }}>
@@ -344,7 +344,7 @@ export default function LoginScreen() {
             </Text>
           </Pressable>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View>
   );
 }

@@ -5,6 +5,22 @@ import { renderHook, act } from '@testing-library/react-native';
 import { Platform } from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 
+// Mock Platform module
+jest.mock('react-native', () => ({
+  Platform: {
+    OS: 'ios',
+    isPad: false,
+    isTV: false,
+    Version: 0,
+    Constants: {},
+    select: jest.fn(),
+  },
+  // Add other exports if needed
+}));
+
+// Get the mocked Platform
+const MockedPlatform = Platform as jest.Mocked<typeof Platform>;
+
 import {
   isAppleAuthAvailable,
   parseAppleCredential,
@@ -67,38 +83,44 @@ describe('Apple Sign In', () => {
   });
 
   describe('isAppleAuthAvailable - Platform Detection', () => {
+    const originalOS = Platform.OS;
+
+    afterEach(() => {
+      (Platform as any).OS = originalOS;
+    });
+
     it('should return true on iOS', () => {
-      jest.spyOn(Platform, 'OS', 'get').mockReturnValue('ios');
+      (Platform as any).OS = 'ios';
       expect(isAppleAuthAvailable()).toBe(true);
     });
 
     it('should return true on macOS', () => {
-      jest.spyOn(Platform, 'OS', 'get').mockReturnValue('macos');
+      (Platform as any).OS = 'macos';
       expect(isAppleAuthAvailable()).toBe(true);
     });
 
     it('should return false on Android', () => {
-      jest.spyOn(Platform, 'OS', 'get').mockReturnValue('android');
+      (Platform as any).OS = 'android';
       expect(isAppleAuthAvailable()).toBe(false);
     });
 
     it('should return false on web (without MSStream)', () => {
-      jest.spyOn(Platform, 'OS', 'get').mockReturnValue('web');
+      (Platform as any).OS = 'web';
       delete (window as any).MSStream;
       expect(isAppleAuthAvailable()).toBe(false);
     });
 
     it('should return true on web with MSStream (IE11)', () => {
-      jest.spyOn(Platform, 'OS', 'get').mockReturnValue('web');
+      (Platform as any).OS = 'web';
       (window as any).MSStream = true;
       expect(isAppleAuthAvailable()).toBe(true);
       delete (window as any).MSStream;
     });
 
     it('should return true on iOS simulator', () => {
-      jest.spyOn(Platform, 'OS', 'get').mockReturnValue('ios');
-      jest.spyOn(Platform, 'isPad', 'get').mockReturnValue(false);
-      jest.spyOn(Platform, 'isTV', 'get').mockReturnValue(false);
+      (Platform as any).OS = 'ios';
+      (Platform as any).isPad = false;
+      (Platform as any).isTV = false;
       expect(isAppleAuthAvailable()).toBe(true);
     });
   });
@@ -114,21 +136,21 @@ describe('Apple Sign In', () => {
     });
 
     it('should reflect correct availability on iOS', () => {
-      jest.spyOn(Platform, 'OS', 'get').mockReturnValue('ios');
+      (Platform as any).OS = 'ios';
       const hookResult = useAppleAuth();
 
       expect(hookResult.isAvailable).toBe(true);
     });
 
     it('should reflect correct availability on Android', () => {
-      jest.spyOn(Platform, 'OS', 'get').mockReturnValue('android');
+      (Platform as any).OS = 'android';
       const hookResult = useAppleAuth();
 
       expect(hookResult.isAvailable).toBe(false);
     });
 
     it('should call onSuccess callback when sign in succeeds', async () => {
-      jest.spyOn(Platform, 'OS', 'get').mockReturnValue('ios');
+      (Platform as any).OS = 'ios';
 
       const mockProfile: OAuthUserProfile = {
         id: 'apple-user-123',
@@ -167,7 +189,7 @@ describe('Apple Sign In', () => {
     });
 
     it('should call onError callback when sign in fails', async () => {
-      jest.spyOn(Platform, 'OS', 'get').mockReturnValue('ios');
+      (Platform as any).OS = 'ios';
 
       const mockError: OAuthError = {
         type: 'cancelled',
@@ -540,7 +562,7 @@ describe('Apple Sign In', () => {
 
   describe('signInWithApple - Complete Sign In Flow', () => {
     beforeEach(() => {
-      jest.spyOn(Platform, 'OS', 'get').mockReturnValue('ios');
+      (Platform as any).OS = 'ios';
     });
 
     it('should successfully complete Apple sign in flow', async () => {
@@ -586,7 +608,7 @@ describe('Apple Sign In', () => {
     });
 
     it('should return provider_error when platform is Android', async () => {
-      jest.spyOn(Platform, 'OS', 'get').mockReturnValue('android');
+      (Platform as any).OS = 'android';
 
       const onErrorMock = jest.fn();
       const { result } = renderHook(() => useAppleAuth({
@@ -781,7 +803,7 @@ describe('Apple Sign In', () => {
 
   describe('initializeAppleWebAuth - Web Platform', () => {
     it('should log warning when called on non-web platform', () => {
-      jest.spyOn(Platform, 'OS', 'get').mockReturnValue('ios');
+      (Platform as any).OS = 'ios';
       const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
 
       const { initializeAppleWebAuth } = require('../apple');
