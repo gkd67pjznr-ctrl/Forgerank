@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { createQueuedJSONStorage } from "./storage/createQueuedAsyncStorage";
+import { useMemo } from "react";
 
 const STORAGE_KEY = "forgerank.settings.v2"; // New key for Zustand version
 
@@ -71,7 +72,22 @@ export const selectSettings = (state: SettingsState): Settings => ({
 
 // Hook for accessing settings (matches old API)
 export function useSettings(): Settings {
-  return useSettingsStore(selectSettings);
+  // Use individual state properties to avoid infinite loop
+  const hapticsEnabled = useSettingsStore((state) => state.hapticsEnabled);
+  const soundsEnabled = useSettingsStore((state) => state.soundsEnabled);
+  const unitSystem = useSettingsStore((state) => state.unitSystem);
+  const defaultRestSeconds = useSettingsStore((state) => state.defaultRestSeconds);
+
+  // Memoize the settings object to prevent unnecessary re-renders
+  return useMemo(
+    () => ({
+      hapticsEnabled,
+      soundsEnabled,
+      unitSystem,
+      defaultRestSeconds,
+    }),
+    [hapticsEnabled, soundsEnabled, unitSystem, defaultRestSeconds]
+  );
 }
 
 // Imperative getter for non-React code

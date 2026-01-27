@@ -25,78 +25,6 @@ interface SocialState {
   setHydrated: (value: boolean) => void;
 }
 
-// Mock seed data for fresh installs
-function seedMockData(): {
-  posts: WorkoutPost[];
-  reactions: Reaction[];
-  comments: Comment[];
-  notifications: AppNotification[];
-} {
-  const now = Date.now();
-
-  const posts: WorkoutPost[] = [
-    {
-      id: uid(),
-      authorUserId: "u_demo_1",
-      authorDisplayName: "Sarah",
-      privacy: "public",
-      createdAtMs: now - 1000 * 60 * 30,
-      title: "Leg day",
-      caption: "Quads were NOT happy.",
-      durationSec: 52 * 60,
-      completionPct: 0.9,
-      exerciseCount: 5,
-      setCount: 18,
-      likeCount: 3,
-      commentCount: 1,
-      workoutSnapshot: {
-        routineName: "Legs",
-        topLines: [
-          { exerciseName: "Squat", bestSet: { weightLabel: "185 lb", reps: 5, e1rmLabel: "216 lb" } },
-          { exerciseName: "RDL", bestSet: { weightLabel: "165 lb", reps: 8, e1rmLabel: "209 lb" } },
-        ],
-      },
-    },
-    {
-      id: uid(),
-      authorUserId: "u_demo_2",
-      authorDisplayName: "TJ",
-      privacy: "public",
-      createdAtMs: now - 1000 * 60 * 90,
-      title: "Bench PR",
-      caption: "Hit a clean rep PR today.",
-      durationSec: 44 * 60,
-      completionPct: 1,
-      exerciseCount: 4,
-      setCount: 14,
-      likeCount: 7,
-      commentCount: 2,
-      workoutSnapshot: {
-        routineName: "Push",
-        topLines: [{ exerciseName: "Bench Press", bestSet: { weightLabel: "205 lb", reps: 6, e1rmLabel: "246 lb" } }],
-      },
-    },
-  ];
-
-  const comments: Comment[] = [
-    {
-      id: uid(),
-      postId: posts[0].id,
-      userId: "u_demo_3",
-      userDisplayName: "Mark",
-      text: "Absolute savage 😂",
-      createdAtMs: now - 1000 * 60 * 10,
-    },
-  ];
-
-  return {
-    posts,
-    reactions: [],
-    comments,
-    notifications: [],
-  };
-}
-
 export const useSocialStore = create<SocialState>()(
   persist(
     (set, get) => ({
@@ -210,15 +138,6 @@ export const useSocialStore = create<SocialState>()(
                 logError({ context: 'SocialStore', error: err, userMessage: 'Failed to remove old social data' });
               });
             }
-          }
-
-          // Seed mock data if empty
-          if (state && state.posts.length === 0) {
-            const mockData = seedMockData();
-            state.posts = mockData.posts;
-            state.reactions = mockData.reactions;
-            state.comments = mockData.comments;
-            state.notifications = mockData.notifications;
           }
 
           state?.setHydrated(true);

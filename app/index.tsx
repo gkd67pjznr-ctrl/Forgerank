@@ -1,4 +1,4 @@
-import { Link } from "expo-router";
+import { Link, type Href } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useThemeColors } from "../src/ui/theme";
 
@@ -6,7 +6,7 @@ export default function Index() {
   const c = useThemeColors();
 
   const CardLink = (props: { href: string; title: string; subtitle: string }) => (
-    <Link href={props.href as any} asChild>
+    <Link href={props.href as Href} asChild>
       <Pressable
         style={{
           borderWidth: 1,

@@ -117,7 +117,7 @@ export default function FriendsScreen() {
                   {canSendRequest ? (
                     <Pressable
                       onPress={() => {
-                        sendFriendRequest(ME as any, p.id as any);
+                        sendFriendRequest(ME, p.id);
                       }}
                       style={({ pressed }) => ({
                         paddingVertical: 10,
@@ -137,7 +137,7 @@ export default function FriendsScreen() {
                     <Pressable
                       onPress={() => {
                         // accept as ME, where p.id was the requester
-                        acceptFriendRequest(ME as any, p.id as any);
+                        acceptFriendRequest(ME, p.id);
                       }}
                       style={({ pressed }) => ({
                         paddingVertical: 10,

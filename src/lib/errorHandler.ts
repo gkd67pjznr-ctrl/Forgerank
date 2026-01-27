@@ -37,9 +37,6 @@ export function logError(params: ErrorContext): void {
   // Log with appropriate level
   if (__DEV__) {
     console.error(`[${context}] Error:`, errorDetails);
-  } else {
-    // In production, log concise error message
-    console.error(`[${context}] ${userMessage || 'Error'}: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 

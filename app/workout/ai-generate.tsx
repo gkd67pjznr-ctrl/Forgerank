@@ -7,6 +7,7 @@ import { useAIGeneratePlan } from "../../src/lib/premadePlans/useAIGeneratePlan"
 import { makeDesignSystem } from "../../src/ui/designSystem";
 import { FR } from "../../src/ui/forgerankStyle";
 import { useThemeColors, useThemeRadius } from "../../src/ui/theme";
+import { KeyboardAwareScrollView } from "../../src/ui/components/KeyboardAwareScrollView";
 
 /**
  * AI Plan Generator
@@ -142,7 +143,7 @@ if (isNativeApp) {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <ScrollView contentContainerStyle={{ padding: FR.space.x4, gap: FR.space.x4, paddingBottom: 100 }}>
+      <KeyboardAwareScrollView contentContainerStyle={{ padding: FR.space.x4, gap: FR.space.x4, paddingBottom: 100 }}>
         {/* Header */}
         <View style={{ gap: FR.space.x2 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: FR.space.x3 }}>
@@ -365,7 +366,7 @@ if (isNativeApp) {
         >
           <Text style={{ color: c.text, ...FR.type.body }}>Back</Text>
         </Pressable>
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {/* Fixed Bottom Button */}
       <View

@@ -1,6 +1,6 @@
 // app/(tabs)/workout.tsx
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { Link, useRouter } from "expo-router";
+import { Link, useRouter, type Href } from "expo-router";
 import { useThemeColors } from "../../src/ui/theme";
 import { EXERCISES_V1 } from "../../src/data/exercises";
 // [MIGRATED 2026-01-23] Using Zustand stores
@@ -64,7 +64,7 @@ export default function WorkoutTab() {
 
     if (props.href) {
       return (
-        <Link href={props.href as any} asChild>
+        <Link href={props.href as Href} asChild>
           <Pressable>{inner}</Pressable>
         </Link>
       );

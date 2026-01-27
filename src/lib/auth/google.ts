@@ -64,7 +64,7 @@ function getGoogleClientId(): string {
   const clientId = Constants.expoConfig?.extra?.googleClientId as string | undefined;
 
   if (!clientId) {
-    console.warn(
+    if (__DEV__) console.warn(
       'Google OAuth client ID not found in app.json extra.googleClientId. ' +
       'Add it to your app.json configuration.'
     );
@@ -214,7 +214,7 @@ async function signInWithGoogleCode(
     // This requires the code to be exchanged on the backend
     // For demo purposes, we'll return a success with note about backend
 
-    console.warn(
+    if (__DEV__) console.warn(
       'Google OAuth code exchange requires backend implementation. ' +
       'Use Supabase OAuth redirect flow for production.'
     );

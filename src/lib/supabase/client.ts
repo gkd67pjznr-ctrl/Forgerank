@@ -60,18 +60,30 @@ function validateEnvironment(): void {
 /**
  * Create and configure Supabase client
  * Uses Expo Constants to access environment variables configured in app.json
+ *
+ * For local development without Supabase, the client will be created with placeholder values.
+ * Real Supabase features will be disabled until proper credentials are provided.
  */
 const supabaseUrl = getSupabaseUrl();
 const supabaseAnonKey = getSupabaseAnonKey();
 
-// Validate environment before creating client
-validateEnvironment();
+// Validate environment only if credentials are provided
+// This allows local development without Supabase
+if (supabaseUrl || supabaseAnonKey) {
+  validateEnvironment();
+}
 
 /**
  * Supabase client instance
  * Singleton pattern ensures single connection throughout the app
+ *
+ * If credentials are not provided, creates a client with placeholder values.
+ * The client will be non-functional but won't crash the app.
  */
-export const supabase: SupabaseClient = createClient(supabaseUrl!, supabaseAnonKey!);
+export const supabase: SupabaseClient = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseAnonKey || 'placeholder-key'
+);
 
 /**
  * Perform health check on Supabase connection

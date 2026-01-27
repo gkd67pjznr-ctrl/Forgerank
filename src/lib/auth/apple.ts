@@ -287,14 +287,14 @@ export async function initializeAppleWebAuth(
   scope: string = 'email name'
 ): Promise<void> {
   if (Platform.OS !== 'web') {
-    console.warn('Apple web auth should only be initialized on web platform');
+    if (__DEV__) console.warn('Apple web auth should only be initialized on web platform');
     return;
   }
 
   // Load Apple's JS SDK
   // Note: This is a placeholder for web implementation
   // In production, you would load Apple's JS SDK from their CDN
-  console.info('Apple web auth initialization requires Apple JS SDK');
+  if (__DEV__) console.info('Apple web auth initialization requires Apple JS SDK');
 }
 
 // ============================================================================

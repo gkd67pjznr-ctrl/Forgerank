@@ -12,8 +12,8 @@ import {
 } from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 
-import { useThemeColors } from '../../theme';
-import { FR } from '../../forgerankStyle';
+import { useThemeColors } from '../theme';
+import { FR } from '../forgerankStyle';
 import { isAppleAuthAvailable } from '../../lib/auth/apple';
 
 // ============================================================================
@@ -210,10 +210,11 @@ export function OAuthButton({
 
   if (shouldUseNativeAppleButton) {
     const buttonType = AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN;
-    const buttonStyle =
-      variant === 'outline'
-        ? AppleAuthentication.AppleAuthenticationStyle.WHITE_OUTLINE
-        : AppleAuthentication.AppleAuthenticationStyle.BLACK;
+    // Check if AppleAuthenticationStyle exists, otherwise use WHITE_OUTLINE as fallback
+    const hasStyle = AppleAuthentication.AppleAuthenticationStyle;
+    const buttonStyle = variant === 'outline' || !hasStyle
+      ? AppleAuthentication.AppleAuthenticationStyle?.WHITE_OUTLINE ?? 0
+      : AppleAuthentication.AppleAuthenticationStyle?.BLACK ?? 0;
 
     return (
       <AppleAuthentication.AppleAuthenticationButton

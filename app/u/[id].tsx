@@ -160,7 +160,7 @@ export default function PublicProfileScreen() {
               <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
                 {canSendRequest ? (
                   <Pressable
-                    onPress={() => sendFriendRequest(ME as any, userId as any)}
+                    onPress={() => sendFriendRequest(ME, userId)}
                     style={({ pressed }) => ({
                       paddingVertical: 10,
                       paddingHorizontal: 12,
@@ -177,7 +177,7 @@ export default function PublicProfileScreen() {
 
                 {canAccept ? (
                   <Pressable
-                    onPress={() => acceptFriendRequest(ME as any, userId as any)}
+                    onPress={() => acceptFriendRequest(ME, userId)}
                     style={({ pressed }) => ({
                       paddingVertical: 10,
                       paddingHorizontal: 12,

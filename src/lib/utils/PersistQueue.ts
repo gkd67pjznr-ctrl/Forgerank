@@ -9,7 +9,7 @@
  * Based on the implementation from the old currentSessionStore.
  */
 export class PersistQueue {
-  private queue: Promise<void> = Promise.resolve();
+  private queue: Promise<unknown> = Promise.resolve();
 
   /**
    * Enqueue an async operation to run sequentially.

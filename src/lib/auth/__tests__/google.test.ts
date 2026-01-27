@@ -4,6 +4,20 @@
 import { Platform } from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 
+// Mock Platform module
+jest.mock('react-native', () => ({
+  Platform: {
+    OS: 'ios',
+    isPad: false,
+    isTV: false,
+    Version: 0,
+    Constants: {},
+    select: jest.fn(),
+  },
+}));
+
+const MockedPlatform = Platform as jest.Mocked<typeof Platform>;
+
 import {
   isGoogleAuthAvailable,
   getGoogleOAuthUrl,
@@ -52,17 +66,17 @@ describe('Google OAuth', () => {
 
   describe('isGoogleAuthAvailable', () => {
     it('should return true on iOS', () => {
-      jest.spyOn(Platform, 'OS', 'get').mockReturnValue('ios');
+      (Platform as any).OS = 'ios';
       expect(isGoogleAuthAvailable()).toBe(true);
     });
 
     it('should return true on Android', () => {
-      jest.spyOn(Platform, 'OS', 'get').mockReturnValue('android');
+      (Platform as any).OS = 'android';
       expect(isGoogleAuthAvailable()).toBe(true);
     });
 
     it('should return true on web', () => {
-      jest.spyOn(Platform, 'OS', 'get').mockReturnValue('web');
+      (Platform as any).OS = 'web';
       expect(isGoogleAuthAvailable()).toBe(true);
     });
   });

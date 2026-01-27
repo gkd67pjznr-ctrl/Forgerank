@@ -1,11 +1,12 @@
 // app/new-message.tsx
 import { Stack, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
 import { ensureThread } from "../src/lib/stores/chatStore";
 import { areFriends, hydrateFriends } from "../src/lib/stores/friendsStore";
 import type { ID } from "../src/lib/socialModel";
 import { useThemeColors } from "../src/ui/theme";
+import { KeyboardAwareScrollView } from "../src/ui/components/KeyboardAwareScrollView";
 
 const ME: ID = "u_demo_me";
 
@@ -51,7 +52,7 @@ export default function NewMessageScreen() {
       />
 
       <View style={{ flex: 1, backgroundColor: c.bg }}>
-        <ScrollView contentContainerStyle={{ padding: 16, gap: 10, paddingBottom: 24 }}>
+        <KeyboardAwareScrollView contentContainerStyle={{ padding: 16, gap: 10, paddingBottom: 24 }}>
           <View style={{ gap: 6 }}>
             <Text style={{ color: c.text, fontSize: 18, fontWeight: "900" }}>Pick someone</Text>
             <Text style={{ color: c.muted, fontWeight: "700" }}>
@@ -164,7 +165,7 @@ export default function NewMessageScreen() {
               </Pressable>
             );
           })}
-        </ScrollView>
+        </KeyboardAwareScrollView>
       </View>
     </>
   );

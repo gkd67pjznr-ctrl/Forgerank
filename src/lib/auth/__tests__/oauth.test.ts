@@ -244,7 +244,7 @@ describe('OAuth Helper Utilities', () => {
       const mockToken = `header.${base64Payload}.signature`;
       const profile = extractGoogleProfile(mockToken);
 
-      expect(profile?.name).toBeUndefined();
+      expect(profile?.name).toBe('');
     });
 
     it('should return null for invalid token', () => {

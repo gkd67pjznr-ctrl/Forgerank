@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { createQueuedJSONStorage } from "./storage/createQueuedAsyncStorage";
 import type { Routine } from "../routinesModel";
+import { useMemo } from "react";
 
 const STORAGE_KEY = "routines.v2"; // New key for Zustand version
 
@@ -64,7 +65,12 @@ export const selectRoutineById = (id: string) => (state: RoutinesState) =>
 
 // Hook for accessing routines (matches old API)
 export function useRoutines(): Routine[] {
-  return useRoutinesStore(selectRoutines);
+  const routines = useRoutinesStore((state) => state.routines);
+  // Use useMemo to cache the sorted array and prevent infinite loop
+  return useMemo(
+    () => routines.slice().sort((a, b) => b.updatedAtMs - a.updatedAtMs),
+    [routines]
+  );
 }
 
 export function useRoutine(id: string): Routine | undefined {

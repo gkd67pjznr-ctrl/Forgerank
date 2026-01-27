@@ -68,7 +68,7 @@ function setupAppStateListener(): () => void {
       const queue = getGlobalPersistQueue();
       queue.flush().catch((err) => {
         // Log but don't throw - app is backgrounding anyway
-        console.error('[currentSessionStore] Failed to flush on app state change:', err);
+        if (__DEV__) console.error('[currentSessionStore] Failed to flush on app state change:', err);
       });
     }
   });

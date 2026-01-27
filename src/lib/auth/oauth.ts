@@ -199,7 +199,7 @@ export async function signInWithOAuthToken(
 
     return result;
   } catch (error) {
-    console.error('OAuth sign in error:', error);
+    if (__DEV__) console.error('OAuth sign in error:', error);
     throw createOAuthError(
       'supabase_error',
       'Failed to authenticate with Supabase',
@@ -217,7 +217,7 @@ export async function signOut(): Promise<void> {
   try {
     await supabase.auth.signOut();
   } catch (error) {
-    console.error('Sign out error:', error);
+    if (__DEV__) console.error('Sign out error:', error);
     throw new Error('Failed to sign out');
   }
 }

@@ -1,6 +1,6 @@
 # FORGERANK FEATURE MASTER
 
-**Last Updated:** 2026-01-26
+**Last Updated:** 2026-01-27
 **Version:** v0.1 (Pre-launch)
 
 ---
@@ -10,6 +10,7 @@
 | Feature Group | Status | Progress | Details |
 |---------------|--------|----------|---------|
 | [Workout Core](#workout-core) | In Progress | 8/20 | [Details](features/feature-workouts.md) |
+| [Workout Logging UX](#workout-logging-ux) | Planned | 0/10 | [Details](features/feature-workout-logging-ux.md) |
 | [Exercise Library](#exercise-library) | Done | 3/3 | [Details](features/feature-exercises.md) |
 | [Scoring & Ranks](#scoring--ranks) | Done | 5/5 | [Details](features/feature-scoring.md) |
 | [Cue System (Gym Buddy)](#cue-system-gym-buddy) | Planned | 1/10 | [Details](features/feature-cue-system.md) |
@@ -24,7 +25,7 @@
 | [Integrations](#integrations) | Planned | 0/4 | [Details](features/feature-integrations.md) |
 | [Onboarding](#onboarding) | Planned | 0/5 | [Details](features/feature-onboarding.md) |
 
-**Total:** 32/123 features (26%)
+**Total:** 32/133 features (24%)
 
 ---
 
@@ -54,6 +55,30 @@ The core workout logging and tracking experience.
 - Calendar view (basic)
 
 **Next Up:** Routine-based workout flow, input polish, PR celebration
+
+---
+
+## Workout Logging UX
+**Status:** Planned | **Progress:** 0/10 features
+
+The visual interface for logging sets - needs complete redesign (Fitbod/Liftoff style).
+
+**Current Problems:**
+- Cluttered UI with confusing "Quick Add" vs "Exercise Blocks"
+- No clear "Add Exercise" button
+- "Mark Done" flow is backwards (sets logged, then marked done)
+
+**Planned:**
+- Add Exercise button (prominent, at top and bottom)
+- Exercise cards with inline set entry (weight | reps | ✓)
+- Set completion via checkmark button (triggers PR check, rest timer)
+- Exercise reordering (drag to reorder)
+- Exercise removal (swipe or X button)
+- Smart defaults (auto-fill from previous set)
+- Keyboard handling (number pad, focus management)
+- Empty states
+
+**Bugs to Fix:** 7 logged in feature file
 
 ---
 

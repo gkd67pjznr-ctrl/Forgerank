@@ -1,10 +1,11 @@
 // app/create-post.tsx
 import { Stack, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
 import { createPost, hydrateFeed, type PostVisibility } from "../src/lib/stores/feedStore";
 import type { ID } from "../src/lib/socialModel";
 import { useThemeColors } from "../src/ui/theme";
+import { KeyboardAwareScrollView } from "../src/ui/components/KeyboardAwareScrollView";
 
 const ME: ID = "u_demo_me";
 
@@ -53,7 +54,7 @@ export default function CreatePostScreen() {
       />
 
       <View style={{ flex: 1, backgroundColor: c.bg }}>
-        <ScrollView contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 24 }}>
+        <KeyboardAwareScrollView contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 24 }}>
           {/* Visibility toggle */}
           <View
             style={{
@@ -164,7 +165,7 @@ export default function CreatePostScreen() {
               <Text style={{ color: c.text, fontWeight: "900" }}>Publish</Text>
             </Pressable>
           </View>
-        </ScrollView>
+        </KeyboardAwareScrollView>
       </View>
     </>
   );
