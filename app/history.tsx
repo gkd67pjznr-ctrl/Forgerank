@@ -5,6 +5,7 @@ import { useThemeColors } from "../src/ui/theme";
 // [MIGRATED 2026-01-23] Using Zustand stores (auto-hydration, no manual hydrate needed)
 import { useWorkoutSessions } from "../src/lib/stores";
 import { durationMs, formatDateShort, formatTimeShort, formatDuration } from "../src/lib/workoutModel";
+import { ProtectedRoute } from "../src/ui/components/ProtectedRoute";
 
 export default function History() {
   const c = useThemeColors();
@@ -33,8 +34,9 @@ export default function History() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 40 }}>
+    <ProtectedRoute>
+      <View style={{ flex: 1, backgroundColor: c.bg }}>
+        <ScrollView contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 40 }}>
         <Text style={{ color: c.text, fontSize: 22, fontWeight: "900" }}>History</Text>
 
         {sessions.length === 0 ? (
@@ -69,7 +71,8 @@ export default function History() {
             );
           })
         )}
-      </ScrollView>
-    </View>
+        </ScrollView>
+      </View>
+    </ProtectedRoute>
   );
 }

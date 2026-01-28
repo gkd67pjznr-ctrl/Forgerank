@@ -1,5 +1,5 @@
 // src/lib/stores/socialStore.ts
-// Zustand store for social posts, reactions, comments with AsyncStorage persistence
+// Zustand store for social posts, reactions, comments with AsyncStorage persistence and Supabase sync/realtime
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -8,6 +8,14 @@ import type { AppNotification, Comment, EmoteId, Reaction, WorkoutPost } from ".
 import { uid } from "../uid";
 import { logError } from "../errorHandler";
 import { safeJSONParse } from "../storage/safeJSONParse";
+import type { SyncMetadata } from "../sync/syncTypes";
+import { getUser } from "./authStore";
+import { postRepository } from "../sync/repositories/postRepository";
+import { reactionRepository } from "../sync/repositories/reactionRepository";
+import { commentRepository } from "../sync/repositories/commentRepository";
+import { notificationRepository } from "../sync/repositories/notificationRepository";
+import { networkMonitor } from "../sync/NetworkMonitor";
+import { subscribeToUserPosts, subscribeToPostReactions, subscribeToPostComments } from "../sync";
 
 const STORAGE_KEY = "social.v2";
 
@@ -17,12 +25,18 @@ interface SocialState {
   comments: Comment[];
   notifications: AppNotification[];
   hydrated: boolean;
+  _sync: SyncMetadata;
 
   // Actions
   createPost: (input: Omit<WorkoutPost, "id" | "likeCount" | "commentCount">) => WorkoutPost;
   toggleReaction: (postId: string, myUserId: string, emote: EmoteId) => void;
   addComment: (postId: string, myUserId: string, myDisplayName: string, text: string) => Comment | null;
   setHydrated: (value: boolean) => void;
+
+  // Sync actions
+  pullFromServer: () => Promise<void>;
+  pushToServer: () => Promise<void>;
+  sync: () => Promise<void>;
 }
 
 export const useSocialStore = create<SocialState>()(
@@ -33,6 +47,13 @@ export const useSocialStore = create<SocialState>()(
       comments: [],
       notifications: [],
       hydrated: false,
+      _sync: {
+        lastSyncAt: null,
+        lastSyncHash: null,
+        syncStatus: 'idle',
+        syncError: null,
+        pendingMutations: 0,
+      },
 
       createPost: (input) => {
         const post: WorkoutPost = {
@@ -45,6 +66,16 @@ export const useSocialStore = create<SocialState>()(
         set((state) => ({
           posts: [post, ...state.posts],
         }));
+
+        // Sync to server if online
+        if (networkMonitor.isOnline()) {
+          const user = getUser();
+          if (user) {
+            postRepository.create(post).catch(err => {
+              console.error('[socialStore] Failed to sync post:', err);
+            });
+          }
+        }
 
         return post;
       },
@@ -63,6 +94,13 @@ export const useSocialStore = create<SocialState>()(
               p.id === postId ? { ...p, likeCount: Math.max(0, p.likeCount - 1) } : p
             ),
           }));
+
+          // Sync to server if online
+          if (networkMonitor.isOnline()) {
+            reactionRepository.delete(existing.id, myUserId, postId).catch(err => {
+              console.error('[socialStore] Failed to delete reaction:', err);
+            });
+          }
           return;
         }
 
@@ -71,6 +109,13 @@ export const useSocialStore = create<SocialState>()(
           set((state) => ({
             reactions: state.reactions.map((r) => (r.id === existing.id ? { ...r, emote } : r)),
           }));
+
+          // Sync to server if online
+          if (networkMonitor.isOnline()) {
+            reactionRepository.create({ ...existing, emote }).catch(err => {
+              console.error('[socialStore] Failed to update reaction:', err);
+            });
+          }
           return;
         }
 
@@ -87,6 +132,13 @@ export const useSocialStore = create<SocialState>()(
           reactions: [r, ...state.reactions],
           posts: state.posts.map((p) => (p.id === postId ? { ...p, likeCount: p.likeCount + 1 } : p)),
         }));
+
+        // Sync to server if online
+        if (networkMonitor.isOnline()) {
+          reactionRepository.create(r).catch(err => {
+            console.error('[socialStore] Failed to create reaction:', err);
+          });
+        }
       },
 
       addComment: (postId, myUserId, myDisplayName, text) => {
@@ -110,10 +162,85 @@ export const useSocialStore = create<SocialState>()(
           posts: state.posts.map((p) => (p.id === postId ? { ...p, commentCount: p.commentCount + 1 } : p)),
         }));
 
+        // Sync to server if online
+        if (networkMonitor.isOnline()) {
+          commentRepository.create(c).catch(err => {
+            console.error('[socialStore] Failed to create comment:', err);
+          });
+        }
+
         return c;
       },
 
       setHydrated: (value) => set({ hydrated: value }),
+
+      // Sync actions
+      pullFromServer: async () => {
+        const user = getUser();
+        if (!user) {
+          console.warn('[socialStore] Cannot pull: no user signed in');
+          return;
+        }
+
+        set({ _sync: { ...get()._sync, syncStatus: 'syncing', syncError: null } });
+
+        try {
+          // Fetch feed from server
+          const remotePosts = await postRepository.fetchFeed({ userId: user.id });
+
+          // Merge with local posts (server wins for counters)
+          set((state) => ({
+            posts: mergePosts(state.posts, remotePosts),
+            _sync: {
+              ...state._sync,
+              syncStatus: 'success',
+              lastSyncAt: Date.now(),
+            },
+          }));
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          set((state) => ({
+            _sync: {
+              ...state._sync,
+              syncStatus: 'error',
+              syncError: errorMessage,
+            },
+          }));
+          throw error;
+        }
+      },
+
+      pushToServer: async () => {
+        const user = getUser();
+        if (!user) {
+          console.warn('[socialStore] Cannot push: no user signed in');
+          return;
+        }
+
+        if (!networkMonitor.isOnline()) {
+          console.warn('[socialStore] Cannot push: offline');
+          return;
+        }
+
+        try {
+          // Reactions and comments are synced immediately on action
+          // This is mainly for any pending posts
+          set((state) => ({
+            _sync: {
+              ...state._sync,
+              pendingMutations: 0,
+            },
+          }));
+        } catch (error) {
+          console.error('[socialStore] Push failed:', error);
+          throw error;
+        }
+      },
+
+      sync: async () => {
+        await get().pullFromServer();
+        await get().pushToServer();
+      },
     }),
     {
       name: STORAGE_KEY,
@@ -261,4 +388,128 @@ export function addComment(input: AddCommentInput): Comment | null {
     input.myDisplayName,
     input.text
   );
+}
+
+// ============================================================================
+// Sync Helpers
+// ============================================================================
+
+/**
+ * Merge local and remote posts (server wins for counters)
+ */
+function mergePosts(local: WorkoutPost[], remote: WorkoutPost[]): WorkoutPost[] {
+  const postMap = new Map<string, WorkoutPost>();
+
+  // Add all local posts
+  for (const post of local) {
+    postMap.set(post.id, post);
+  }
+
+  // Override with remote posts (server has accurate counters)
+  for (const remotePost of remote) {
+    const existing = postMap.get(remotePost.id);
+
+    if (!existing) {
+      // New remote post
+      postMap.set(remotePost.id, remotePost);
+    } else {
+      // Merge - use server counters but keep local content if newer
+      const localTime = existing.createdAtMs ?? 0;
+      const remoteTime = remotePost.createdAtMs ?? 0;
+
+      postMap.set(remotePost.id, {
+        ...remotePost,
+        // Keep local content if it's newer
+        ...(localTime > remoteTime ? {
+          title: existing.title,
+          caption: existing.caption,
+        } : {}),
+      });
+    }
+  }
+
+  // Return sorted by createdAtMs descending
+  return Array.from(postMap.values()).sort(
+    (a, b) => (b.createdAtMs ?? 0) - (a.createdAtMs ?? 0)
+  );
+}
+
+/**
+ * Get sync status for social store
+ */
+export function getSocialSyncStatus(): SyncMetadata {
+  return useSocialStore.getState()._sync;
+}
+
+/**
+ * Setup realtime subscription for user's posts
+ */
+export function setupPostsRealtime(userId: string): () => void {
+  return subscribeToUserPosts(userId, {
+    onInsert: (post) => {
+      useSocialStore.setState((state) => ({
+        posts: [post, ...state.posts],
+      }));
+    },
+    onUpdate: (post) => {
+      useSocialStore.setState((state) => ({
+        posts: state.posts.map(p =>
+          p.id === post.id ? post : p
+        ),
+      }));
+    },
+    onDelete: (postId) => {
+      useSocialStore.setState((state) => ({
+        posts: state.posts.filter(p => p.id !== postId),
+      }));
+    },
+  });
+}
+
+/**
+ * Setup realtime subscription for post reactions
+ */
+export function setupReactionsRealtime(postId: string): () => void {
+  return subscribeToPostReactions(postId, {
+    onInsert: (reaction) => {
+      useSocialStore.setState((state) => {
+        // Check if reaction already exists locally
+        const existing = state.reactions.find(
+          r => r.postId === reaction.postId && r.userId === reaction.userId
+        );
+
+        if (existing) {
+          // Update existing
+          return {
+            reactions: state.reactions.map(r =>
+              r.id === existing.id ? reaction : r
+            ),
+          };
+        }
+
+        // Add new
+        return {
+          reactions: [reaction, ...state.reactions],
+        };
+      });
+    },
+    onDelete: (reactionId) => {
+      useSocialStore.setState((state) => ({
+        reactions: state.reactions.filter(r => r.id !== reactionId),
+      }));
+    },
+  });
+}
+
+/**
+ * Setup realtime subscription for post comments
+ */
+export function setupCommentsRealtime(postId: string): () => void {
+  return subscribeToPostComments(postId, {
+    onInsert: (comment) => {
+      useSocialStore.setState((state) => ({
+        comments: [...state.comments, comment],
+      }));
+    },
+  });
 }

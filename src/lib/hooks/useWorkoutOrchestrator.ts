@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import type { LoggedSet } from "../loggerTypes";
-import type { Cue, ExerciseSessionState, InstantCue, DetectCueResult } from "../perSetCue";
+import type { Cue, ExerciseSessionState, InstantCue, DetectCueResult, DetectCueMeta } from "../perSetCue";
+import type { CelebrationSelectorParams } from "../celebration";
 import {
   detectCueForWorkingSet,
   makeEmptyExerciseState,
@@ -28,6 +29,8 @@ export interface WorkoutOrchestratorOptions {
   unit?: UnitSystem;
   onHaptic?: (type: 'light' | 'pr') => void;
   onSound?: (type: 'light' | 'pr') => void;
+  onWorkoutFinished?: (sessionId: string) => void;
+  onPRCelebration?: (params: CelebrationSelectorParams) => void;
 }
 
 export interface WorkoutOrchestratorResult {
@@ -35,20 +38,20 @@ export interface WorkoutOrchestratorResult {
   instantCue: InstantCue | null;
   recapCues: Cue[];
   sessionStateByExercise: Record<string, ExerciseSessionState>;
-  
+
   // Actions
   addSetForExercise: (exerciseId: string, weightLb: number, reps: number) => void;
   finishWorkout: () => void;
   saveAsRoutine: (exerciseBlocks: string[], sets: LoggedSet[]) => void;
   reset: (plannedExerciseIds: string[]) => void;
   clearInstantCue: () => void;
-  
+
   // Utilities
   ensureExerciseState: (exerciseId: string) => ExerciseSessionState;
 }
 
 export function useWorkoutOrchestrator(options: WorkoutOrchestratorOptions): WorkoutOrchestratorResult {
-  const { plan, unit = 'lb', onHaptic, onSound } = options;
+  const { plan, unit = 'lb', onHaptic, onSound, onWorkoutFinished, onPRCelebration } = options;
 
   const [instantCue, setInstantCue] = useState<InstantCue | null>(null);
   const [recapCues, setRecapCues] = useState<Cue[]>([]);
@@ -111,6 +114,15 @@ export function useWorkoutOrchestrator(options: WorkoutOrchestratorOptions): Wor
       setInstantCue({ message: title, detail, intensity: "high" });
       onHaptic?.('pr');
       onSound?.('pr');
+
+      // Trigger PR celebration callback
+      onPRCelebration?.({
+        prType: meta.type,
+        deltaLb: meta.weightDeltaLb || meta.e1rmDeltaLb || meta.repDeltaAtWeight,
+        exerciseName: exerciseName(exerciseId),
+        weightLabel: meta.weightLabel,
+        reps,
+      });
     } else {
       // No PR - check fallback cue
       const current = ensureCountdown(exerciseId);
@@ -200,7 +212,10 @@ export function useWorkoutOrchestrator(options: WorkoutOrchestratorOptions): Wor
 
     clearCurrentSession();
     setCurrentPlan(null);
-  }, [hydrated, persisted, plan, unit, onHaptic, onSound]);
+
+    // Notify that workout is finished with session ID for navigation
+    onWorkoutFinished?.(sessionObj.id);
+  }, [hydrated, persisted, plan, unit, onHaptic, onSound, onWorkoutFinished]);
 
   const saveAsRoutine = useCallback((exerciseBlocks: string[], sets: LoggedSet[]) => {
     // Before hydration, actions are no-ops

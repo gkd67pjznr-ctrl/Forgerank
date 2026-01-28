@@ -5,13 +5,10 @@ import { useThemeColors } from "../../../src/ui/theme";
 import { useWorkoutSessions } from "../../../src/lib/stores";
 import { startOfDayMs, formatDateShort, formatTimeShort, formatDuration, durationMs } from "../../../src/lib/workoutModel";
 import { EXERCISES_V1 } from "../../../src/data/exercises";
+import { kgToLb } from "../../../src/lib/units";
 
 function exerciseName(exerciseId: string) {
   return EXERCISES_V1.find((e) => e.id === exerciseId)?.name ?? exerciseId;
-}
-
-function kgToLb(kg: number) {
-  return kg * 2.2046226218;
 }
 
 export default function DayDetail() {

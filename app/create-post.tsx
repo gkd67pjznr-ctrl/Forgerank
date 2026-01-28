@@ -2,7 +2,8 @@
 import { Stack, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
-import { createPost, hydrateFeed, type PostVisibility } from "../src/lib/stores/feedStore";
+import { useUser } from "../src/lib/stores/authStore";
+import { createPost, type PostVisibility } from "../src/lib/stores/feedStore";
 import type { ID } from "../src/lib/socialModel";
 import { useThemeColors } from "../src/ui/theme";
 import { KeyboardAwareScrollView } from "../src/ui/components/KeyboardAwareScrollView";
@@ -12,7 +13,9 @@ const ME: ID = "u_demo_me";
 export default function CreatePostScreen() {
   const c = useThemeColors();
   const router = useRouter();
+  const user = useUser();
 
+  const userId = user?.id ?? ME;
   const [text, setText] = useState("");
   const [visibility, setVisibility] = useState<PostVisibility>("public");
   const [error, setError] = useState<string | null>(null);
@@ -27,8 +30,7 @@ export default function CreatePostScreen() {
     setError(null);
 
     try {
-      hydrateFeed().catch(() => {});
-      createPost({ authorUserId: ME, text: clean, visibility });
+      createPost({ authorUserId: userId, text: clean, visibility });
       router.back();
     } catch {
       setError("Could not publish post.");
@@ -138,7 +140,7 @@ export default function CreatePostScreen() {
               <TextInput
                 value={text}
                 onChangeText={setText}
-                placeholder="What’s the move today?"
+                placeholder="What's the move today?"
                 placeholderTextColor={c.muted}
                 style={{ color: c.text, fontWeight: "700", minHeight: 120 }}
                 multiline

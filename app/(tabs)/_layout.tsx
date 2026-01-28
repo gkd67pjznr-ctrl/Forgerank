@@ -11,9 +11,13 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   const loading = useAuthLoading();
   const authStore = useAuth();
 
+  console.log('[AuthGuard] Render:', { loading, isAuthenticated });
+
   useEffect(() => {
+    console.log('[AuthGuard] Effect:', { loading, isAuthenticated });
     // Only check authentication after hydration is complete
     if (!loading && !isAuthenticated) {
+      console.log('[AuthGuard] Redirecting to login...');
       // Clear any stale errors
       authStore.clearError();
       // Redirect to login
@@ -23,6 +27,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
   // Show loading spinner while checking auth
   if (loading) {
+    console.log('[AuthGuard] Showing loading spinner');
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" />
@@ -32,11 +37,13 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
   // If not authenticated, don't render children (will redirect)
   if (!isAuthenticated) {
+    console.log('[AuthGuard] Not authenticated, showing empty');
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }} />
     );
   }
 
+  console.log('[AuthGuard] Rendering children');
   return <>{children}</>;
 }
 

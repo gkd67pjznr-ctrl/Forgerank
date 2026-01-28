@@ -1,23 +1,16 @@
 // app/chat.tsx
 import { Link, Stack, useRouter } from "expo-router";
-import { Pressable, ScrollView, Text, View } from "react-native";
-import { getMessagesForThread, useThreads } from "../src/lib/stores/chatStore";
+import { useEffect, useState } from "react";
+import { Pressable, ScrollView, Text, View, RefreshControl } from "react-native";
+import { useUser } from "../src/lib/stores/authStore";
+import { getMessagesForThread, useThreads, useChatStore } from "../src/lib/stores/chatStore";
 import type { ID } from "../src/lib/socialModel";
 import { displayName, ME_ID } from "../src/lib/userDirectory";
 import { useThemeColors } from "../src/ui/theme";
+import { timeAgo } from "../src/lib/units";
+import { ProtectedRoute } from "../src/ui/components/ProtectedRoute";
 
 const ME: ID = ME_ID;
-
-function timeAgo(ms: number): string {
-  const s = Math.max(1, Math.floor((Date.now() - ms) / 1000));
-  if (s < 60) return `${s}s`;
-  const m = Math.floor(s / 60);
-  if (m < 60) return `${m}m`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h`;
-  const d = Math.floor(h / 24);
-  return `${d}d`;
-}
 
 function otherUserId(thread: { memberUserIds: ID[] }, myUserId: ID): ID {
   return thread.memberUserIds.find((id) => id !== myUserId) ?? thread.memberUserIds[0] ?? myUserId;
@@ -35,14 +28,45 @@ function unreadCountForThread(threadId: ID, myUserId: ID): number {
 export default function ChatScreen() {
   const c = useThemeColors();
   const router = useRouter();
-  const threads = useThreads(ME);
+  const user = useUser();
+  const [refreshing, setRefreshing] = useState(false);
+  const { pullFromServer } = useChatStore();
+
+  const userId = user?.id ?? ME;
+  const threads = useThreads(userId);
+
+  // Pull to refresh
+  async function onRefresh() {
+    setRefreshing(true);
+    try {
+      await pullFromServer();
+    } catch (err) {
+      console.error('[Chat] Refresh failed:', err);
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
+  // Initial sync on mount
+  useEffect(() => {
+    if (user?.id) {
+      pullFromServer().catch(err => {
+        console.error('[Chat] Failed to sync:', err);
+      });
+    }
+  }, [user?.id, pullFromServer]);
 
   return (
-    <>
+    <ProtectedRoute>
       <Stack.Screen options={{ title: "Chat" }} />
 
       <View style={{ flex: 1, backgroundColor: c.bg }}>
-        <ScrollView contentContainerStyle={{ padding: 16, gap: 10, paddingBottom: 24 }}>
+        <ScrollView
+          contentContainerStyle={{ padding: 16, gap: 10, paddingBottom: 24 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
           {/* Top actions */}
           <View style={{ flexDirection: "row", gap: 10 }}>
             <Pressable
@@ -92,13 +116,13 @@ export default function ChatScreen() {
             >
               <Text style={{ color: c.text, fontWeight: "900", fontSize: 16 }}>No messages yet</Text>
               <Text style={{ color: c.muted }}>
-                This is the Threads list. Tap “New Message” to start a DM.
+                This is the Threads list. Tap "New Message" to start a DM.
               </Text>
             </View>
           ) : null}
 
           {threads.map((t) => {
-            const otherId = otherUserId(t, ME);
+            const otherId = otherUserId(t, userId);
             const name = displayName(otherId);
 
             const msgs = getMessagesForThread(t.id);
@@ -107,7 +131,7 @@ export default function ChatScreen() {
             const lastAt = last?.createdAtMs ?? t.updatedAtMs ?? t.createdAtMs;
             const when = timeAgo(lastAt);
 
-            const unread = unreadCountForThread(t.id, ME);
+            const unread = unreadCountForThread(t.id, userId);
 
             return (
               <Link key={t.id} href={`/dm/${t.id}` as any} asChild>
@@ -199,6 +223,6 @@ export default function ChatScreen() {
           })}
         </ScrollView>
       </View>
-    </>
+    </ProtectedRoute>
   );
 }

@@ -5,13 +5,10 @@ import { useThemeColors } from "../../src/ui/theme";
 import { useWorkoutSessions } from "../../src/lib/stores";
 import { durationMs, formatDateShort, formatTimeShort, formatDuration } from "../../src/lib/workoutModel";
 import { EXERCISES_V1 } from "../../src/data/exercises";
+import { kgToLb } from "../../src/lib/units";
 
 function exerciseName(exerciseId: string) {
   return EXERCISES_V1.find((e) => e.id === exerciseId)?.name ?? exerciseId;
-}
-
-function kgToLb(kg: number) {
-  return kg * 2.2046226218;
 }
 
 export default function WorkoutDetail() {
@@ -30,7 +27,7 @@ export default function WorkoutDetail() {
   }
 
   // group sets by exercise in order they appear
-  const groups: Array<{ exerciseId: string; sets: typeof session.sets }> = [];
+  const groups: { exerciseId: string; sets: typeof session.sets }[] = [];
   for (const set of session.sets) {
     const last = groups[groups.length - 1];
     if (!last || last.exerciseId !== set.exerciseId) {

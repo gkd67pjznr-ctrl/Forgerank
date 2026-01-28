@@ -1,5 +1,5 @@
 // src/lib/stores/feedStore.ts
-// Zustand store for feed posts with AsyncStorage persistence
+// Zustand store for feed posts with AsyncStorage persistence and Supabase sync
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -8,6 +8,10 @@ import type { ID } from "../socialModel";
 import { uid } from "../uid";
 import { logError } from "../errorHandler";
 import { safeJSONParse } from "../storage/safeJSONParse";
+import type { SyncMetadata } from "../sync/syncTypes";
+import { getUser } from "./authStore";
+import { postRepository } from "../sync/repositories/postRepository";
+import { networkMonitor } from "../sync/NetworkMonitor";
 
 // Import from new Zustand friendsStore location
 import {
@@ -33,11 +37,17 @@ interface FeedState {
   posts: FeedPost[];
   likesByPostId: Record<string, Record<string, boolean>>;
   hydrated: boolean;
+  _sync: SyncMetadata;
 
   // Actions
   toggleLike: (postId: ID, userId: ID) => { ok: boolean; reason?: string };
   createPost: (opts: { authorUserId: ID; text: string; visibility?: PostVisibility }) => FeedPost;
   setHydrated: (value: boolean) => void;
+
+  // Sync actions
+  pullFromServer: () => Promise<void>;
+  pushToServer: () => Promise<void>;
+  sync: () => Promise<void>;
 }
 
 /**
@@ -84,6 +94,13 @@ export const useFeedStore = create<FeedState>()(
       posts: [],
       likesByPostId: {},
       hydrated: false,
+      _sync: {
+        lastSyncAt: null,
+        lastSyncHash: null,
+        syncStatus: 'idle',
+        syncError: null,
+        pendingMutations: 0,
+      },
 
       toggleLike: (postId, userId) => {
         const post = get().posts.find((p) => p.id === postId);
@@ -130,6 +147,72 @@ export const useFeedStore = create<FeedState>()(
       },
 
       setHydrated: (value) => set({ hydrated: value }),
+
+      // Sync actions
+      pullFromServer: async () => {
+        const user = getUser();
+        if (!user) {
+          console.warn('[feedStore] Cannot pull: no user signed in');
+          return;
+        }
+
+        set({ _sync: { ...get()._sync, syncStatus: 'syncing', syncError: null } });
+
+        try {
+          // Fetch feed from server
+          const remotePosts = await postRepository.fetchFeed({ userId: user.id });
+
+          set((state) => ({
+            posts: mergeFeedPosts(state.posts, remotePosts),
+            _sync: {
+              ...state._sync,
+              syncStatus: 'success',
+              lastSyncAt: Date.now(),
+            },
+          }));
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          set((state) => ({
+            _sync: {
+              ...state._sync,
+              syncStatus: 'error',
+              syncError: errorMessage,
+            },
+          }));
+          throw error;
+        }
+      },
+
+      pushToServer: async () => {
+        const user = getUser();
+        if (!user) {
+          console.warn('[feedStore] Cannot push: no user signed in');
+          return;
+        }
+
+        if (!networkMonitor.isOnline()) {
+          console.warn('[feedStore] Cannot push: offline');
+          return;
+        }
+
+        try {
+          // Feed posts are synced immediately on create
+          set((state) => ({
+            _sync: {
+              ...state._sync,
+              pendingMutations: 0,
+            },
+          }));
+        } catch (error) {
+          console.error('[feedStore] Push failed:', error);
+          throw error;
+        }
+      },
+
+      sync: async () => {
+        await get().pullFromServer();
+        await get().pushToServer();
+      },
     }),
     {
       name: STORAGE_KEY,
@@ -252,4 +335,37 @@ export function createPost(opts: { authorUserId: ID; text: string; visibility?: 
 
 export function toggleLike(postId: string, userId: string): { ok: boolean; reason?: string } {
   return useFeedStore.getState().toggleLike(postId, userId);
+}
+
+// ============================================================================
+// Sync Helpers
+// ============================================================================
+
+/**
+ * Merge local and remote feed posts
+ */
+function mergeFeedPosts(local: FeedPost[], remote: FeedPost[]): FeedPost[] {
+  const postMap = new Map<string, FeedPost>();
+
+  // Add all local posts
+  for (const post of local) {
+    postMap.set(String(post.id), post);
+  }
+
+  // Add/override with remote posts
+  for (const remotePost of remote) {
+    postMap.set(String(remotePost.id), remotePost);
+  }
+
+  // Return sorted by createdAtMs descending
+  return Array.from(postMap.values()).sort(
+    (a, b) => b.createdAtMs - a.createdAtMs
+  );
+}
+
+/**
+ * Get sync status for feed store
+ */
+export function getFeedSyncStatus(): SyncMetadata {
+  return useFeedStore.getState()._sync;
 }

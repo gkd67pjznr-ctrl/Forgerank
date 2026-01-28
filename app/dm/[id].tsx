@@ -2,6 +2,7 @@
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Platform, Pressable, ScrollView, Text, TextInput, View, KeyboardAvoidingView } from "react-native";
+import { useUser } from "../../src/lib/stores/authStore";
 import {
     markThreadRead,
     sendMessage,
@@ -10,9 +11,13 @@ import {
     useThread,
     useThreadMessages,
     useThreadOtherUserId,
+    setupChatRealtime,
+    setupTypingRealtime,
+    broadcastTyping,
 } from "../../src/lib/stores/chatStore";
 import type { ID } from "../../src/lib/socialModel";
 import { useThemeColors } from "../../src/ui/theme";
+import { ProtectedRoute } from "../../src/ui/components/ProtectedRoute";
 
 const ME: ID = "u_demo_me";
 
@@ -36,15 +41,17 @@ function timeLabel(ms: number): string {
 export default function DMThreadScreen() {
   const c = useThemeColors();
   const router = useRouter();
+  const user = useUser();
   const params = useLocalSearchParams<{ id?: string }>();
 
   const threadId = (params?.id ?? "") as ID;
+  const userId = user?.id ?? ME;
 
   const thread = useThread(threadId);
   const messages = useThreadMessages(threadId);
-  const otherId = useThreadOtherUserId(thread, ME);
+  const otherId = useThreadOtherUserId(thread, userId);
 
-  const otherTyping = useOtherUserTyping(threadId, ME);
+  const otherTyping = useOtherUserTyping(threadId, userId);
 
   const title = useMemo(() => {
     if (!otherId) return "DM";
@@ -53,14 +60,27 @@ export default function DMThreadScreen() {
 
   const [draft, setDraftText] = useState("");
 
+  // Setup realtime subscriptions for chat
+  useEffect(() => {
+    if (thread && user?.id) {
+      const chatCleanup = setupChatRealtime(threadId);
+      const typingCleanup = setupTypingRealtime(threadId);
+
+      return () => {
+        chatCleanup?.();
+        typingCleanup?.();
+      };
+    }
+  }, [threadId, user?.id]);
+
   // ✅ Proper ref type for RN ScrollView
   const scrollerRef = useRef<ScrollView>(null);
 
   // Mark read on open + whenever this screen regains focus-ish (cheap + correct for v1)
   useEffect(() => {
     if (!threadId) return;
-    markThreadRead(threadId, ME);
-  }, [threadId]);
+    markThreadRead(threadId, userId);
+  }, [threadId, userId]);
 
   // Scroll down + mark read when messages change
   useEffect(() => {
@@ -68,11 +88,11 @@ export default function DMThreadScreen() {
 
     const t = setTimeout(() => {
       scrollerRef.current?.scrollToEnd({ animated: true });
-      markThreadRead(threadId, ME);
+      markThreadRead(threadId, userId);
     }, 50);
 
     return () => clearTimeout(t);
-  }, [threadId, messages.length]);
+  }, [threadId, messages.length, userId]);
 
   const canSend = draft.trim().length > 0;
 
@@ -81,32 +101,42 @@ export default function DMThreadScreen() {
 
     // Typing state: on while there is any non-empty draft
     const typingNow = next.trim().length > 0;
-    setTyping(threadId, ME, typingNow);
+    setTyping(threadId, userId, typingNow);
+
+    // Broadcast typing indicator via realtime
+    if (otherId) {
+      broadcastTyping(threadId, userId, typingNow);
+    }
   }
 
   function onSend() {
     const clean = draft.trim();
     if (!clean) return;
 
-    sendMessage(threadId, ME, clean);
+    sendMessage(threadId, userId, clean);
 
     // Clear draft + clear typing
     setDraftText("");
-    setTyping(threadId, ME, false);
+    setTyping(threadId, userId, false);
+
+    // Broadcast that we stopped typing
+    if (otherId) {
+      broadcastTyping(threadId, userId, false);
+    }
 
     // Mark read immediately (sender)
-    markThreadRead(threadId, ME);
+    markThreadRead(threadId, userId);
   }
 
   // Thread not found (bad route / stale id)
   if (!threadId || !thread) {
     return (
-      <>
+      <ProtectedRoute>
         <Stack.Screen options={{ title: "DM" }} />
         <View style={{ flex: 1, backgroundColor: c.bg, padding: 16, gap: 12 }}>
           <Text style={{ color: c.text, fontWeight: "900", fontSize: 18 }}>Thread not found</Text>
           <Text style={{ color: c.muted }}>
-            This DM id doesn’t exist in the chat store yet. Go back to Chat and open an existing thread.
+            This DM id doesn't exist in the chat store yet. Go back to Chat and open an existing thread.
           </Text>
 
           <Pressable
@@ -124,12 +154,12 @@ export default function DMThreadScreen() {
             <Text style={{ color: c.text, fontWeight: "900" }}>Back</Text>
           </Pressable>
         </View>
-      </>
+      </ProtectedRoute>
     );
   }
 
   return (
-    <>
+    <ProtectedRoute>
       <Stack.Screen
         options={{
           title,
@@ -137,7 +167,10 @@ export default function DMThreadScreen() {
             <Pressable
               onPress={() => {
                 // leaving thread: stop typing
-                setTyping(threadId, ME, false);
+                setTyping(threadId, userId, false);
+                if (otherId) {
+                  broadcastTyping(threadId, userId, false);
+                }
                 router.back();
               }}
               style={{ paddingHorizontal: 8, paddingVertical: 4 }}
@@ -158,7 +191,7 @@ export default function DMThreadScreen() {
           ref={scrollerRef}
           contentContainerStyle={{ padding: 16, gap: 10, paddingBottom: 110 }}
           onContentSizeChange={() => scrollerRef.current?.scrollToEnd({ animated: true })}
-          onScrollBeginDrag={() => markThreadRead(threadId, ME)}
+          onScrollBeginDrag={() => markThreadRead(threadId, userId)}
         >
           {messages.length === 0 ? (
             <View
@@ -177,7 +210,7 @@ export default function DMThreadScreen() {
           ) : null}
 
           {messages.map((m) => {
-            const mine = m.senderUserId === ME;
+            const mine = m.senderUserId === userId;
             return (
               <View
                 key={m.id}
@@ -266,7 +299,12 @@ export default function DMThreadScreen() {
                 style={{ color: c.text, fontWeight: "700" }}
                 multiline
                 autoCorrect
-                onBlur={() => setTyping(threadId, ME, false)}
+                onBlur={() => {
+                  setTyping(threadId, userId, false);
+                  if (otherId) {
+                    broadcastTyping(threadId, userId, false);
+                  }
+                }}
               />
             </View>
 
@@ -288,6 +326,6 @@ export default function DMThreadScreen() {
           </View>
         </View>
       </KeyboardAvoidingView>
-    </>
+    </ProtectedRoute>
   );
 }

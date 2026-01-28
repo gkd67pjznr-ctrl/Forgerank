@@ -1,10 +1,10 @@
 // app/auth/login.tsx
 // Login screen with email, password, and OAuth (Google & Apple)
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { View, Text, TextInput, Pressable, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useThemeColors } from "@/src/ui/theme";
-import { useAuth, useAuthLoading, useAuthError } from "@/src/lib/stores";
+import { useAuth, useAuthLoading, useAuthError, useUser } from "@/src/lib/stores";
 import { OAuthButton } from "@/src/ui/components/OAuthButton";
 import { KeyboardAwareScrollView } from "@/src/ui/components/KeyboardAwareScrollView";
 import { useGoogleAuth } from "@/src/lib/auth/google";
@@ -32,6 +32,7 @@ export default function LoginScreen() {
   const router = useRouter();
   const c = useThemeColors();
   const authStore = useAuth();
+  const user = useUser();
   const loading = useAuthLoading();
   const authError = useAuthError();
 
@@ -49,13 +50,23 @@ export default function LoginScreen() {
   const { signInWithGoogle } = useGoogleAuth({
     onSuccess: () => {
       setIsGoogleLoading(false);
-      router.replace("/(tabs)");
+      // Note: Navigation is handled by auth state listener
+      // The session will be established when the deep link callback is processed
     },
     onError: (error: OAuthError) => {
       setIsGoogleLoading(false);
       Alert.alert("Google Sign-In Error", getOAuthErrorMessage(error));
     },
   });
+
+  // Watch for auth state changes to navigate after successful OAuth
+  useEffect(() => {
+    if (user && authStore.session && isGoogleLoading) {
+      // OAuth was successful and session is now active
+      setIsGoogleLoading(false);
+      router.replace("/(tabs)");
+    }
+  }, [user, authStore.session]);
 
   const { signInWithApple, isAvailable: isAppleAvailable } = useAppleAuth({
     onSuccess: () => {

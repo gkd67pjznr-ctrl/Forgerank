@@ -32,11 +32,13 @@ export type UseLiveWorkoutSessionResult = {
   reps: number;
   weightLbText: string;
   repsText: string;
+  weightStep: number; // Current weight increment step
 
   onWeightText: (t: string) => void;
   onRepsText: (t: string) => void;
   onWeightCommit: () => void;
   onRepsCommit: () => void;
+  onWeightStepChange: (step: number) => void;
 
   decWeight: () => void;
   incWeight: () => void;
@@ -46,6 +48,10 @@ export type UseLiveWorkoutSessionResult = {
   // edit existing set rows
   setWeightForSet: (setId: string, text: string) => void;
   setRepsForSet: (setId: string, text: string) => void;
+
+  // "same as previous" helpers for exercise blocks
+  getLastSetForExercise: (exerciseId: string) => LoggedSet | null;
+  copyFromLastSet: (exerciseId: string, setId: string) => void;
 
   // helpers
   kgToLb: (kg: number) => number;
@@ -78,6 +84,7 @@ export function useLiveWorkoutSession(
   const [reps, setReps] = useState(startReps);
   const [weightLbText, setWeightLbText] = useState(String(startWeight));
   const [repsText, setRepsText] = useState(String(startReps));
+  const [weightStep, setWeightStep] = useState(2.5); // Default 2.5 lb increments
 
   // per-exercise defaults (last-used)
   const [defaultsByExerciseId, setDefaultsByExerciseId] = useState<Record<string, Defaults>>({});
@@ -189,19 +196,48 @@ export function useLiveWorkoutSession(
 
   const decWeight = useCallback(() => {
     setWeightLb((w) => {
-      const next = Math.max(0, w - 2.5);
+      const next = Math.max(0, w - weightStep);
       setWeightLbText(next.toFixed(1));
       return next;
     });
-  }, []);
+  }, [weightStep]);
 
   const incWeight = useCallback(() => {
     setWeightLb((w) => {
-      const next = Math.min(2000, w + 2.5); // Max 2000 lbs
+      const next = Math.min(2000, w + weightStep); // Max 2000 lbs
       setWeightLbText(next.toFixed(1));
       return next;
     });
+  }, [weightStep]);
+
+  const onWeightStepChange = useCallback((step: number) => {
+    setWeightStep(step);
   }, []);
+
+  // Get the last logged set for an exercise
+  const getLastSetForExercise = useCallback((exerciseId: string): LoggedSet | null => {
+    const exerciseSets = sets.filter((s) => s.exerciseId === exerciseId);
+    if (exerciseSets.length === 0) return null;
+    // Return the most recent set
+    return exerciseSets[exerciseSets.length - 1];
+  }, [sets]);
+
+  // Copy weight/reps from the last set for an exercise
+  const copyFromLastSet = useCallback((exerciseId: string, targetSetId: string) => {
+    const lastSet = getLastSetForExercise(exerciseId);
+    if (!lastSet) {
+      callbacks?.onError?.("No previous set to copy from");
+      return;
+    }
+
+    const wLb = kgToLb(lastSet.weightKg);
+    updateSet(targetSetId, {
+      weightKg: lastSet.weightKg,
+      reps: lastSet.reps,
+    });
+
+    callbacks?.onSuccess?.("Copied from previous set");
+  }, [getLastSetForExercise, updateSet, callbacks]);
 
   const decReps = useCallback(() => {
     setReps((r) => {
@@ -296,11 +332,13 @@ export function useLiveWorkoutSession(
       reps,
       weightLbText,
       repsText,
+      weightStep,
 
       onWeightText,
       onRepsText,
       onWeightCommit,
       onRepsCommit,
+      onWeightStepChange,
 
       decWeight,
       incWeight,
@@ -320,6 +358,9 @@ export function useLiveWorkoutSession(
       addSet,
 
       resetSession,
+
+      getLastSetForExercise,
+      copyFromLastSet,
     }),
     [
       sets,
@@ -330,10 +371,12 @@ export function useLiveWorkoutSession(
       reps,
       weightLbText,
       repsText,
+      weightStep,
       onWeightText,
       onRepsText,
       onWeightCommit,
       onRepsCommit,
+      onWeightStepChange,
       decWeight,
       incWeight,
       decReps,
@@ -347,6 +390,8 @@ export function useLiveWorkoutSession(
       syncQuickAddToExercise,
       addSet,
       resetSession,
+      getLastSetForExercise,
+      copyFromLastSet,
     ]
   );
 }

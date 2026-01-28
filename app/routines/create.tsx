@@ -4,6 +4,7 @@ import { useThemeColors } from "../../src/ui/theme";
 import { uid, type Routine } from "../../src/lib/routinesModel";
 // [MIGRATED 2026-01-23] Using Zustand stores
 import { upsertRoutine } from "../../src/lib/stores";
+import { ProtectedRoute } from "../../src/ui/components/ProtectedRoute";
 
 const PRESET_NAMES = ["Push Day", "Pull Day", "Leg Day", "Upper", "Lower", "Full Body"];
 
@@ -25,7 +26,8 @@ export default function CreateRoutine() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg, padding: 16, gap: 12 }}>
+    <ProtectedRoute>
+      <View style={{ flex: 1, backgroundColor: c.bg, padding: 16, gap: 12 }}>
       <Text style={{ color: c.text, fontSize: 22, fontWeight: "900" }}>Create Routine</Text>
       <Text style={{ color: c.muted }}>
         Quick-create with a preset name (we’ll add full text input next).
@@ -49,6 +51,7 @@ export default function CreateRoutine() {
           </Pressable>
         ))}
       </View>
-    </View>
+      </View>
+    </ProtectedRoute>
   );
 }
