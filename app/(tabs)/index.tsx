@@ -5,19 +5,9 @@ import type { EmoteId, WorkoutPost } from "../../src/lib/socialModel";
 import { toggleReaction, useFeedAll, useMyReaction } from "../../src/lib/stores/socialStore";
 import { useThemeColors } from "../../src/ui/theme";
 import { TabErrorBoundary } from "../../src/ui/tab-error-boundary";
+import { timeAgo } from "../../src/lib/units";
 
 const MY_USER_ID = "u_demo_me"; // v1 placeholder (later: auth user id)
-
-function timeAgo(ms: number): string {
-  const s = Math.max(1, Math.floor((Date.now() - ms) / 1000));
-  if (s < 60) return `${s}s`;
-  const m = Math.floor(s / 60);
-  if (m < 60) return `${m}m`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h`;
-  const d = Math.floor(h / 24);
-  return `${d}d`;
-}
 
 function emoteLabel(e: EmoteId): string {
   if (e === "like") return "👍";

@@ -78,6 +78,7 @@ Every task follows this cycle. No exceptions.
 │                                                             │
 │   7. DOCUMENT                                               │
 │      └── Update feature file, progress.md                   │
+│      └── Add test cases to USER_TESTING_CHECKLIST.md      │
 │                                                             │
 │   8. SCORE                                                  │
 │      └── Calculate completion score (see below)             │
@@ -214,6 +215,93 @@ After completing work, update the relevant feature file in `docs/features/`:
 
 ---
 
+## USER TESTING CHECKLIST UPDATE PROTOCOL
+
+**CRITICAL:** After completing ANY work that requires user testing, you MUST update `docs/USER_TESTING_CHECKLIST.md` with new test cases.
+
+### When to Update
+
+Add test cases to the checklist when you complete:
+- New features (UI flows, screens, interactions)
+- Bug fixes that affect user behavior
+- Data model changes that affect the UI
+- Navigation changes
+- Store/state management changes
+
+### What to Add
+
+For each new feature/fix, add:
+1. **Test Case ID** (e.g., TC-R13 for Routine feature #13)
+2. **Clear steps** to reproduce
+3. **Expected behavior**
+4. **Pass/Fail checkbox**
+5. **Notes section** for user feedback
+
+### Template
+
+```markdown
+### TC-XX: [Brief test name]
+**Steps:**
+1. Step 1
+2. Step 2
+3. Step 3
+
+**Expected:** [What should happen]
+**Result:** ⬜ Pass / ❌ Fail / ⚠️ Issue
+
+**Notes:**
+```
+[Your notes here]
+```
+```
+
+### Example
+
+```markdown
+### TC-R13: Progress bar color changes
+**Steps:**
+1. Start a routine workout
+2. Complete sets to reach ~25% progress
+3. Verify progress bar color (should be warning/yellow)
+4. Complete sets to reach ~50% progress
+5. Verify progress bar color (should be primary)
+6. Complete sets to reach 100% progress
+7. Verify progress bar color (should be success/green)
+
+**Expected:** Colors change based on completion level
+**Result:** ⬜ Pass / ❌ Fail / ⚠️ Issue
+
+**Notes:**
+```
+[User's feedback here]
+```
+```
+
+### After Updating
+
+1. Add a new "Latest Testing Session" section header with the date
+2. Group related test cases together
+3. Include a summary at the top of what was tested
+4. Inform the user that the checklist has been updated
+
+### Example Completion Message
+
+```markdown
+## Work Complete
+
+I've added 12 new test cases to `docs/USER_TESTING_CHECKLIST.md` for the routine-based workout flow features.
+
+**Test Coverage:**
+- P0: Start workout from routine (2 test cases)
+- P1: Routine progress indicator (3 test cases)
+- P2: Workout summary screen (4 test cases)
+- P3: Quick-start from list (3 test cases)
+
+Please open the checklist and run through the tests on Expo Go when you're ready!
+```
+
+---
+
 ## PROGRESS.MD UPDATE PROTOCOL
 
 Update `docs/progress.md` when:
@@ -241,6 +329,7 @@ Update `docs/progress.md` when:
 - [ ] Score >= 70%
 - [ ] Feature file updated
 - [ ] No new TypeScript errors
+- [ ] **USER_TESTING_CHECKLIST.md updated with new test cases**
 
 ### Before User Testing (Expo Go)
 - [ ] Score >= 90%

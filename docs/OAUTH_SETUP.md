@@ -71,45 +71,51 @@ The OAuth integration uses:
 4. Configure authorized redirect URIs:
 
 ```
-# Development (Expo Go)
-exp://127.0.0.1:19000/--/auth
+# Development (Expo Go with default scheme)
+exp://127.0.0.1:19000/auth
 
-# Production (replace with your bundle ID)
-com.yourcompany.forgerank://auth
+# Development (custom scheme)
+forgerank://auth
+
+# Production (replace with your app scheme)
+yourapp://auth
 ```
 
 5. Copy the **Client ID**
 
 ### Step 4: Configure Environment Variables
 
-Update `/home/thomas/Forgerank/.env`:
+1. Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
 
-```bash
-# Google OAuth Client ID
-EXPO_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
-```
+2. Update `.env` with your credentials:
+   ```bash
+   EXPO_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+   ```
 
-### Step 5: Update app.json
+3. Restart your development server:
+   ```bash
+   npm start
+   ```
 
-Add the Google client ID to your app configuration:
-
-```json
-{
-  "expo": {
-    "extra": {
-      "googleClientId": process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID
-    }
-  }
-}
-```
-
-### Step 6: Enable Google Provider in Supabase
+### Step 5: Enable Google Provider in Supabase
 
 1. Go to your Supabase project dashboard
 2. Navigate to **Authentication** > **Providers**
 3. Enable **Google** provider
 4. Paste your Google Client ID and Client Secret
-5. Set the redirect URL to your app's callback URL
+5. Add the redirect URL to your site URL:
+   - `forgerank://auth` (or your custom scheme)
+
+### Step 6: Verify App Configuration
+
+The app configuration in `app.config.js` already includes:
+- `scheme: 'forgerank'` - Used for deep linking
+- `googleClientId` in `extra` - Loaded from environment variable
+
+Verify these settings match your Google Cloud Console configuration.
 
 ## Apple Sign In Setup
 

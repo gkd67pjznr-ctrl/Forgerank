@@ -1,6 +1,7 @@
 // app/live-workout.tsx
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from "react-native";
+import { useRouter } from "expo-router";
 
 import { makeDesignSystem } from "../src/ui/designSystem";
 import { FR } from "../src/ui/forgerankStyle";
@@ -25,6 +26,7 @@ import { WorkoutControls } from "../src/ui/components/LiveWorkout/WorkoutControl
 import { SelectedExerciseCard } from "../src/ui/components/LiveWorkout/SelectedExerciseCard";
 import { WorkoutActions } from "../src/ui/components/LiveWorkout/WorkoutActions";
 import { RecapCues } from "../src/ui/components/LiveWorkout/RecapCues";
+import { PRCelebration } from "../src/ui/components/LiveWorkout/PRCelebration";
 
 // Hooks
 import { useValidationToast } from "../src/lib/hooks/useValidationToast";
@@ -42,6 +44,8 @@ import {
 
 // Utils
 import { randomHighlightDurationMs } from "../src/lib/perSetCue";
+import { selectCelebration } from "../src/lib/celebration";
+import type { SelectedCelebration } from "../src/lib/celebration";
 
 // Constants
 const DEFAULT_REST_SECONDS = 90;
@@ -94,6 +98,7 @@ function hapticPR() {
 export default function LiveWorkout() {
   const c = useThemeColors();
   const ds = makeDesignSystem("dark", "toxic");
+  const router = useRouter();
 
   // Unified spacing/radii via FR
   const PAD = FR.space.x4;
@@ -110,6 +115,9 @@ export default function LiveWorkout() {
   const [focusMode, setFocusMode] = useState(false);
   const [restVisible, setRestVisible] = useState(false);
   const [showTimerDetails, setShowTimerDetails] = useState(false);
+
+  // PR celebration state
+  const [celebration, setCelebration] = useState<SelectedCelebration | null>(null);
 
   // Exercise picker state - extracted to custom hook
   const pickerState = useExercisePickerState({
@@ -136,6 +144,17 @@ export default function LiveWorkout() {
     },
     onSound: (type) => {
       // Sound logic can be added here if needed
+    },
+    onWorkoutFinished: (sessionId) => {
+      // Navigate to workout summary screen
+      router.push(`/workout-summary?sessionId=${sessionId}` as any);
+    },
+    onPRCelebration: (params) => {
+      // Select and show celebration for PR
+      const selected = selectCelebration(params);
+      if (selected) {
+        setCelebration(selected);
+      }
     },
   });
 
@@ -228,7 +247,11 @@ export default function LiveWorkout() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg }}>
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: c.bg }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+    >
       <InstantCueToast
         cue={orchestrator.instantCue}
         onClear={orchestrator.clearInstantCue}
@@ -249,7 +272,19 @@ export default function LiveWorkout() {
         onDone={onRestTimerDoneFeedback}
       />
 
-      <ScrollView contentContainerStyle={{ padding: PAD, gap: GAP, paddingBottom: SCROLL_BOTTOM_PADDING }}>
+      <PRCelebration
+        celebration={celebration}
+        onDismiss={() => setCelebration(null)}
+        onShare={() => {
+          // TODO: Implement share functionality
+          setCelebration(null);
+        }}
+      />
+
+      <ScrollView
+        contentContainerStyle={{ padding: PAD, gap: GAP, paddingBottom: SCROLL_BOTTOM_PADDING }}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* Timer Bar */}
         <WorkoutTimerBar
           timer={timer}
@@ -294,6 +329,8 @@ export default function LiveWorkout() {
           setRepsForSet={session.setRepsForSet}
           kgToLb={session.kgToLb}
           estimateE1RMLb={session.estimateE1RMLb}
+          getLastSetForExercise={session.getLastSetForExercise}
+          copyFromLastSet={session.copyFromLastSet}
         />
 
         {/* Quick Add Section - free workout mode only */}
@@ -318,6 +355,7 @@ export default function LiveWorkout() {
               onDecReps={session.decReps}
               onIncReps={session.incReps}
               onAddSet={addSet}
+              onWeightStepChange={session.onWeightStepChange}
             />
           </>
         )}
@@ -333,6 +371,6 @@ export default function LiveWorkout() {
         {/* Recap Cues */}
         <RecapCues cues={orchestrator.recapCues} />
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 }

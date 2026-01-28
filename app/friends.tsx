@@ -1,16 +1,21 @@
 // app/friends.tsx
 import { Stack, useRouter } from "expo-router";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Pressable, ScrollView, Text, View, ActivityIndicator, RefreshControl } from "react-native";
+import { useUser } from "../src/lib/stores/authStore";
 import { ensureThread } from "../src/lib/stores/chatStore";
 import {
   acceptFriendRequest,
   areFriends,
   getFriendStatus,
-  hydrateFriends,
   sendFriendRequest,
+  useFriendEdges,
+  setupFriendsRealtime,
+  useFriendsStore,
 } from "../src/lib/stores/friendsStore";
 import type { ID } from "../src/lib/socialModel";
 import { useThemeColors } from "../src/ui/theme";
+import { ProtectedRoute } from "../src/ui/components/ProtectedRoute";
 
 const ME: ID = "u_demo_me";
 
@@ -38,14 +43,39 @@ function labelForStatus(opts: {
 export default function FriendsScreen() {
   const c = useThemeColors();
   const router = useRouter();
+  const user = useUser();
+  const [refreshing, setRefreshing] = useState(false);
+  const { pullFromServer } = useFriendsStore();
 
-  // make sure friends store is ready
-  hydrateFriends().catch(() => {});
+  const userId = user?.id ?? ME;
 
-  const people = DIRECTORY.filter((p) => p.id !== ME);
+  // Get friend edges from store (now sync-enabled)
+  const friendEdges = useFriendEdges(userId);
+
+  // Setup realtime subscriptions for friends
+  useEffect(() => {
+    if (user?.id) {
+      const cleanup = setupFriendsRealtime(user.id);
+      return cleanup;
+    }
+  }, [user?.id]);
+
+  // Pull to refresh
+  async function onRefresh() {
+    setRefreshing(true);
+    try {
+      await pullFromServer();
+    } catch (err) {
+      console.error('[Friends] Refresh failed:', err);
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
+  const people = DIRECTORY.filter((p) => p.id !== userId);
 
   return (
-    <>
+    <ProtectedRoute>
       <Stack.Screen
         options={{
           title: "Friends",
@@ -58,7 +88,12 @@ export default function FriendsScreen() {
       />
 
       <View style={{ flex: 1, backgroundColor: c.bg }}>
-        <ScrollView contentContainerStyle={{ padding: 16, gap: 10, paddingBottom: 24 }}>
+        <ScrollView
+          contentContainerStyle={{ padding: 16, gap: 10, paddingBottom: 24 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
           <View style={{ gap: 6, marginBottom: 6 }}>
             <Text style={{ color: c.text, fontSize: 18, fontWeight: "900" }}>Friends</Text>
             <Text style={{ color: c.muted, fontWeight: "700" }}>
@@ -67,13 +102,13 @@ export default function FriendsScreen() {
           </View>
 
           {people.map((p) => {
-            const isFriends = areFriends(ME, p.id);
+            const isFriends = areFriends(userId, p.id);
 
             // We look both directions to infer a simple request state.
-            // Convention we’re assuming:
+            // Convention we're assuming:
             // - getFriendStatus(A, B) === "requested" means A requested B
-            const outgoing = String(getFriendStatus(ME, p.id) ?? "none");
-            const incoming = String(getFriendStatus(p.id, ME) ?? "none");
+            const outgoing = String(getFriendStatus(userId, p.id) ?? "none");
+            const incoming = String(getFriendStatus(p.id, userId) ?? "none");
 
             const label = labelForStatus({ isFriends, outgoing, incoming });
 
@@ -117,7 +152,7 @@ export default function FriendsScreen() {
                   {canSendRequest ? (
                     <Pressable
                       onPress={() => {
-                        sendFriendRequest(ME, p.id);
+                        sendFriendRequest(userId, p.id);
                       }}
                       style={({ pressed }) => ({
                         paddingVertical: 10,
@@ -136,8 +171,8 @@ export default function FriendsScreen() {
                   {canAccept ? (
                     <Pressable
                       onPress={() => {
-                        // accept as ME, where p.id was the requester
-                        acceptFriendRequest(ME, p.id);
+                        // accept as userId, where p.id was the requester
+                        acceptFriendRequest(userId, p.id);
                       }}
                       style={({ pressed }) => ({
                         paddingVertical: 10,
@@ -156,7 +191,7 @@ export default function FriendsScreen() {
                   {isFriends ? (
                     <Pressable
                       onPress={() => {
-                        const t = ensureThread(ME, p.id, "friendsOnly");
+                        const t = ensureThread(userId, p.id, "friendsOnly");
                         router.push((`/dm/${t.id}` as any) as any);
                       }}
                       style={({ pressed }) => ({
@@ -183,6 +218,6 @@ export default function FriendsScreen() {
           })}
         </ScrollView>
       </View>
-    </>
+    </ProtectedRoute>
   );
 }

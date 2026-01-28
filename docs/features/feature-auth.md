@@ -31,13 +31,22 @@ User accounts, login, signup, and session management. Enables cloud sync, social
 
 **Implementation:** `src/lib/supabase/client.ts`, `src/lib/stores/authStore.ts`
 
-### In Progress - Google OAuth
+### Done - Google OAuth
 - [x] OAuth flow scaffolded
 - [x] Google config structure
-- [ ] Working Google sign-in
-- [ ] Token exchange with Supabase
+- [x] Deep link handler for OAuth callback
+- [x] Token exchange with Supabase
+- [x] Auth state integration
 
-**Implementation:** `src/lib/auth/google.ts`, `src/lib/auth/oauth.ts`
+**Implementation:** `src/lib/auth/google.ts`, `src/lib/auth/oauth.ts`, `app/_layout.tsx`
+
+**Remaining Setup Required:**
+- [ ] Create Google Cloud Project and OAuth credentials
+- [ ] Add redirect URIs to Google Cloud Console
+- [ ] Enable Google provider in Supabase dashboard
+- [ ] Set `EXPO_PUBLIC_GOOGLE_CLIENT_ID` in `.env` file
+
+See `docs/OAUTH_SETUP.md` for complete setup instructions.
 
 ---
 

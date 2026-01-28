@@ -1,12 +1,14 @@
 // app/new-message.tsx
 import { Stack, useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
+import { useUser } from "../src/lib/stores/authStore";
 import { ensureThread } from "../src/lib/stores/chatStore";
-import { areFriends, hydrateFriends } from "../src/lib/stores/friendsStore";
+import { areFriends } from "../src/lib/stores/friendsStore";
 import type { ID } from "../src/lib/socialModel";
 import { useThemeColors } from "../src/ui/theme";
 import { KeyboardAwareScrollView } from "../src/ui/components/KeyboardAwareScrollView";
+import { ProtectedRoute } from "../src/ui/components/ProtectedRoute";
 
 const ME: ID = "u_demo_me";
 
@@ -21,20 +23,20 @@ const DIRECTORY: Array<{ id: ID; name: string; subtitle?: string }> = [
 export default function NewMessageScreen() {
   const c = useThemeColors();
   const router = useRouter();
+  const user = useUser();
 
-  hydrateFriends().catch(() => {});
-
+  const userId = user?.id ?? ME;
   const [q, setQ] = useState("");
 
   const people = useMemo(() => {
-    const base = DIRECTORY.filter((p) => p.id !== ME);
+    const base = DIRECTORY.filter((p) => p.id !== userId);
     const query = q.trim().toLowerCase();
     if (!query) return base;
     return base.filter((p) => p.name.toLowerCase().includes(query));
-  }, [q]);
+  }, [q, userId]);
 
   return (
-    <>
+    <ProtectedRoute>
       <Stack.Screen
         options={{
           title: "New Message",
@@ -100,7 +102,7 @@ export default function NewMessageScreen() {
           ) : null}
 
           {people.map((p) => {
-            const isFriends = areFriends(ME, p.id);
+            const isFriends = areFriends(userId, p.id);
 
             return (
               <Pressable
@@ -144,7 +146,7 @@ export default function NewMessageScreen() {
                       <Pressable
                         onPress={(e) => {
                           e.stopPropagation?.();
-                          const thread = ensureThread(ME, p.id, "friendsOnly");
+                          const thread = ensureThread(userId, p.id, "friendsOnly");
                           router.push((`/dm/${thread.id}` as any) as any);
                         }}
                         style={({ pressed }) => ({
@@ -167,6 +169,6 @@ export default function NewMessageScreen() {
           })}
         </KeyboardAwareScrollView>
       </View>
-    </>
+    </ProtectedRoute>
   );
 }

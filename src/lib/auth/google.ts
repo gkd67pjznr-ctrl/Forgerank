@@ -393,8 +393,12 @@ export function handleGoogleOAuthCallback(url: string): OAuthResult | null {
 /**
  * Sign in with Google using Supabase's built-in OAuth
  *
- * This opens Supabase's Google OAuth URL and handles the callback.
- * This is simpler than the manual flow above.
+ * This opens Supabase's Google OAuth URL in an in-app browser.
+ * The OAuth callback is handled via deep linking in the root layout.
+ *
+ * IMPORTANT: The actual session creation happens when the deep link
+ * callback is processed by the URL listener. This function only
+ * initiates the auth flow.
  *
  * @returns Promise resolving to OAuth result
  */
@@ -425,41 +429,13 @@ export async function signInWithSupabaseGoogle(): Promise<OAuthResult> {
       );
 
       if (result.type === 'success') {
-        // Wait for Supabase to establish the session
-        // The session is automatically created via the deep link callback
-        const { data: { session } } = await supabase.auth.getSession();
-
-        if (session?.user) {
-          // Extract user profile from Supabase user metadata
-          // Use the Google email from the user object as the primary source
-          const userEmail = session.user.email;
-          const userName = session.user.user_metadata?.full_name ||
-                          session.user.user_metadata?.name ||
-                          session.user.user_metadata?.user_name ||
-                          (userEmail ? userEmail.split('@')[0] : 'User');
-          const userPicture = session.user.user_metadata?.avatar_url ||
-                             session.user.user_metadata?.picture;
-
-          // Extract profile from ID token if available, otherwise use Supabase user data
-          // For OAuth flows, Supabase stores the provider tokens
-          const profile: OAuthUserProfile = {
-            id: session.user.id,
-            email: userEmail || '',
-            emailVerified: session.user.email_confirmed_at != null ||
-                          session.user.user_metadata?.email_verified === true ||
-                          session.user.user_metadata?.verified_email === true,
-            name: userName,
-            picture: userPicture,
-          };
-
-          return {
-            success: true,
-            user: profile,
-          };
-        }
-
+        // The browser will redirect to the app's deep link
+        // Supabase's URL listener in _layout.tsx will handle the session
+        // Return a pending result - the actual session will be established
+        // when the deep link is processed
         return {
           success: true,
+          user: null, // Will be populated by auth state change
         };
       }
 

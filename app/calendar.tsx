@@ -5,6 +5,7 @@ import { startOfDayMs } from "../src/lib/workoutModel";
 // [MIGRATED 2026-01-23] Using Zustand stores (auto-hydration, no manual hydrate needed)
 import { useWorkoutSessions } from "../src/lib/stores";
 import { useThemeColors } from "../src/ui/theme";
+import { ProtectedRoute } from "../src/ui/components/ProtectedRoute";
 
 function monthKey(d: Date) {
   return `${d.getFullYear()}-${d.getMonth()}`;
@@ -84,7 +85,8 @@ export default function Calendar() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg, padding: 16, gap: 12 }}>
+    <ProtectedRoute>
+      <View style={{ flex: 1, backgroundColor: c.bg, padding: 16, gap: 12 }}>
       <Text style={{ color: c.text, fontSize: 22, fontWeight: "900" }}>Calendar</Text>
 
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
@@ -171,6 +173,7 @@ export default function Calendar() {
       <Text style={{ color: c.muted }}>
         Tap any day to open day detail. Highlighted days have workouts.
       </Text>
-    </View>
+      </View>
+    </ProtectedRoute>
   );
 }

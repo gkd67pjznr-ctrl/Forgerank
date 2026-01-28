@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { supabase } from "../supabase/client";
 import type { AuthError, Session } from "@supabase/supabase-js";
 import type { DatabaseUser, mapDatabaseUser } from "../supabase/types";
+import { syncOrchestrator } from "../sync/SyncOrchestrator";
 
 /**
  * User profile matching camelCase convention used in the app
@@ -32,6 +33,8 @@ interface AuthState {
   signUp: (email: string, password: string, displayName: string) => Promise<{ success: boolean; error?: string }>;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
+  updatePassword: (newPassword: string) => Promise<{ success: boolean; error?: string }>;
   clearError: () => void;
   setHydrated: (value: boolean) => void;
   setLoading: (value: boolean) => void;
@@ -63,7 +66,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   session: null,
   hydrated: false,
-  loading: true,
+  loading: false,  // Changed from true to prevent infinite loading
   error: null,
 
   /**
@@ -198,6 +201,60 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   /**
+   * Request a password reset email
+   * Sends an email with a reset link to the user's email address
+   */
+  resetPassword: async (email: string) => {
+    set({ loading: true, error: null });
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: __DEV__
+          ? "exp://127.0.0.1:19000/--/auth/reset-password"
+          : "https://forgerank.app/auth/reset-password",
+      });
+
+      if (error) {
+        set({ error: error.message, loading: false });
+        return { success: false, error: error.message };
+      }
+
+      set({ loading: false });
+      return { success: true };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+      set({ error: errorMessage, loading: false });
+      return { success: false, error: errorMessage };
+    }
+  },
+
+  /**
+   * Update the user's password
+   * Call this after the user has clicked the reset link in their email
+   */
+  updatePassword: async (newPassword: string) => {
+    set({ loading: true, error: null });
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) {
+        set({ error: error.message, loading: false });
+        return { success: false, error: error.message };
+      }
+
+      set({ loading: false });
+      return { success: true };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+      set({ error: errorMessage, loading: false });
+      return { success: false, error: errorMessage };
+    }
+  },
+
+  /**
    * Clear any auth error
    */
   clearError: () => set({ error: null }),
@@ -277,9 +334,6 @@ type AuthSubscription = {
 
 /**
  * Initialize the Supabase auth state listener
-
-/**
- * Initialize the Supabase auth state listener
  * Call this once in the root layout to sync auth state with the store
  *
  * @param onAuthStateChange Optional callback for auth state changes
@@ -288,11 +342,20 @@ type AuthSubscription = {
 export function setupAuthListener(
   onAuthStateChange?: (event: string, session: Session | null) => void
 ): () => void {
+  console.log('[authStore] Setting up auth state listener...');
+
   const { data: authListener } = supabase.auth.onAuthStateChange(
     async (event, session) => {
-      const store = useAuthStore.getState();
+      console.log('[authStore] Auth state change:', event, session?.user?.email || 'no user');
 
-      // Update session in store
+      // Prepare updates
+      const updates: Partial<AuthState> = {
+        session,
+        hydrated: true,
+        loading: false,
+      };
+
+      // Update user in store
       if (session?.user) {
         // Fetch user profile from public users table
         const { data: profileData } = await supabase
@@ -302,10 +365,10 @@ export function setupAuthListener(
           .single();
 
         if (profileData) {
-          store.user = toUserProfile(profileData);
+          updates.user = toUserProfile(profileData);
         } else {
           // Fallback to auth metadata
-          store.user = {
+          updates.user = {
             id: session.user.id,
             email: session.user.email ?? "",
             displayName: session.user.user_metadata?.display_name ?? null,
@@ -315,12 +378,29 @@ export function setupAuthListener(
           };
         }
       } else {
-        store.user = null;
+        updates.user = null;
       }
 
-      store.session = session;
-      store.hydrated = true;
-      store.loading = false;
+      // Use setState with a callback function to properly trigger re-renders
+      useAuthStore.setState((state) => {
+        const newState = { ...state, ...updates };
+        console.log('[authStore] State updated:', { loading: newState.loading, user: newState.user?.email || 'no user' });
+        return newState;
+      });
+
+      // Trigger sync on sign in
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        if (session?.user) {
+          syncOrchestrator.onSignIn(session.user.id, session).catch(err => {
+            console.error('[authStore] Sync on sign-in error:', err);
+          });
+        }
+      }
+
+      // Clear sync state on sign out
+      if (event === 'SIGNED_OUT') {
+        syncOrchestrator.onSignOut();
+      }
 
       // Call optional callback
       onAuthStateChange?.(event, session);

@@ -20,6 +20,8 @@ import {
 import type { ID } from "../../src/lib/socialModel";
 import { getUser, ME_ID } from "../../src/lib/userDirectory";
 import { useThemeColors } from "../../src/ui/theme";
+import { timeAgo } from "../../src/lib/units";
+import { ProtectedRoute } from "../../src/ui/components/ProtectedRoute";
 
 const ME: ID = ME_ID;
 
@@ -30,17 +32,6 @@ function labelForStatus(opts: { isFriends: boolean; outgoing: string; incoming: 
   if (incoming === "requested") return "incoming request";
   if (outgoing === "requested") return "request sent";
   return "not friends";
-}
-
-function timeAgo(ms: number): string {
-  const s = Math.max(1, Math.floor((Date.now() - ms) / 1000));
-  if (s < 60) return `${s}s`;
-  const m = Math.floor(s / 60);
-  if (m < 60) return `${m}m`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h`;
-  const d = Math.floor(h / 24);
-  return `${d}d`;
 }
 
 function visibilityLabel(v: FeedPost["visibility"]): string {
@@ -58,7 +49,7 @@ export default function PublicProfileScreen() {
 
   if (!userId) {
     return (
-      <>
+      <ProtectedRoute>
         <Stack.Screen options={{ title: "Profile" }} />
         <View style={{ flex: 1, backgroundColor: c.bg, padding: 16, gap: 12 }}>
           <Text style={{ color: c.text, fontWeight: "900", fontSize: 18 }}>Missing user id</Text>
@@ -77,7 +68,7 @@ export default function PublicProfileScreen() {
             <Text style={{ color: c.text, fontWeight: "900" }}>Back</Text>
           </Pressable>
         </View>
-      </>
+      </ProtectedRoute>
     );
   }
 
@@ -103,7 +94,7 @@ export default function PublicProfileScreen() {
     .filter((p) => canUserViewPost(p, ME));
 
   return (
-    <>
+    <ProtectedRoute>
       <Stack.Screen
         options={{
           title: "Profile",
@@ -313,6 +304,6 @@ export default function PublicProfileScreen() {
           </View>
         </ScrollView>
       </View>
-    </>
+    </ProtectedRoute>
   );
 }

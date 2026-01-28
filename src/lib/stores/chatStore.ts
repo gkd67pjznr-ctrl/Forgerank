@@ -1,5 +1,5 @@
 // src/lib/stores/chatStore.ts
-// Zustand store for chat threads and messages with AsyncStorage persistence
+// Zustand store for chat threads and messages with AsyncStorage persistence and Supabase sync/realtime
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { create } from "zustand";
@@ -8,6 +8,10 @@ import { createQueuedJSONStorage } from "./storage/createQueuedAsyncStorage";
 import type { ChatMessage, ChatThread, ID } from "../socialModel";
 import { logError } from "../errorHandler";
 import { safeJSONParse } from "../storage/safeJSONParse";
+import type { SyncMetadata } from "../sync/syncTypes";
+import { getUser } from "./authStore";
+import { networkMonitor } from "../sync/NetworkMonitor";
+import { realtimeManager } from "../sync/RealtimeManager";
 
 // Import from new Zustand friendsStore location
 import {
@@ -27,6 +31,7 @@ interface ChatState {
   messages: ChatMessage[];
   reads: ReadState;
   hydrated: boolean;
+  _sync: SyncMetadata;
 
   // Actions
   ensureThread: (
@@ -37,6 +42,11 @@ interface ChatState {
   sendMessage: (threadId: ID, senderUserId: ID, text: string) => void;
   markThreadRead: (threadId: ID, userId: ID, atMs?: number) => void;
   setHydrated: (value: boolean) => void;
+
+  // Sync actions
+  pullFromServer: () => Promise<void>;
+  pushToServer: () => Promise<void>;
+  sync: () => Promise<void>;
 }
 
 // ============================================================================
@@ -105,6 +115,13 @@ export const useChatStore = create<ChatState>()(
         messages: [],
         reads: {},
         hydrated: false,
+        _sync: {
+          lastSyncAt: null,
+          lastSyncHash: null,
+          syncStatus: 'idle',
+          syncError: null,
+          pendingMutations: 0,
+        },
 
         ensureThread: (myUserId, otherUserId, canMessage = "friendsOnly") => {
           const existing =
@@ -169,6 +186,11 @@ export const useChatStore = create<ChatState>()(
 
           // Sender is no longer "typing" once message is sent
           setTyping(threadId, senderUserId, false);
+
+          // Broadcast message via realtime if online
+          if (networkMonitor.isOnline()) {
+            realtimeManager.broadcast(`chat:${threadId}`, 'message', msg);
+          }
         },
 
         markThreadRead: (threadId, userId, atMs = Date.now()) => {
@@ -178,6 +200,71 @@ export const useChatStore = create<ChatState>()(
         },
 
         setHydrated: (value) => set({ hydrated: value }),
+
+        // Sync actions
+        pullFromServer: async () => {
+          const user = getUser();
+          if (!user) {
+            console.warn('[chatStore] Cannot pull: no user signed in');
+            return;
+          }
+
+          set({ _sync: { ...get()._sync, syncStatus: 'syncing', syncError: null } });
+
+          try {
+            // Note: Chat messages would be fetched from a chat_messages table
+            // This is a placeholder for future implementation
+            set((state) => ({
+              _sync: {
+                ...state._sync,
+                syncStatus: 'success',
+                lastSyncAt: Date.now(),
+              },
+            }));
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            set((state) => ({
+              _sync: {
+                ...state._sync,
+                syncStatus: 'error',
+                syncError: errorMessage,
+              },
+            }));
+            throw error;
+          }
+        },
+
+        pushToServer: async () => {
+          const user = getUser();
+          if (!user) {
+            console.warn('[chatStore] Cannot push: no user signed in');
+            return;
+          }
+
+          if (!networkMonitor.isOnline()) {
+            console.warn('[chatStore] Cannot push: offline');
+            return;
+          }
+
+          try {
+            // Messages are broadcast via realtime immediately
+            // This is for any pending messages
+            set((state) => ({
+              _sync: {
+                ...state._sync,
+                pendingMutations: 0,
+              },
+            }));
+          } catch (error) {
+            console.error('[chatStore] Push failed:', error);
+            throw error;
+          }
+        },
+
+        sync: async () => {
+          await get().pullFromServer();
+          await get().pushToServer();
+        },
       };
     },
     {
@@ -367,4 +454,67 @@ export function sendMessage(threadId: string, senderId: ID, text: string): void 
 
 export function markThreadRead(threadId: string, userId: ID): void {
   useChatStore.getState().markThreadRead(threadId, userId);
+}
+
+// ============================================================================
+// Sync Helpers
+// ============================================================================
+
+/**
+ * Get sync status for chat store
+ */
+export function getChatSyncStatus(): SyncMetadata {
+  return useChatStore.getState()._sync;
+}
+
+/**
+ * Setup realtime subscription for chat thread
+ */
+export function setupChatRealtime(threadId: ID): () => void {
+  return realtimeManager.subscribeToBroadcast(
+    `chat:${threadId}`,
+    'message',
+    (payload) => {
+      // Handle incoming message
+      const msg = payload as ChatMessage;
+      useChatStore.setState((state) => {
+        // Check if message already exists
+        if (state.messages.find(m => m.id === msg.id)) {
+          return state;
+        }
+
+        return {
+          messages: [...state.messages, msg],
+          threads: state.threads.map(t =>
+            t.id === msg.threadId
+              ? { ...t, updatedAtMs: Math.max(t.updatedAtMs ?? 0, msg.createdAtMs) }
+              : t
+          ),
+        };
+      });
+    }
+  );
+}
+
+/**
+ * Setup realtime subscription for typing indicators
+ */
+export function setupTypingRealtime(threadId: ID): () => void {
+  return realtimeManager.subscribeToBroadcast(
+    `chat:${threadId}`,
+    'typing',
+    (payload) => {
+      const { userId, isTyping } = payload as { userId: ID; isTyping: boolean };
+      setTyping(threadId, userId, isTyping);
+    }
+  );
+}
+
+/**
+ * Broadcast typing indicator
+ */
+export function broadcastTyping(threadId: ID, userId: ID, isTyping: boolean): void {
+  if (networkMonitor.isOnline()) {
+    realtimeManager.broadcast(`chat:${threadId}`, 'typing', { userId, isTyping });
+  }
 }

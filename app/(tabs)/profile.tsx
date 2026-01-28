@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useThemeColors } from "../../src/ui/theme";
 import { useDevMode } from "../../src/lib/devMode";
 import { TabErrorBoundary } from "../../src/ui/tab-error-boundary";
+import { ProtectedRoute } from "../../src/ui/components/ProtectedRoute";
 
 export default function ProfileTab() {
   const c = useThemeColors();
@@ -89,9 +90,10 @@ export default function ProfileTab() {
   );
 
   return (
-    <TabErrorBoundary screenName="Profile">
-      <>
-      {/* Password Prompt Modal */}
+    <ProtectedRoute>
+      <TabErrorBoundary screenName="Profile">
+        <>
+        {/* Password Prompt Modal */}
       <Modal
         visible={showPasswordPrompt}
         transparent
@@ -296,8 +298,9 @@ export default function ProfileTab() {
             </Pressable>
           </>
         )}
-      </ScrollView>
-      </>
-    </TabErrorBoundary>
+        </ScrollView>
+        </>
+      </TabErrorBoundary>
+    </ProtectedRoute>
   );
 }

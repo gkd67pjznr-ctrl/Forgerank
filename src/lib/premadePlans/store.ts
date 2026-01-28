@@ -59,7 +59,7 @@ export async function hydratePremadePlansStore(): Promise<void> {
 
     // Seed with sample plans if empty
     if (plans.length === 0) {
-      console.log('Seeding premade plans with samples...');
+      if (__DEV__) console.log('Seeding premade plans with samples...');
       plans = SAMPLE_PLANS.slice();
       await persist();
     }

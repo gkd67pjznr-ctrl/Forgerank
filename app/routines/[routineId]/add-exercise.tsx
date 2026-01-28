@@ -5,6 +5,7 @@ import { EXERCISES_V1 } from "../../../src/data/exercises";
 import { uid, type RoutineExercise } from "../../../src/lib/routinesModel";
 // [MIGRATED 2026-01-23] Using Zustand stores
 import { upsertRoutine, useRoutine } from "../../../src/lib/stores";
+import { ProtectedRoute } from "../../../src/ui/components/ProtectedRoute";
 
 export default function AddExerciseToRoutine() {
   const c = useThemeColors();
@@ -41,8 +42,9 @@ export default function AddExerciseToRoutine() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 10, paddingBottom: 40 }}>
+    <ProtectedRoute>
+      <View style={{ flex: 1, backgroundColor: c.bg }}>
+        <ScrollView contentContainerStyle={{ padding: 16, gap: 10, paddingBottom: 40 }}>
         <Text style={{ color: c.text, fontSize: 22, fontWeight: "900" }}>Add Exercise</Text>
         <Text style={{ color: c.muted }}>Tap one to add to: {routine.name}</Text>
 
@@ -63,7 +65,8 @@ export default function AddExerciseToRoutine() {
             <Text style={{ color: c.muted }}>{e.id}</Text>
           </Pressable>
         ))}
-      </ScrollView>
-    </View>
+        </ScrollView>
+      </View>
+    </ProtectedRoute>
   );
 }

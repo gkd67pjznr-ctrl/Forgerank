@@ -67,19 +67,27 @@
 ## What's Not Working / Missing
 
 ### Auth
-- Login/signup flows don't actually work yet
-- OAuth not connected
+- Email/password login works ✅
+- Google OAuth implemented, requires external setup:
+  - Google Cloud Console configuration
+  - Supabase Google provider enablement
+  - Environment variable setup
 - No protected routes
 
 ### Social
-- Feed shows mock data only
-- No real posts or reactions
-- Friends list is mock data
+- Backend sync system implemented ✅
+- Real-time subscriptions implemented ✅
+- Social stores integrated with sync ✅
+- Feed/social UI needs to use sync data instead of mock data
+- Friends list needs to use sync data
 
 ### Backend
-- No cloud sync yet
-- Data is local only
-- Real-time features not connected
+- Backend sync system implemented ✅
+- Repository layer for all 8 tables ✅
+- Real-time subscriptions via Supabase ✅
+- Offline mutation queuing ✅
+- Conflict resolution strategies ✅
+- Need to connect UI to sync data streams
 
 ### Polish
 - No PR celebration animations
@@ -110,9 +118,9 @@
 ## Next Steps
 
 ### Immediate (This Week)
-1. Fix critical bugs from audit (SPEC-011)
-2. Complete Zustand migration
-3. Add proper error handling
+1. Connect social UI to sync data streams
+2. Implement protected routes
+3. Add sync status UI components
 
 ### Short Term (Next 2 Weeks)
 1. Routine-based workout flow
@@ -121,9 +129,9 @@
 4. PR detection celebration
 
 ### Medium Term (Next Month)
-1. Working authentication
-2. Cloud sync
-3. Friends system basics
+1. Complete social feature integration
+2. Chat functionality polish
+3. Multi-device sync testing
 
 ---
 
@@ -150,6 +158,34 @@
 ---
 
 ## Decision Log
+
+### 2026-01-27 (continued)
+- Implemented complete backend sync system (4-week rollout plan):
+  - Phase 1: Core Infrastructure ✅
+    - Created sync types (`src/lib/sync/syncTypes.ts`)
+    - Implemented NetworkMonitor for online/offline detection
+    - Created repository layer for all 8 database tables
+    - Implemented SyncOrchestrator for coordinating sync operations
+    - Created PendingOperationsQueue for offline mutation queuing
+    - Implemented ConflictResolver with smart merge strategies
+    - Created RealtimeManager for Supabase realtime subscriptions
+  - Phase 2: Store Integration ✅
+    - Integrated workoutStore with sync and conflict resolution
+    - Integrated routinesStore with sync
+    - Integrated workoutPlanStore with sync
+  - Phase 3: Social Sync ✅
+    - Integrated friendsStore with sync and realtime
+    - Integrated socialStore with sync and realtime
+    - Integrated feedStore with sync
+  - Phase 4: Chat Sync ✅
+    - Integrated chatStore with sync and realtime
+    - Implemented typing indicators via realtime broadcast
+  - Phase 5: Utility Hooks ✅
+    - Created `useSyncStatus.ts` hooks for sync UI state
+    - Added `useSyncState()` combined hook for sync UI components
+  - Updated authStore to trigger sync on sign in/sign out
+  - Updated app/_layout.tsx to initialize sync system on app start
+  - Added foreground sync trigger when app comes to foreground
 
 ### 2026-01-27
 - Fixed keyboard covering input fields issue:

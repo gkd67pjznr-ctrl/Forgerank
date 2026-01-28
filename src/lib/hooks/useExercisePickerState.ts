@@ -94,7 +94,7 @@ export function useExercisePickerState({
   // Open picker to add an exercise to the block (free workout mode only)
   const openPickerToAdd = () => {
     if (planMode) {
-      console.log("Cannot add exercises during a planned workout");
+      if (__DEV__) console.log("Cannot add exercises during a planned workout");
       return;
     }
     setPickerMode("addBlock");

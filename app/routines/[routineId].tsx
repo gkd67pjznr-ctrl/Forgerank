@@ -1,13 +1,28 @@
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { View, Text, Pressable, ScrollView, Alert } from "react-native";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import { useThemeColors } from "../../src/ui/theme";
 // [MIGRATED 2026-01-23] Using Zustand stores
-import { deleteRoutine, upsertRoutine, useRoutine } from "../../src/lib/stores";
+import { deleteRoutine, upsertRoutine, useRoutine, clearCurrentSession, hasCurrentSession } from "../../src/lib/stores";
+import { setCurrentPlan } from "../../src/lib/workoutPlanStore";
 import type { RoutineExercise } from "../../src/lib/routinesModel";
 import { EXERCISES_V1 } from "../../src/data/exercises";
+import { makePlanFromRoutine } from "../../src/lib/workoutPlanModel";
+import { ProtectedRoute } from "../../src/ui/components/ProtectedRoute";
 
 function nameForExercise(exerciseId: string) {
   return EXERCISES_V1.find((e) => e.id === exerciseId)?.name ?? exerciseId;
+}
+
+/**
+ * Convert RoutineExercise to PlannedExercise for WorkoutPlan
+ */
+function toPlannedExercise(rx: RoutineExercise) {
+  return {
+    exerciseId: rx.exerciseId,
+    targetSets: rx.targetSets ?? 3,
+    targetRepsMin: rx.targetRepsMin,
+    targetRepsMax: rx.targetRepsMax,
+  };
 }
 
 export default function RoutineDetail() {
@@ -19,9 +34,11 @@ export default function RoutineDetail() {
 
   if (!routine) {
     return (
-      <View style={{ flex: 1, backgroundColor: c.bg, padding: 16 }}>
-        <Text style={{ color: c.text, fontWeight: "900" }}>Routine not found.</Text>
-      </View>
+      <ProtectedRoute>
+        <View style={{ flex: 1, backgroundColor: c.bg, padding: 16 }}>
+          <Text style={{ color: c.text, fontWeight: "900" }}>Routine not found.</Text>
+        </View>
+      </ProtectedRoute>
     );
   }
 
@@ -71,10 +88,70 @@ export default function RoutineDetail() {
     </Pressable>
   );
 
+  function handleStartWorkout() {
+    if (!routine) return;
+
+    const hasActiveSession = hasCurrentSession();
+
+    if (hasActiveSession) {
+      Alert.alert(
+        "Replace Current Workout?",
+        "You have an active workout in progress. Starting this routine will replace it. Continue?",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Start Routine",
+            style: "destructive",
+            onPress: () => startRoutine(),
+          },
+        ]
+      );
+    } else {
+      startRoutine();
+    }
+  }
+
+  function startRoutine() {
+    if (!routine) return;
+
+    // Clear any existing session
+    clearCurrentSession();
+
+    // Convert routine to WorkoutPlan
+    const plan = makePlanFromRoutine({
+      routineId: routine.id,
+      routineName: routine.name,
+      exercises: routine.exercises.map(toPlannedExercise),
+    });
+
+    // Set as current plan
+    setCurrentPlan(plan);
+
+    // Navigate to live workout
+    router.replace("/live-workout");
+  }
+
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 40 }}>
+    <ProtectedRoute>
+      <View style={{ flex: 1, backgroundColor: c.bg }}>
+        <ScrollView contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 40 }}>
         <Text style={{ color: c.text, fontSize: 22, fontWeight: "900" }}>{routine.name}</Text>
+
+        {/* Start Workout Button */}
+        <Pressable
+          onPress={handleStartWorkout}
+          style={{
+            paddingVertical: 14,
+            paddingHorizontal: 16,
+            borderRadius: 14,
+            backgroundColor: c.primary,
+            alignItems: "center",
+            borderWidth: 1,
+            borderColor: c.border,
+          }}
+        >
+          <Text style={{ color: "#fff", fontSize: 16, fontWeight: "900" }}>Start Workout</Text>
+        </Pressable>
 
         <Link href={`/routines/${routine.id}/add-exercise`} asChild>
           <Pressable
@@ -130,7 +207,8 @@ export default function RoutineDetail() {
         <Pressable onPress={nuke} style={{ marginTop: 10 }}>
           <Text style={{ color: c.muted, fontWeight: "900" }}>Delete routine</Text>
         </Pressable>
-      </ScrollView>
-    </View>
+        </ScrollView>
+      </View>
+    </ProtectedRoute>
   );
 }

@@ -2,6 +2,7 @@ import { View, Text, Pressable, ScrollView } from "react-native";
 import { useThemeColors } from "../src/ui/theme";
 // [MIGRATED 2026-01-23] Using Zustand stores
 import { useSettings, updateSettings } from "../src/lib/stores";
+import { ProtectedRoute } from "../src/ui/components/ProtectedRoute";
 
 function Row(props: {
   title: string;
@@ -62,8 +63,9 @@ export default function SettingsScreen() {
   const settings = useSettings();
 
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg }}>
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 40 }}>
+    <ProtectedRoute>
+      <View style={{ flex: 1, backgroundColor: c.bg }}>
+        <ScrollView contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 40 }}>
         <Text style={{ fontSize: 22, fontWeight: "900", color: c.text }}>Settings</Text>
 
         <View style={{ borderWidth: 1, borderColor: c.border, borderRadius: 14, backgroundColor: c.card, padding: 12 }}>
@@ -142,7 +144,8 @@ export default function SettingsScreen() {
         <Text style={{ color: c.muted }}>
           Next: we’ll wire these settings into LiveWorkout (rest timer default + unit display).
         </Text>
-      </ScrollView>
-    </View>
+        </ScrollView>
+      </View>
+    </ProtectedRoute>
   );
 }

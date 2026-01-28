@@ -1,28 +1,20 @@
 // app/(tabs)/feed.tsx
 import { Link } from "expo-router";
-import { useMemo, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
-import { useFriendEdges } from "../../src/lib/stores/friendsStore";
+import { useEffect, useMemo, useState } from "react";
+import { Pressable, ScrollView, Text, View, ActivityIndicator, RefreshControl } from "react-native";
+import { useUser } from "../../src/lib/stores/authStore";
+import { useFriendEdges, setupFriendsRealtime } from "../../src/lib/stores/friendsStore";
 import type { EmoteId, WorkoutPost } from "../../src/lib/socialModel";
-import { toggleReaction, useFeedAll, useMyReaction } from "../../src/lib/stores/socialStore";
+import { toggleReaction, useFeedAll, useMyReaction, setupPostsRealtime, useSocialStore } from "../../src/lib/stores/socialStore";
 import { displayName, ME_ID } from "../../src/lib/userDirectory";
 import { FR } from "../../src/ui/forgerankStyle";
 import { useThemeColors } from "../../src/ui/theme";
 import { TabErrorBoundary } from "../../src/ui/tab-error-boundary";
+import { timeAgo } from "../../src/lib/units";
+import { ProtectedRoute } from "../../src/ui/components/ProtectedRoute";
 
 type FeedMode = "public" | "friends";
 const ME = ME_ID;
-
-function timeAgo(ms: number): string {
-  const s = Math.max(1, Math.floor((Date.now() - ms) / 1000));
-  if (s < 60) return `${s}s`;
-  const m = Math.floor(s / 60);
-  if (m < 60) return `${m}m`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h`;
-  const d = Math.floor(h / 24);
-  return `${d}d`;
-}
 
 function emoteLabel(e: EmoteId): string {
   if (e === "like") return "👍";
@@ -41,9 +33,43 @@ function compactNum(n: number): string {
 
 export default function FeedTab() {
   const c = useThemeColors();
+  const user = useUser();
   const all = useFeedAll();
   const edges = useFriendEdges(ME);
   const [mode, setMode] = useState<FeedMode>("public");
+  const [refreshing, setRefreshing] = useState(false);
+  const { pullFromServer: syncFeed } = useSocialStore();
+
+  const userId = user?.id ?? ME;
+
+  // Setup realtime subscriptions for posts
+  useEffect(() => {
+    if (user?.id) {
+      const cleanup = setupPostsRealtime(user.id);
+      return cleanup;
+    }
+  }, [user?.id]);
+
+  // Initial data fetch
+  useEffect(() => {
+    if (user?.id) {
+      syncFeed().catch(err => {
+        console.error('[Feed] Failed to sync:', err);
+      });
+    }
+  }, [user?.id]);
+
+  // Pull to refresh
+  async function onRefresh() {
+    setRefreshing(true);
+    try {
+      await syncFeed();
+    } catch (err) {
+      console.error('[Feed] Refresh failed:', err);
+    } finally {
+      setRefreshing(false);
+    }
+  }
 
   const friendIdSet = useMemo(() => {
     const set = new Set<string>();
@@ -83,7 +109,7 @@ export default function FeedTab() {
 
   const EmoteButton = (p: { postId: string; emote: EmoteId; active?: boolean }) => (
     <Pressable
-      onPress={() => toggleReaction(p.postId, ME, p.emote)}
+      onPress={() => toggleReaction(p.postId, userId, p.emote)}
       style={({ pressed }) => ({
         paddingVertical: FR.space.x2,
         paddingHorizontal: FR.space.x3,
@@ -99,7 +125,7 @@ export default function FeedTab() {
   );
 
   const PostCard = (p: { post: WorkoutPost }) => {
-    const my = useMyReaction(p.post.id, ME);
+    const my = useMyReaction(p.post.id, userId);
     const top = p.post.workoutSnapshot?.topLines?.slice(0, 2) ?? [];
 
     return (
@@ -140,7 +166,7 @@ export default function FeedTab() {
           {top.length > 0 ? (
             <View style={{ gap: 4 }}>
               {top.map((line, i) => (
-                <Text 
+                <Text
                   key={i}
                   style={{ color: c.text, ...FR.type.body }}>
 
@@ -174,14 +200,18 @@ export default function FeedTab() {
   };
 
   return (
-    <TabErrorBoundary screenName="Feed">
-      <View style={{ flex: 1, backgroundColor: c.bg }}>
+    <ProtectedRoute>
+      <TabErrorBoundary screenName="Feed">
+        <View style={{ flex: 1, backgroundColor: c.bg }}>
         <ScrollView
           contentContainerStyle={{
             padding: FR.space.x4,
             gap: FR.space.x3,
             paddingBottom: FR.space.x6,
           }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
         >
           {/* Title */}
           <View style={{ gap: 6 }}>
@@ -223,5 +253,6 @@ export default function FeedTab() {
         </ScrollView>
       </View>
     </TabErrorBoundary>
+    </ProtectedRoute>
   );
 }
