@@ -65,10 +65,12 @@ See `docs/OAUTH_SETUP.md` for complete setup instructions.
 - [ ] Verification status check
 - [ ] Resend verification
 
-### Planned - Protected Routes
-- [ ] Auth guard for screens
-- [ ] Redirect to login
-- [ ] Auth-required features gating
+### Done - Protected Routes
+- [x] Auth guard for screens (ProtectedRoute component)
+- [x] Redirect to login when not authenticated
+- [x] Loading state while checking auth
+
+**Implementation:** `src/ui/components/ProtectedRoute.tsx`
 
 ### Planned - Logout
 - [ ] Sign out function

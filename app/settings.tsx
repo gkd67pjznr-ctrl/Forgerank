@@ -1,4 +1,5 @@
 import { View, Text, Pressable, ScrollView } from "react-native";
+import { Link } from "expo-router";
 import { useThemeColors } from "../src/ui/theme";
 // [MIGRATED 2026-01-23] Using Zustand stores
 import { useSettings, updateSettings } from "../src/lib/stores";
@@ -141,8 +142,26 @@ export default function SettingsScreen() {
           />
         </View>
 
+        {/* Dev Menu Link */}
+        {__DEV__ && (
+          <Link href="/dev-menu" asChild>
+            <Pressable
+              style={{
+                borderWidth: 1,
+                borderColor: c.border,
+                borderRadius: 14,
+                backgroundColor: c.card,
+                padding: 12,
+              }}
+            >
+              <Text style={{ fontWeight: "900", fontSize: 16, color: c.text }}>Dev Menu</Text>
+              <Text style={{ opacity: 0.75, color: c.muted }}>Quick access to all screens for testing.</Text>
+            </Pressable>
+          </Link>
+        )}
+
         <Text style={{ color: c.muted }}>
-          Next: we’ll wire these settings into LiveWorkout (rest timer default + unit display).
+          Next: we'll wire these settings into LiveWorkout (rest timer default + unit display).
         </Text>
         </ScrollView>
       </View>

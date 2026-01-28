@@ -47,39 +47,56 @@ Supabase backend integration for data persistence, cloud sync, and real-time fea
 
 ---
 
-### Planned - Cloud Sync
-- [ ] Workout sync to Supabase
-- [ ] Routine sync to Supabase
-- [ ] Settings sync
-- [ ] Automatic on workout complete
+### Done - Cloud Sync Infrastructure
+- [x] SyncOrchestrator - main coordinator for all sync operations
+- [x] Workout repository with sync
+- [x] Routine repository with sync
+- [x] Post repository with sync
+- [x] Friends repository with sync
+- [x] Comments/reactions repositories
+- [ ] Settings sync (not yet implemented)
 
-### Planned - Offline Queue
-- [ ] Queue changes when offline
-- [ ] Persist queue to AsyncStorage
-- [ ] Flush on reconnect
-- [ ] Retry logic
+**Implementation:** `src/lib/sync/SyncOrchestrator.ts`, `src/lib/sync/repositories/`
 
-### Planned - Conflict Resolution
-- [ ] Last-write-wins strategy
-- [ ] Timestamp comparison
-- [ ] Merge logic for complex data
+### Done - Offline Queue
+- [x] PendingOperationsQueue for offline changes
+- [x] Persist queue to AsyncStorage
+- [x] Flush on reconnect
+- [x] Retry logic with exponential backoff
 
-### Planned - Sync Status
-- [ ] Syncing indicator
-- [ ] Sync error display
-- [ ] Manual sync button
-- [ ] Last synced timestamp
+**Implementation:** `src/lib/sync/PendingOperationsQueue.ts`
+
+### Done - Conflict Resolution
+- [x] ConflictResolver with strategies
+- [x] Last-write-wins strategy
+- [x] Timestamp comparison
+- [x] Merge logic for complex data
+
+**Implementation:** `src/lib/sync/ConflictResolver.ts`
+
+### Done - Sync Status
+- [x] useSyncStatus hook
+- [x] Syncing indicator support
+- [x] Sync error tracking
+- [ ] Manual sync button UI
+- [ ] Last synced timestamp display
+
+**Implementation:** `src/lib/hooks/useSyncStatus.ts`
 
 ### Planned - Data Migration
 - [ ] Local to cloud migration
 - [ ] v1 to v2 data format
 - [ ] Import from other apps
 
-### Planned - Real-time Subscriptions
-- [ ] Feed updates
-- [ ] Friend requests
-- [ ] Reactions
-- [ ] Comments
+### Done - Real-time Subscriptions
+- [x] RealtimeManager for subscriptions
+- [x] Feed updates
+- [x] Friend requests
+- [x] Reactions
+- [x] Comments
+- [x] NetworkMonitor for connectivity
+
+**Implementation:** `src/lib/sync/RealtimeManager.ts`, `src/lib/sync/NetworkMonitor.ts`
 
 ### Planned - File Storage
 - [ ] Photo uploads for posts
@@ -93,6 +110,12 @@ Supabase backend integration for data persistence, cloud sync, and real-time fea
 **Key Files:**
 - `src/lib/supabase/client.ts` - Supabase client
 - `src/lib/supabase/types.ts` - TypeScript types
+- `src/lib/sync/SyncOrchestrator.ts` - Main sync coordinator
+- `src/lib/sync/PendingOperationsQueue.ts` - Offline queue
+- `src/lib/sync/ConflictResolver.ts` - Conflict handling
+- `src/lib/sync/RealtimeManager.ts` - Real-time subscriptions
+- `src/lib/sync/NetworkMonitor.ts` - Connectivity detection
+- `src/lib/sync/repositories/` - Entity-specific sync repos
 - `supabase/migrations/` - SQL migrations
 - `supabase/tests/` - RLS tests
 

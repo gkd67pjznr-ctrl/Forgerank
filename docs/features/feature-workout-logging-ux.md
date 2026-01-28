@@ -28,15 +28,15 @@ The core workout logging interface - where users record their sets, weight, and 
 │  [Workout Timer]         [Finish] [•••] │  <- Top bar
 ├─────────────────────────────────────────┤
 │                                         │
-│  [+ Add Exercise]                       │  <- Prominent button
-│                                         │
+│  [+ Add Exercise]                       │  <- Prominent button // only have at
+│                                         │     bottom, delete this
 │  ┌───────────────────────────────────┐ │
 │  │ Bench Press                  [↓] │ │  <- Exercise card (collapsible)
 │  │                                  │ │
 │  │  Set 1  [____] lb  [____] reps  [✓]│  <- Set line with inputs + checkmark
 │  │  Set 2  [____] lb  [____] reps  [✓]│
-│  │  Set 3  [____] lb  [____] reps  [✓]│
-│  │                                  │ │
+│  │  Set 3  [____] lb  [____] reps  [✓]│  <- //add "swipe to delete", swipe will
+│  │                                  │ │  move set to side and show delete button
 │  │  [+ Add Set]                     │ │  <- Add another set to this exercise
 │  └───────────────────────────────────┘ │
 │                                         │
@@ -240,6 +240,46 @@ The core workout logging interface - where users record their sets, weight, and 
 
 ---
 
+### BUG-LOG-008: Button overflow on long exercise names
+**Severity:** High
+**Description:** "Expand" and "+Set" buttons get pushed off screen when exercise title is too long.
+
+**Fix:** Truncate exercise name with ellipsis, ensure buttons always visible.
+
+---
+
+### BUG-LOG-009: Timer UI too verbose
+**Severity:** Medium
+**Description:** Time tracker at top (elapsed/estimated) takes too much space.
+
+**Fix:** Make minimal - show elapsed only ("23:45"), tap to expand full stats. Collapsible.
+
+---
+
+### BUG-LOG-010: Quick Add Set box serves no purpose
+**Severity:** Medium
+**Description:** QuickAddSetCard is redundant with exercise card set entry.
+
+**Fix:** Remove from UI entirely. Archive code if needed elsewhere.
+
+---
+
+### BUG-LOG-011: Recap Cues Log clutters screen
+**Severity:** Low
+**Description:** Log at bottom of live workout screen is unnecessary noise.
+
+**Fix:** Remove recap cues log from live workout screen.
+
+---
+
+### BUG-LOG-012: Routine exercises don't load (CRITICAL)
+**Severity:** Critical
+**Description:** When starting a workout from a created routine, none of the chosen exercises load. Shows only "Barbell Bench Press - Medium Grip" (first exercise in DB) regardless of routine content.
+
+**Fix:** Debug routine loading flow - likely issue in how routine exercises are passed to CurrentSession.
+
+---
+
 ## Technical Notes
 
 **Key Files to Modify:**
@@ -247,11 +287,13 @@ The core workout logging interface - where users record their sets, weight, and 
 - `src/ui/components/LiveWorkout/ExerciseBlocksCard.tsx` - Redesign as ExerciseCard
 - `src/ui/components/LiveWorkout/QuickAddSetCard.tsx` - Remove (replaced by set lines)
 
-**New Components:**
-- `ExerciseCard.tsx` - Single exercise with set lines
-- `SetLine.tsx` - Individual set input row
-- `AddExerciseButton.tsx` - Prominent add button
-- `EmptyWorkoutState.tsx` - Empty state illustration
+**New Components (Some Implemented):**
+- `ExerciseCard.tsx` - Single exercise with set lines (planned)
+- `SetLine.tsx` - Individual set input row (planned)
+- `AddExerciseButton.tsx` - Prominent add button (planned)
+- `EmptyWorkoutState.tsx` - Empty state illustration (planned)
+- `PlateCalculator.tsx` - Visual plate loading calculator ✅ DONE
+- `NumberInput.tsx` - Improved number input component ✅ DONE
 
 **Data Model Changes:**
 ```typescript

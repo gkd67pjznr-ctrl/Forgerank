@@ -78,8 +78,9 @@ The core workout logging experience - the heart of Forgerank. Users start workou
 - [ ] Track progress against routine
 - [ ] Completion percentage
 
-**Status:** Partially implemented, needs connection
-**Next:** SPEC-010
+**Status:** BROKEN - exercises don't load from routine (see BUG-LOG-012)
+**Bug:** When starting workout from routine, shows only "Barbell Bench Press - Medium Grip" instead of routine's exercises
+**Next:** Fix routine loading before other enhancements
 
 ### In Progress - Set Input Polish
 - [ ] Calculator-style number pad
@@ -100,16 +101,17 @@ The core workout logging experience - the heart of Forgerank. Users start workou
 **Status:** Basic timer works
 **Next:** SPEC-013
 
-### In Progress - PR Detection & Celebration
-- [ ] Weight PR detection
-- [ ] Rep PR detection
-- [ ] e1RM PR detection
-- [ ] Celebration toast
-- [ ] Sound effects
+### Done - PR Detection & Celebration
+- [x] Weight PR detection
+- [x] Rep PR detection
+- [x] e1RM PR detection
+- [x] Celebration toast (InstantCueToast)
+- [x] Full-screen PR celebration modal
+- [x] Sound effects (SoundManager)
+- [x] Haptic feedback
 - [ ] One-tap share
 
-**Status:** Detection logic exists, celebration missing
-**Next:** SPEC-014
+**Implementation:** `src/lib/perSetCue.ts`, `src/ui/components/LiveWorkout/PRCelebration.tsx`, `src/lib/sound/SoundManager.ts`, `src/lib/celebration/`
 
 ---
 
