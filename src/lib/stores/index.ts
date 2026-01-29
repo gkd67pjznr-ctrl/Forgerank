@@ -9,6 +9,7 @@ export {
   getWorkoutSessionById,
   addWorkoutSession,
   clearWorkoutSessions,
+  getWorkoutSyncStatus,
 } from "./workoutStore";
 
 // Current active session
@@ -43,6 +44,7 @@ export {
   subscribeCurrentPlan,
   selectPlan,
   selectIsHydrated,
+  getWorkoutPlanSyncStatus,
 } from "./workoutPlanStore";
 
 // User routines
@@ -55,6 +57,7 @@ export {
   upsertRoutine,
   deleteRoutine,
   clearRoutines,
+  getRoutinesSyncStatus,
 } from "./routinesStore";
 
 // App settings
@@ -95,6 +98,7 @@ export {
   blockUser,
   hydrateFriends,
   subscribeFriends,
+  getFriendsSyncStatus,
 } from "./friendsStore";
 
 // Social (posts, reactions, comments)
@@ -115,6 +119,7 @@ export {
   addComment,
   hydrateSocialStore,
   subscribeSocial,
+  getSocialSyncStatus,
 } from "./socialStore";
 
 // Feed
@@ -133,6 +138,7 @@ export {
   areFriends as feedAreFriends,
   hydrateFeed,
   subscribeFeed,
+  getFeedSyncStatus,
   type PostVisibility,
   type FeedPost,
 } from "./feedStore";
@@ -160,4 +166,5 @@ export {
   canUserMessageThread,
   hydrateChat,
   subscribeChat,
+  getChatSyncStatus,
 } from "./chatStore";

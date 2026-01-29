@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { View, Text, Pressable, ScrollView, Alert, ActivityIndicator, TextInput, Modal, Image } from "react-native";
+import { Link } from "expo-router";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
@@ -425,6 +426,24 @@ export default function SettingsScreen() {
             }
           />
         </View>
+
+        {/* Dev Menu Link */}
+        {__DEV__ && (
+          <Link href="/dev-menu" asChild>
+            <Pressable
+              style={{
+                borderWidth: 1,
+                borderColor: c.border,
+                borderRadius: 14,
+                backgroundColor: c.card,
+                padding: 12,
+              }}
+            >
+              <Text style={{ fontWeight: "900", fontSize: 16, color: c.text }}>Dev Menu</Text>
+              <Text style={{ opacity: 0.75, color: c.muted }}>Quick access to all screens for testing.</Text>
+            </Pressable>
+          </Link>
+        )}
 
         {/* Email Verification Status */}
         <View style={{ borderWidth: 1, borderColor: c.border, borderRadius: 14, backgroundColor: c.card, padding: 12 }}>

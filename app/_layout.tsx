@@ -1,6 +1,8 @@
+import { View, Pressable } from 'react-native';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { Ionicons } from '@expo/vector-icons';
 import 'react-native-reanimated';
 import { useEffect } from 'react';
 import * as WebBrowser from 'expo-web-browser';
@@ -10,6 +12,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import ErrorBoundary from '@/src/ui/error-boundary';
 import { setupAuthListener, useAuthStore } from '@/src/lib/stores';
 import { supabase } from '@/src/lib/supabase/client';
+import { PersistentTabBar } from '@/src/ui/components/PersistentTabBar';
 
 // Initialize WebBrowser for auth sessions
 WebBrowser.maybeCompleteAuthSession();
@@ -18,8 +21,25 @@ export const unstable_settings = {
   anchor: '(tabs)',
 };
 
+function HeaderBackButton({ tintColor }: { tintColor: string }) {
+  const router = useRouter();
+  return (
+    <Pressable
+      onPress={() => router.back()}
+      style={({ pressed }) => ({
+        opacity: pressed ? 0.6 : 1,
+        marginRight: 16,
+      })}
+    >
+      <Ionicons name="chevron-back" size={28} color={tintColor} />
+    </Pressable>
+  );
+}
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const tintColor = colorScheme === 'dark' ? '#fafafa' : '#111827';
+  const bgColor = colorScheme === 'dark' ? '#0a0a0a' : '#ffffff';
 
   // Initialize auth state listener on mount
   useEffect(() => {
@@ -56,44 +76,39 @@ export default function RootLayout() {
   return (
     <ErrorBoundary name="root">
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="auth/login"
-            options={{
-              headerShown: false,
-              presentation: 'card',
+        <View style={{ flex: 1 }}>
+          <Stack
+            screenOptions={{
+              headerShown: true,
+              headerTitle: '',
+              headerBackVisible: false,
+              headerLeft: () => <HeaderBackButton tintColor={tintColor} />,
+              headerStyle: {
+                backgroundColor: bgColor,
+              },
+              headerShadowVisible: false,
+              contentStyle: {
+                paddingBottom: 60,
+                backgroundColor: bgColor,
+              },
             }}
-          />
-          <Stack.Screen
-            name="auth/signup"
-            options={{
-              headerShown: false,
-              presentation: 'card',
-            }}
-          />
-          <Stack.Screen
-            name="auth/forgot-password"
-            options={{
-              headerShown: false,
-              presentation: 'card',
-            }}
-          />
-          <Stack.Screen
-            name="auth/reset-password"
-            options={{
-              headerShown: false,
-              presentation: 'card',
-            }}
-          />
-          <Stack.Screen
-            name="auth/verify-email"
-            options={{
-              headerShown: false,
-              presentation: 'card',
-            }}
-          />
-        </Stack>
+          >
+            <Stack.Screen
+              name="(tabs)"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="live-workout" options={{ headerShown: false }} />
+            <Stack.Screen name="auth/login" options={{ headerShown: false, presentation: 'card', contentStyle: { paddingBottom: 0 } }} />
+            <Stack.Screen name="auth/signup" options={{ headerShown: false, presentation: 'card', contentStyle: { paddingBottom: 0 } }} />
+            <Stack.Screen name="auth/forgot-password" options={{ headerShown: false, presentation: 'card', contentStyle: { paddingBottom: 0 } }} />
+            <Stack.Screen name="auth/reset-password" options={{ headerShown: false, presentation: 'card', contentStyle: { paddingBottom: 0 } }} />
+            <Stack.Screen name="auth/verify-email" options={{ headerShown: false, presentation: 'card', contentStyle: { paddingBottom: 0 } }} />
+          </Stack>
+          <PersistentTabBar />
+        </View>
         <StatusBar style="auto" />
       </ThemeProvider>
     </ErrorBoundary>

@@ -169,6 +169,23 @@ export const useFriendsStore = create<FriendsState>()(
           });
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
+          // Don't throw for table-not-found errors - just log and continue with local data
+          const isTableMissing = errorMessage.includes('Could not find the') ||
+                                  errorMessage.includes('relation') ||
+                                  errorMessage.includes('does not exist');
+
+          if (isTableMissing) {
+            console.warn('[friendsStore] Backend tables not set up yet, using local data only');
+            set({
+              _sync: {
+                ...get()._sync,
+                syncStatus: 'idle',
+                syncError: null,
+              },
+            });
+            return;
+          }
+
           set({
             _sync: {
               ...get()._sync,
@@ -244,11 +261,21 @@ export const useFriendsStore = create<FriendsState>()(
 // Selectors
 // ============================================================================
 
-export const selectFriendEdges = (myUserId: ID) => (state: FriendsState) =>
-  state.edges
+// Memoized selector cache for friend edges
+const friendEdgesCache = new Map<string, { edges: FriendEdge[]; result: FriendEdge[] }>();
+
+export const selectFriendEdges = (myUserId: ID) => (state: FriendsState): FriendEdge[] => {
+  const cached = friendEdgesCache.get(myUserId);
+  if (cached && cached.edges === state.edges) {
+    return cached.result;
+  }
+  const result = state.edges
     .filter((e) => e.userId === myUserId)
     .slice()
     .sort((a, b) => b.updatedAtMs - a.updatedAtMs);
+  friendEdgesCache.set(myUserId, { edges: state.edges, result });
+  return result;
+};
 
 export const selectFriendStatus = (myUserId: ID, otherUserId: ID) => (state: FriendsState) =>
   state.edges.find((x) => x.userId === myUserId && x.otherUserId === otherUserId)?.status ?? "none";

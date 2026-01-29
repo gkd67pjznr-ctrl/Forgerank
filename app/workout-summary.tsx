@@ -7,7 +7,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useThemeColors } from "../src/ui/theme";
 import { FR } from "../src/ui/forgerankStyle";
 import { EXERCISES_V1 } from "../src/data/exercises";
-import { useWorkoutStore } from "../src/lib/stores";
+import { useWorkoutStore, useIsHydrated } from "../src/lib/stores";
 import { timeAgo } from "../src/lib/units";
 
 type WorkoutSummaryData = {
@@ -48,19 +48,25 @@ export default function WorkoutSummary() {
   const router = useRouter();
   const { sessionId } = useLocalSearchParams<{ sessionId?: string }>();
 
-  // Get the workout session
+  // Get the workout session - wait for hydration
+  const hydrated = useIsHydrated();
   const sessions = useWorkoutStore((state) => state.workouts);
   const [summary, setSummary] = useState<WorkoutSummaryData | null>(null);
   const [isSharing, setIsSharing] = useState(false);
   const [endedAtMs, setEndedAtMs] = useState<number | null>(null);
 
   useEffect(() => {
+    // Wait for hydration before accessing sessions
+    if (!hydrated) return;
+
     if (!sessionId) {
       router.replace("/");
       return;
     }
 
-    const session = sessions.find((s) => s.id === sessionId);
+    // Ensure sessions is an array before calling find
+    const sessionsArray = sessions ?? [];
+    const session = sessionsArray.find((s) => s.id === sessionId);
     if (!session) {
       // Session not found, go home
       router.replace("/");
@@ -95,7 +101,7 @@ export default function WorkoutSummary() {
       exerciseIds,
     });
     setEndedAtMs(session.endedAtMs);
-  }, [sessionId, sessions, router]);
+  }, [hydrated, sessionId, sessions, router]);
 
   if (!summary) {
     return (

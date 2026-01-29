@@ -6,7 +6,10 @@
  * Extracted from live-workout.tsx to reduce component complexity.
  */
 
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FR } from "@/src/ui/forgerankStyle";
 import { useThemeColors } from "@/src/ui/theme";
 import type { WorkoutPlan } from "@/src/lib/workoutPlanModel";
@@ -21,25 +24,42 @@ export interface WorkoutHeaderProps {
 
 export function WorkoutHeader({ plan, sets, focusMode }: WorkoutHeaderProps) {
   const c = useThemeColors();
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
   const CARD_R = FR.radius.card;
 
   const planMode = !!plan && plan.exercises.length > 0;
   const progress = calculatePlanProgress(plan, sets);
 
   return (
-    <View
-      style={{
-        borderWidth: 1,
-        borderColor: c.border,
-        backgroundColor: c.card,
-        borderRadius: CARD_R,
-        padding: FR.space.x4,
-        gap: FR.space.x2,
-      }}
-    >
-      <Text style={{ color: c.text, ...FR.type.h2 }}>
-        {planMode ? plan?.routineName ?? "Planned Workout" : "Free Workout"}
-      </Text>
+    <View style={{ gap: FR.space.x3 }}>
+      {/* Back button row */}
+      <View style={{ paddingTop: insets.top * 0.5, flexDirection: 'row', alignItems: 'center' }}>
+        <Pressable
+          onPress={() => router.back()}
+          style={({ pressed }) => ({
+            opacity: pressed ? 0.6 : 1,
+            padding: 4,
+          })}
+        >
+          <Ionicons name="chevron-back" size={28} color={c.text} />
+        </Pressable>
+      </View>
+
+      {/* Main header card */}
+      <View
+        style={{
+          borderWidth: 1,
+          borderColor: c.border,
+          backgroundColor: c.card,
+          borderRadius: CARD_R,
+          padding: FR.space.x4,
+          gap: FR.space.x2,
+        }}
+      >
+        <Text style={{ color: c.text, ...FR.type.h2 }}>
+          {planMode ? plan?.routineName ?? "Planned Workout" : "Free Workout"}
+        </Text>
       <Text style={{ color: c.muted, ...FR.type.sub }}>
         Sets logged: {sets.length} • Focus: {focusMode ? "On" : "Off"}
       </Text>
@@ -74,6 +94,7 @@ export function WorkoutHeader({ plan, sets, focusMode }: WorkoutHeaderProps) {
           </View>
         </View>
       )}
+      </View>
     </View>
   );
 }

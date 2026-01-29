@@ -110,6 +110,12 @@ export const postRepository: PostRepository = {
     const { data, error } = await query;
 
     if (error) {
+      const msg = error.message ?? '';
+      const isTableMissing = msg.includes('Could not find the') || msg.includes('does not exist');
+      if (isTableMissing) {
+        console.warn('[postRepository] Backend tables not set up yet');
+        return [];
+      }
       console.error('[postRepository] fetchFeed error:', error);
       throw new Error(`Failed to fetch feed: ${error.message}`);
     }

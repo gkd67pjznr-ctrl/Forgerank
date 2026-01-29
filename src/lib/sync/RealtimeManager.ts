@@ -298,20 +298,10 @@ class RealtimeManagerClass {
   /**
    * Unsubscribe from a channel
    *
-   * @param channelName Channel name or channelName:event pattern
+   * @param channelName Channel name
    */
   private unsubscribe(channelName: string): void {
-    // Check if it's a broadcast subscription
-    if (channelName.includes(':')) {
-      const unsubscribe = this.subscriptions.get(channelName);
-      if (unsubscribe) {
-        unsubscribe();
-        this.subscriptions.delete(channelName);
-      }
-      return;
-    }
-
-    // Regular channel subscription
+    // Remove the channel from Supabase
     const channel = this.channels.get(channelName);
 
     if (channel) {
@@ -319,10 +309,9 @@ class RealtimeManagerClass {
       this.channels.delete(channelName);
     }
 
-    const unsubscribe = this.subscriptions.get(channelName);
-    if (unsubscribe) {
-      this.subscriptions.delete(channelName);
-    }
+    // Just delete the subscription entry - don't call the stored function
+    // (calling it would cause infinite recursion since it calls this.unsubscribe)
+    this.subscriptions.delete(channelName);
   }
 
   /**

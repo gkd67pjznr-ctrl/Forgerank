@@ -20,8 +20,8 @@ import { uid as routineUid, type Routine, type RoutineExercise } from "../routin
 // [MIGRATED 2026-01-23] Using Zustand stores
 import { addWorkoutSession, clearCurrentSession, ensureCurrentSession, useCurrentSession, useIsHydrated, upsertRoutine } from "../stores";
 // Gamification integration
-import { processGamificationWorkout, toWorkoutForCalculation } from "../hooks/useGamificationWorkoutFinish";
-import { useGamificationStore } from "../stores/gamificationStore";
+import { toWorkoutForCalculation } from "../hooks/useGamificationWorkoutFinish";
+import { useGamificationStore, processGamificationWorkout } from "../stores/gamificationStore";
 
 function exerciseName(exerciseId: string) {
   return EXERCISES_V1.find((e) => e.id === exerciseId)?.name ?? exerciseId;

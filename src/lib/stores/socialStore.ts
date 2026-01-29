@@ -199,6 +199,23 @@ export const useSocialStore = create<SocialState>()(
           }));
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
+          // Don't throw for table-not-found errors - just log and continue with local data
+          const isTableMissing = errorMessage.includes('Could not find the') ||
+                                  errorMessage.includes('relation') ||
+                                  errorMessage.includes('does not exist');
+
+          if (isTableMissing) {
+            console.warn('[socialStore] Backend tables not set up yet, using local data only');
+            set((state) => ({
+              _sync: {
+                ...state._sync,
+                syncStatus: 'idle',
+                syncError: null,
+              },
+            }));
+            return;
+          }
+
           set((state) => ({
             _sync: {
               ...state._sync,
@@ -206,6 +223,7 @@ export const useSocialStore = create<SocialState>()(
               syncError: errorMessage,
             },
           }));
+          // Only throw for unexpected errors
           throw error;
         }
       },
@@ -281,8 +299,18 @@ export const useSocialStore = create<SocialState>()(
 // Selectors
 // ============================================================================
 
-export const selectFeedAll = (state: SocialState) =>
-  state.posts.slice().sort((a, b) => b.createdAtMs - a.createdAtMs);
+// Memoized selector to avoid creating new array on each call
+let cachedPosts: WorkoutPost[] = [];
+let cachedSortedPosts: WorkoutPost[] = [];
+
+export const selectFeedAll = (state: SocialState): WorkoutPost[] => {
+  // Only re-sort if posts array reference changed
+  if (state.posts !== cachedPosts) {
+    cachedPosts = state.posts;
+    cachedSortedPosts = state.posts.slice().sort((a, b) => b.createdAtMs - a.createdAtMs);
+  }
+  return cachedSortedPosts;
+};
 
 export const selectPostById = (id: string) => (state: SocialState) =>
   state.posts.find((p) => p.id === id);

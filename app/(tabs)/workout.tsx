@@ -90,7 +90,7 @@ export default function WorkoutTab() {
       <ScrollView style={{ flex: 1, backgroundColor: c.bg }} contentContainerStyle={{ padding: 16, gap: 12 }}>
         <Text style={{ color: c.text, fontSize: 26, fontWeight: "900" }}>Workout</Text>
         <Text style={{ color: c.muted, lineHeight: 18 }}>
-          Start a free workout, follow a premade plan, or build your own routine.
+          Go freestyle, follow a premade plan, or build your own routine.
         </Text>
 
         {/* Main Action */}
@@ -99,7 +99,7 @@ export default function WorkoutTab() {
           subtitle={
             hasSession
               ? `Current session has ${setCount} set${setCount === 1 ? "" : "s"} logged.`
-              : "Start a free workout session."
+              : "Freestyle"
           }
           rightBadge={hasSession ? `${setCount} sets` : undefined}
           onPress={startOrResume}

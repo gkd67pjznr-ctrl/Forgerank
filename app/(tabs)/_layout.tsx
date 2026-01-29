@@ -1,33 +1,16 @@
-import { useEffect } from "react";
 import { View, ActivityIndicator } from "react-native";
-import { Tabs, useRouter } from "expo-router";
+import { Tabs, Redirect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useThemeColors } from "../../src/ui/theme";
-import { useIsAuthenticated, useAuthLoading, useAuth } from "../../src/lib/stores";
+import { useIsAuthenticated, useAuthLoading } from "../../src/lib/stores";
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
   const isAuthenticated = useIsAuthenticated();
   const loading = useAuthLoading();
-  const authStore = useAuth();
-
-  console.log('[AuthGuard] Render:', { loading, isAuthenticated });
-
-  useEffect(() => {
-    console.log('[AuthGuard] Effect:', { loading, isAuthenticated });
-    // Only check authentication after hydration is complete
-    if (!loading && !isAuthenticated) {
-      console.log('[AuthGuard] Redirecting to login...');
-      // Clear any stale errors
-      authStore.clearError();
-      // Redirect to login
-      router.replace("/auth/login");
-    }
-  }, [isAuthenticated, loading, router, authStore]);
 
   // Show loading spinner while checking auth
   if (loading) {
-    console.log('[AuthGuard] Showing loading spinner');
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" />
@@ -35,20 +18,17 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // If not authenticated, don't render children (will redirect)
+  // If not authenticated, redirect to login using Redirect component
   if (!isAuthenticated) {
-    console.log('[AuthGuard] Not authenticated, showing empty');
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }} />
-    );
+    return <Redirect href="/auth/login" />;
   }
 
-  console.log('[AuthGuard] Rendering children');
   return <>{children}</>;
 }
 
 export default function TabsLayout() {
   const c = useThemeColors();
+  const insets = useSafeAreaInsets();
 
   return (
     <AuthGuard>
@@ -58,8 +38,12 @@ export default function TabsLayout() {
           tabBarActiveTintColor: c.text,
           tabBarInactiveTintColor: c.muted,
           tabBarStyle: {
+            display: 'none', // Hidden - using PersistentTabBar instead
+          },
+          sceneStyle: {
+            paddingTop: insets.top * 0.75,
+            paddingBottom: 60, // Space for persistent tab bar
             backgroundColor: c.bg,
-            borderTopColor: c.border,
           },
         }}
       >
