@@ -460,6 +460,33 @@ Example: `docs/AskUQ/2026-01-29-feature-brainstorm.md`
 1. Inform the user that the interview has been archived
 2. Reference the file path in your completion message
 
+### Post-Interview: Update All Docs
+
+**CRITICAL:** After any interview or brainstorm session that introduces new features, changes existing features, or makes design/business decisions, you MUST update ALL affected documentation:
+
+1. **Analyze the interview** for new features, changed features, and decisions
+2. **Update `docs/FEATURE-MASTER.md`:**
+   - Add new feature groups to the summary table
+   - Update progress counts for changed features
+   - Recalculate totals
+   - Update development phases if needed
+   - Update business model section if needed
+3. **Update `docs/MASTER_PLAN.md`:**
+   - Update vision, core differentiators, target user if changed
+   - Update business model, gamification systems, key features tables
+   - Update timeline/phases
+   - Update competitive positioning
+   - Add decision log entry with date and key decisions
+4. **Update existing feature files** (`docs/features/feature-*.md`):
+   - Modify any feature files affected by interview decisions
+   - Update sub-feature counts, statuses, planned items
+5. **Create new feature files** for any brand-new features identified:
+   - Follow the standard feature file format (Overview, Sub-Features, Technical Notes, UI Design, Dependencies, Priority)
+   - Include source reference (e.g., "Source: 2026-01-29 brainstorm interview")
+6. **Inform the user** of all files updated/created with a summary table
+
+This ensures documentation stays synchronized and no decisions are lost between the interview transcript and the living docs.
+
 ---
 
 ## CURRENT STATE QUICK REFERENCE

@@ -5,6 +5,8 @@ XP, levels, streaks, currency, and cosmetics. Keeps users engaged beyond just lo
 
 **Philosophy:** No pay-to-win. All cosmetics, all optional.
 
+**Status:** 12/12 sub-features complete. Remaining work is streak color progression (planned) and future enhancements.
+
 ---
 
 ## Sub-Features
@@ -16,7 +18,7 @@ XP, levels, streaks, currency, and cosmetics. Keeps users engaged beyond just lo
 - [x] Visual XP bar progression
 - [x] XP-based level thresholds
 
-**Formula:** `baseXP (sets × 10) + volumeBonus + exerciseBonus`
+**Formula:** `baseXP (sets x 10) + volumeBonus + exerciseBonus`
 
 **Implementation:** `src/lib/stores/gamificationStore.ts`
 
@@ -155,6 +157,8 @@ Level 6: 2,000 XP
 
 **Categories:** personalities, themes, card_skins, profile_badges, profile_frames, titles
 
+**Note:** Avatar cosmetics (accessories, frames, visual customization) are purchasable through the store using Forge Tokens. Forge Seasons will add limited-time seasonal items to the store inventory (e.g., holiday themes, seasonal card skins, exclusive profile frames) that rotate with each season.
+
 ---
 
 ### Done - Achievements/Badges
@@ -169,48 +173,13 @@ Level 6: 2,000 XP
 
 ### Planned - Streak Color Progression
 - [ ] Streak counter changes color based on length
-- [ ] White (0-6) → Green (7-29) → Blue (30-99) → Purple (100-364) → Gold (365+)
+- [ ] White (0-6) -> Green (7-29) -> Blue (30-99) -> Purple (100-364) -> Gold (365+)
 
 ---
 
-### Planned - Cosmetic Store
-- [ ] Store UI with categories
-- [ ] Purchase confirmation
-- [ ] Preview before buying
-- [ ] Equipped item display
+## Related Features
 
-**Categories:**
-
-**Themes/Color Schemes:**
-- Accent color unlocks (beyond starter 4)
-- Premium gradients
-- Seasonal themes
-
-**Voice Packs/Personalities:**
-- Additional gym buddy personalities
-- Special edition voices
-- Community-created voices (future)
-
-**Card Skins:**
-- How your workout posts appear in feed
-- Different frames, backgrounds
-- Animated options (premium)
-
-**Profile Customization:**
-- Badges to display
-- Profile frames/borders
-- Username titles/flairs
-- Avatar accessories
-
----
-
-### Planned - Achievements/Badges
-- [ ] First workout badge
-- [ ] PR badges (first PR, 10 PRs, 100 PRs)
-- [ ] Consistency badges (7/30/100/365 day streaks)
-- [ ] Strength milestone badges (per tier reached)
-- [ ] Social badges (friends, reactions given)
-- [ ] Hidden/secret achievements
+**Forge Milestones:** Tiered rarity milestones (Common / Rare / Epic / Legendary) are tracked separately in `docs/features/feature-forge-milestones.md`. Forge Milestones extend the gamification system with structured progression goals that award milestone badges based on rarity tiers, distinct from the achievements/badges system here which tracks general workout accomplishments.
 
 ---
 
@@ -342,23 +311,32 @@ CREATE TABLE user_gamification (
 
 ## Dependencies
 
-- ✅ Auth (user identity)
-- ✅ Workout completion (triggers XP/streak)
-- ✅ Backend (persistence/sync)
-- ✅ Settings (equipped items)
+- Auth (user identity)
+- Workout completion (triggers XP/streak)
+- Backend (persistence/sync)
+- Settings (equipped items)
 
 ---
 
 ## Priority
 
-**P1 (Phase 3):**
-- ✅ XP system
-- ✅ User levels
-- ✅ Streak system
-- ✅ Basic currency earning
-
-**P2 (Phase 3-4):**
+**Done (12/12 sub-features complete):**
+- XP system
+- User levels
+- Level up celebration
+- Streak system
+- Currency system
+- Stats & ranks card
+- Backend integration
 - Streak calendar
+- Streak milestones
 - Cosmetic store
-- Achievements
-- Full currency economy
+- Achievements/badges
+
+**Remaining:**
+- Streak color progression (visual enhancement, low priority)
+
+**Future enhancements (tracked in separate feature files):**
+- Forge Milestones with tiered rarity system (see `feature-forge-milestones.md`)
+- Forge Seasons with limited-time seasonal store items
+- Expanded currency economy (PR rewards, daily login, referrals)

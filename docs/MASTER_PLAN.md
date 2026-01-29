@@ -5,8 +5,8 @@
 
 ## Document Info
 - **Created:** 2026-01-25
-- **Last Updated:** 2026-01-25
-- **Status:** Active - Interview Complete
+- **Last Updated:** 2026-01-29
+- **Status:** Active — Updated from brainstorm interview
 
 ---
 
@@ -14,7 +14,9 @@
 
 **Forgerank is a workout tracking app that feels alive.**
 
-It's not just a logging tool - it's a gym buddy with personality, a ranking system that matters, and a social experience that keeps you coming back. Where other apps feel sterile and transactional, Forgerank feels like it knows you, celebrates with you, and pushes you to be better.
+It's not just a logging tool — it's a gym buddy with personality, a ranking system that means something, a growing avatar that represents your journey, and a social experience that keeps you coming back. Where other apps feel sterile and transactional, Forgerank feels like it knows you, celebrates with you, and pushes you to be better.
+
+**Day-one goal:** Very polished, feature-rich, beautiful. Not a beta. Seamless, sleek, well-designed.
 
 ---
 
@@ -27,129 +29,172 @@ It's not just a logging tool - it's a gym buddy with personality, a ranking syst
 - **e1RM-based scoring** using Epley formula
 - **Static top-end standards** based on verified, video'd world-class lifts
 - **Key insight:** Users compare against REAL standards, not inflated user-submitted data
-- **Anti-cheat philosophy:** Playful cues for anomalies ("DAAAAMN did you really do that??"), but ranks never inflate
+- **Anti-cheat philosophy:** Playful cues for anomalies, but ranks never inflate
 
-**Why this wins:** Users know their rank means something. It's not gamified nonsense - it's real progress against real standards.
+**Why this wins:** Users know their rank means something real.
 
-## 2. The Cue System (Gym Buddy)
-**What makes us different:** The app has personality.
+## 2. AI Gym Buddy System
+**What makes us different:** The app has a character.
 
-- **Customizable voices/personalities** - Users pick their gym buddy
-- **3-5 personalities at launch**, more added regularly via AI (Arnold, influencers, "muscle mommy" archetypes)
-- **Text + optional audio** - Let users choose their preference
-- **Contextual encouragement** - Knows your state, says the right thing at the right time
-- **Celebratory moments** - PRs, rank-ups, streaks all get personalized reactions
+- **8-12 personality archetypes at launch** — original characters inspired by archetypes (not licensed real people)
+- **Reactive commentary** — like a sports announcer, not a chatbot
+- **Tiered buddy system:**
+  - Basic (text-only, 2-3 free)
+  - Premium (voice + text, IAP)
+  - Legendary (full theme transformation, IAP)
+- **AI-generated voices** for original characters
+- **Community-created packs** (post-launch)
+- **Reacts to everything:** PRs, rank-ups, long rests, streaks, workout start/finish, final set push
 
 **Why this wins:** Every other app is a spreadsheet. We have a character.
 
-## 3. The Aesthetic
+## 3. Avatar & Hangout Room
+**What makes us different:** Emotional investment beyond gamification.
+
+- **Finch-inspired growing avatar** — literal height/size growth representing commitment to self-care
+- **Multiple art styles** — Bitmoji, pixel art (Mega Man), retro (Street Fighter 2), 3D
+- **Shared hangout room** — see friends' avatars, visual-only, lightly animated
+- **Purchasable decorations** — room members contribute, room creator has admin control
+- **Avatar leaves room** when friend is working out (with status message)
+
+**Why this wins:** Users open the app even on rest days. Deep emotional connection.
+
+## 4. The Aesthetic
 **What makes us different:** Looks so good people want to show it off.
 
 **Inspired by:** Pure dating app
 
 **Visual direction:**
-- **Mysterious/exclusive** - Like a members-only club
-- **Dark gradients + accent colors** - Almost monochromatic with pops of color
-- **Bold typography** - Confident, makes statements
-- **Minimal UI chrome** - Lots of negative space, content-focused
-- **Punchy animations** - PRs, rank-ups, streaks get visual reactions
+- **Mysterious/exclusive** — like a members-only club
+- **Dark gradients + accent colors** — almost monochromatic with pops of color
+- **Bold typography** — confident, makes statements
+- **Minimal UI chrome** — lots of negative space, content-focused
+- **Punchy animations** — PRs, rank-ups, streaks get visual reactions
 
 **Why this wins:** Young lifters care about aesthetics. If the app looks cool, they'll use it.
 
-## 4. The Social Loop
+## 5. The Social Loop
 **What makes us different:** Built for lifters, not general fitness.
 
 - **Full feed with Global + Friends tabs**
-- **Workout posts** with stats, captions, optional photos
-- **Body model default image** - Muscles colored by volume if no photo uploaded
-- **Reactions** - Quick emotes on friends' workouts
-- **Public by default** - Discover new people, grow the community
-- **Leaderboards** - Per-exercise, overall, volume, user level
+- **Auto-generated workout cards** — beautiful, shareable
+- **Auto-posts for milestones** — rank-ups, PRs, streaks
+- **Workout Replay** — cinematic post-workout summaries (THE share moment)
+- **Live presence** — see when friends are working out
+- **Reactions** — quick emotes on friends' workouts
+- **Online competitions** — powerlifting meets, bodybuilding shows (post-launch)
 
 **Why this wins:** Lifters want to share with other lifters, not their running friends.
+
+## 6. Forge DNA & Analytics
+**What makes us different:** Your training identity, visualized.
+
+- **Forge DNA** — visual fingerprint of training style (muscle balance, lift preferences, strength vs volume)
+- **Forge Lab** — premium analytics dashboard (strength curves, volume trends, rank progression)
+- **Premium blur mechanic** — show partial DNA free, full version behind subscription
+
+**Why this wins:** Serious lifters crave data. Casual lifters love the visual identity.
 
 ---
 
 # TARGET USER
 
-## Primary: Young Lifters (18-30)
-- **Intermediate experience** (1-3 years lifting)
-- **Competitive/social** - Care about comparing with friends
-- **Aesthetic-focused** - Care how the app looks
-- **Both men AND women** - Tap into current fitness culture trends
+## Primary: All Lifters
+- **Serious lifters** — want progression data, ranks, analytics
+- **Gym newcomers** — need guidance, motivation, and that first rank-up moment
+- **Social gym-goers** — work out with friends, want to share/compete
+- **Gamers who lift** — respond to XP, ranks, streaks, achievements, avatars
 
 ## Cultural Positioning
-- Tap into current social media trends ("muscle mommies", "tren twins", fitness influencers)
-- Stay current but not cringey - a little spice, not over the top
+- Tap into current social media fitness culture
+- Stay current but not cringey — a little spice, not over the top
 - Expand to appeal to healthy lifestyle/middle-aged audience over time
-- Adapt and update as trends evolve
+- Inclusive body options standard (gender-neutral, diverse representation)
 
 ---
 
 # BUSINESS MODEL
 
-## Freemium Hybrid
+## Freemium + IAP Hybrid
 
 ### Free Tier (Core Experience)
-- Full workout logging
-- Forgerank scoring and ranks
+- Full workout logging + Forgerank scoring + ranks
 - Social feed + friends + reactions
-- Basic history/calendar
-- Streak tracking
-- Personality selection (starter options)
-- CSV export
+- 2-3 starter gym buddy personalities (text-only)
+- Basic history/calendar + weight graph
+- Streak tracking + gamification (XP, levels, Forge Tokens)
+- Avatar (default style) + hangout room
+- Forge DNA (partially blurred)
+- Forge Milestones + trophy case
+- Workout Replay
 
-### Premium Tier (Yearly Subscription)
-- **Advanced analytics** - Long-term trends, detailed charts
-- **Body composition tracking** - Weight, measurements, progress photos
-- **Cloud sync** - Multi-device support
-- **Web app access** - View analytics, build routines on desktop
-- **Early access** - Try new features first
+### Pro Subscription
+- **Forge Lab** — full analytics dashboard
+- **Full Forge DNA** — unblurred training identity
+- **Advanced AI coaching** suggestions (post-launch)
+- **Integration analytics** — Apple Health, MFP, Whoop data displayed
 
-### Cosmetic Store (Currency-Based)
-**No pay-to-win.** All cosmetics, all optional.
+### IAP (In-App Purchases)
+Individual purchases, no subscription required:
+- **Premium buddy packs** — voice + text personalities
+- **Legendary buddy packs** — full theme transformation (colors, sounds, UI style)
+- **Avatar cosmetics** — clothes, accessories, art style packs
+- **Room decorations** — hangout room items
+- **Seasonal items** — limited-time earnable cosmetics (Forge Seasons)
 
-Earn currency through:
-- Leveling up (XP from workouts)
-- PR achievements
-- Daily login
-- Streak milestones
-- Referrals
+### Currency: Forge Tokens
+Earned through gameplay, spent on cosmetics:
 
-Spend currency on:
-- Themes/color schemes
-- Voice packs/personalities
-- Card skins (how your posts look)
-- Profile customization (badges, frames, titles)
+| Action | Tokens |
+|--------|--------|
+| Level up | 50 |
+| 7-day streak | 25 |
+| 30-day streak | 100 |
+| 100-day streak | 500 |
+| Weight PR | 10 |
+| e1RM PR | 5 |
+| Rank up | 25-100 (tier dependent) |
+
+**Philosophy:** No pay-to-win. Cosmetics and analytics only. Core workout experience always free.
 
 ---
 
 # GAMIFICATION SYSTEMS
 
 ## 1. Forgerank (Per-Exercise)
-- 0-1000 score, 20 ranks
+- 0-1000 score, 20 ranks per exercise
 - Based on e1RM against verified standards
 - Rank-up celebrations with animations + sound
-- Shareable moments
+- Shareable moments via Workout Replay
 
 ## 2. User Level (XP System)
-- Separate from Forgerank
+- Separate from Forgerank (measures activity, not strength)
 - Increases by logging workouts
 - Visual XP bar progression
-- Earns currency for cosmetic store
+- Earns Forge Tokens for cosmetic store
 
 ## 3. Streak System
-- Simple day counter
+- Simple day counter, breaks after 5 days inactivity
 - Visual streak calendar (GitHub-style contribution graph)
-- Breaks after 5 days of inactivity
-- Streak counter changes colors based on length
-- Post-workout summary shows streak animation
+- Milestone celebrations (7, 30, 100, 365 days)
+- Currency rewards at milestones
 
-## 4. Leaderboards
-- Per-exercise ranks (among friends)
-- Overall Forgerank (average/total across exercises)
-- Volume/consistency (who works out most)
-- User level (who's grinding XP)
+## 4. Forge Milestones
+- Non-repeatable lifetime achievements
+- Tiered rarity: Common, Rare, Epic, Legendary
+- Trophy case on profile with special visual treatment
+- Legendary = genuinely hard (top 1% type achievements)
+
+## 5. Avatar Growth
+- Finch-inspired growing companion
+- Physical size/height growth driven by volume + sets + rank
+- Represents user's commitment to self-care
+- Multiple art styles mix in shared rooms
+
+## 6. Leaderboards (Post-Launch)
+- Per-exercise, overall, volume, user level
+- Friends-only AND global views
+- Gym-level leaderboards (via Gym Finder)
 
 ---
 
@@ -165,73 +210,80 @@ Spend currency on:
 | Routine/program builder | P0 | Create and follow structured workouts |
 | Exercise library | P0 | Comprehensive, linked to muscle groups |
 | History/calendar view | P0 | Visual streak calendar |
+| Training journal | P2 | Free-form notes per workout (post-launch) |
 
-## PR Experience
+## PR & Celebration Experience
 | Feature | Priority | Notes |
 |---------|----------|-------|
-| Subtle but satisfying feedback | P0 | Well-designed toast, not full-screen takeover |
-| Sound effects | P0 | Audio cues matter |
+| Buddy reactive commentary | P0 | Personality-driven cues on every PR |
+| Sound effects | P0 | Audio cues per personality tier |
 | Haptic feedback | P0 | Physical response |
-| One-tap share | P0 | Share to feed/socials instantly |
+| Workout Replay | P0 | Cinematic post-workout summary |
+| Share to in-app feed | P0 | Focus on Forgerank social, not external |
 
-## Body Model
+## Avatar & Social Space
 | Feature | Priority | Notes |
 |---------|----------|-------|
-| Detailed subdivisions | P1 | Upper chest, rear delts, etc. |
-| Volume-based coloring | P1 | Gradient based on sets per muscle |
-| Primary/secondary/tertiary muscles | P1 | Per exercise |
-| Default post image | P1 | Shows if no photo uploaded |
+| Avatar creation | P0 | Multiple art styles, skippable in onboarding |
+| Avatar growth | P0 | Driven by volume + sets + rank |
+| Hangout room | P1 | Visual-only, lightly animated |
+| Room decorations | P1 | Purchasable, IAP |
+| Friend presence | P1 | Avatar leaves when working out |
 
 ## Social Features
 | Feature | Priority | Notes |
 |---------|----------|-------|
 | Global + Friends feed tabs | P0 | Easy to switch |
-| Workout posts with stats | P0 | Exercises, sets, PRs |
-| User captions | P0 | Add context |
-| Optional photo upload | P0 | Or default to body model |
-| Rank badges earned | P0 | Show off rank-ups |
+| Auto-generated workout cards | P0 | Beautiful, shareable summaries |
+| Auto-posts for milestones | P0 | Rank-ups, PRs, streaks |
+| Optional photo attachments | P1 | Or default to body model |
 | Reactions | P0 | Quick emotes |
-| Algorithm-suggested users | P1 | Help discovery |
+| Live workout presence | P1 | See friends working out |
+| Live workout together | P2 | Shared sessions (post-launch) |
+| Online competitions | P2 | PL meets, BB shows (post-launch) |
+
+## Analytics & Identity
+| Feature | Priority | Notes |
+|---------|----------|-------|
+| Forge DNA | P0 | Partially blurred free, full premium |
+| Forge Lab | P1 | Premium analytics dashboard |
+| Weight graph | P0 | Free |
+| Health integrations | P2 | Apple Health, MFP, Whoop (post-launch) |
 
 ## Notifications
 | Feature | Priority | Notes |
 |---------|----------|-------|
-| Rest timer finished | P0 | Push notification |
-| Streak warnings | P1 | Before it breaks |
-| Rest day reminders | P1 | Configurable |
-| iOS Live Activities widget | P2 | Dynamic island support |
-| Minimal/opt-in only | P0 | Don't be annoying |
+| Friend requests | P0 | Minimal, essential |
+| DMs | P0 | Minimal, essential |
+| Competition results | P1 | Post-launch |
+| Rest timer (backgrounded) | P0 | During workout only |
 
-## Integrations
+**Notification philosophy:** Minimal only. No nagging. Respect the user's attention.
+
+## Integrations (Post-Launch)
 | Feature | Priority | Notes |
 |---------|----------|-------|
-| Apple Health | P1 | Weight, BMI |
-| Fitbit | P2 | Weight, BMI |
-| Spotify/Apple Music | P2 | Workout music controls |
+| Apple Health | P1 | Weight, BMI import |
+| MyFitnessPal | P2 | Nutrition data for Forge Lab |
+| Whoop | P2 | Recovery, strain data |
+| Fitbit | P2 | Weight, activity data |
+
+**Not doing:** Spotify/Apple Music integration (buddy sounds only, no ambient/music).
 
 ---
 
 # ANTI-CHEAT PHILOSOPHY
 
-## The Problem
-Users can lie about their lifts. This could:
-1. Inflate their ranks (making them look stronger than they are)
-2. Affect other users' rankings (if ranks were user-data-driven)
-
-## Our Solution
-
-### Static Ranks
-- Top-end standards are **fixed** based on verified, video'd world-class lifts
+## Static Ranks
+- Top-end standards are **fixed** based on verified world-class lifts
 - User-submitted data **cannot inflate** the ranking tiers
-- Users always compare against real, trusted standards
 
-### Playful Anomaly Detection
+## Playful Anomaly Detection
 - Flag 10%+ e1RM jumps for users in top 3 ranks
-- Cue: "DAAAAMN did you really do that?? That's a HUGE jump!"
 - Lower ranks have more tolerance (new users experimenting)
-- Cross-exercise validation (overhead press strength predicts lateral raise strength)
+- Cross-exercise validation
 
-### Philosophy
+## Philosophy
 - Users can lie to themselves
 - Users cannot lie to affect others
 - The system celebrates authenticity through static, verified standards
@@ -240,35 +292,65 @@ Users can lie about their lifts. This could:
 
 # ONBOARDING
 
-## First-Time Flow
-1. **Quick profile setup**
+## First-Time Flow (All Steps Skippable)
+1. **Avatar creation**
+   - Pick art style (Bitmoji, pixel, retro, 3D)
+   - Basic customization
+   - Default avatar assigned if skipped
+
+2. **Goal setting**
+   - "What are you training for?"
+   - Options: Strength, Aesthetics, Health, Sport
+   - Personalizes AI suggestions
+
+3. **Profile setup**
    - Name
-   - Bodyweight
+   - Bodyweight (with unit toggle)
    - Experience level (beginner/intermediate/advanced)
 
-2. **Pick a personality**
-   - Choose gym buddy voice
-   - Preview different options
+4. **Pick a personality**
+   - Choose gym buddy
+   - Preview text samples per personality
    - Can change later in settings
 
-3. **First workout** (guided)
-   - Walk through logging a few sets
-   - Show them how PRs work
-   - Introduce the ranking system
+5. **Guided first workout**
+   - Walk through logging one real set
+   - Show PR detection + buddy commentary
+   - Trigger first Workout Replay
+   - Skip option for experienced users
 
 ---
 
 # CONTENT MODERATION
 
 ## Approach
-- **Report + Block** - Users can flag content, we review
-- **AI pre-filtering** - Automatic detection of inappropriate content
-- **Keep it simple for v1** - Build more sophisticated moderation later
+- **Report + Block** — users can flag content
+- **AI pre-filtering** — automatic detection of inappropriate content
+- **Anti-toxicity focus** — steer away from direct body comparison
+- **No built-in video platform** — link to IG/TikTok for general content
+- **Video upload only** for competition submissions (scoped context)
 
 ## Privacy
-- **Public by default** - Encourages discovery and growth
-- **Opt-out available** - Friends-only or private options
-- **Per-post control** - Users can choose visibility each time
+- **Public by default** — encourages discovery
+- **Opt-out available** — friends-only or private options
+- **Per-post control** — users choose visibility
+
+---
+
+# ACCESSIBILITY & INCLUSIVITY
+
+- **Community-driven exercise alternatives** — users suggest/flag modifications for injuries, wheelchair, etc.
+- **Inclusive body options** standard from day one (gender-neutral body model, diverse representation)
+- **Not a launch blocker** — phase in after core, but inclusive body model is day-one standard
+
+---
+
+# SOUND DESIGN
+
+- **Buddy sounds only** — sound effects for PRs, rank-ups, set completion + buddy voice lines
+- **No ambient soundscapes** — not a music app
+- **No music integration** — no Spotify/Apple Music player
+- **Tiered audio:** Basic buddies = no audio, Premium = voice lines, Legendary = full sound theme
 
 ---
 
@@ -280,48 +362,67 @@ Users can lie about their lifts. This could:
 - Single codebase, consistent experience
 
 ## Future
-- **Web app** for premium users
-- Analytics dashboard
-- Routine builder
-- Read-only workout history
+- **Web app** for premium users (analytics dashboard, routine builder)
+- Apple Watch companion (post-launch)
 
 ---
 
 # TIMELINE
 
-## Phase 0: Stabilization (Current)
-- Fix existing bugs
-- Complete Zustand migration
-- Establish solid foundation
+## Phase 0: Stabilization (Complete)
+- ✅ Fix existing bugs
+- ✅ Complete Zustand migration
+- ✅ Establish solid foundation
+- ✅ Build backend sync system
 
-## Phase 1: Core Workout Experience (Month 1-2)
+## Phase 1: Core Workout Polish
 - Routine-based workout flow
 - Exercise logging polish
 - Rest timer improvements
-- PR detection and celebration
 
-## Phase 2: Backend & Auth (Month 2-3)
-- Supabase integration complete
-- Authentication (email/password + OAuth)
-- Cloud sync
-- Data migration
+## Phase 2: AI Gym Buddy + Avatar
+- Personality engine (8-12 archetypes)
+- Reactive commentary system
+- AI-generated voice system
+- Avatar creation + growth system
+- Hangout room
 
-## Phase 3: Social Features (Month 3-4)
-- Friends system
-- Full feed implementation
-- Reactions
-- Leaderboards
+## Phase 3: Social & Engagement
+- Full feed with auto-generated workout cards
+- Workout Replay (cinematic summaries)
+- Reactions + comments
+- Forge DNA + Forge Lab
+- Forge Milestones
 
-## Phase 4: Personality & Cosmetics (Month 4-5)
-- Cue system with multiple personalities
-- Cosmetic store
-- Currency system
-- Body model with muscle coloring
+## Phase 4: Launch Polish
+- Full onboarding (avatar, goals, guided workout)
+- Visual polish + animations
+- Performance optimization
+- App Store preparation
 
-## v1 Launch Target: 3+ months
-- Build it right, don't rush
-- Polish the aesthetic
-- Test thoroughly
+## Phase 5: Post-Launch v2
+- Leaderboards + competitions
+- Online powerlifting meets / bodybuilding shows
+- Live Workout Together
+- Integrations (Apple Health, MFP, Whoop)
+
+## Phase 6: Ecosystem
+- Gym Finder / Map with partnerships
+- AI Coaching (template-based)
+- Templates Marketplace
+- Training Journal
+- Forge Seasons
+
+---
+
+# REST DAY ENGAGEMENT
+
+What keeps users coming back when they're not lifting:
+- **Social feed** — scrolling, reacting, checking leaderboards
+- **Planning** — browse/edit routines, plan next workout
+- **Avatar care** — visit avatar, check room, see friends' status
+- **Rank checking** — review progression for serious lifters
+- **Forge DNA** — review training identity
 
 ---
 
@@ -334,10 +435,10 @@ Users can lie about their lifts. This could:
 - 60%+ friend feature adoption
 
 ## Growth Goals
-- Organic sharing of workout posts
+- Organic sharing of Workout Replays to in-app feed
 - Word-of-mouth from aesthetic/vibe
-- Retention through streak system
-- Premium conversion through analytics value
+- Retention through avatar + streak + hangout room
+- Premium conversion through Forge Lab + Forge DNA blur
 
 ## Performance Targets
 - App launch: <2s
@@ -354,59 +455,98 @@ Users can lie about their lifts. This could:
 - A complex programming tool (Strong, Juggernaut)
 - A form analysis app (Tempo)
 - A general health app
+- An AI-everything workout generator
 
 ## We ARE
 - A workout tracker with personality
 - A social platform for lifters
 - A progress visualization tool
 - A premium-feeling experience
+- A virtual gym companion (avatar + buddy)
 
 ## Vs. Competition
 
-| Feature | Forgerank | Liftoff | Hevy | Strong |
-|---------|-----------|---------|------|--------|
-| Personality/cues | Yes | No | No | No |
-| Static verified ranks | Yes | No | No | No |
-| Aesthetic focus | Yes | Some | No | No |
-| Social built-in | Yes | Limited | Yes | No |
-| Cosmetic store | Yes | No | No | No |
-| Free tier | Yes | Yes | Yes | Freemium |
+| Feature | Forgerank | Liftoff | Hevy | Strong | Finch |
+|---------|-----------|---------|------|--------|-------|
+| Personality/cues | Yes (8-12) | No | No | No | No |
+| Static verified ranks | Yes | No | No | No | No |
+| Aesthetic focus | Yes | Some | No | No | Yes |
+| Social built-in | Yes | Limited | Yes | No | No |
+| Growing avatar | Yes | No | No | No | Yes |
+| Cosmetic store | Yes | No | No | No | Yes |
+| Workout Replay | Yes | No | No | No | No |
+| Forge DNA | Yes | No | No | No | No |
+| Online competitions | Yes | No | No | No | No |
+| Free tier | Yes | Yes | Yes | Freemium | Freemium |
 
 ---
 
 # RISKS & MITIGATIONS
 
 ## Technical Complexity
-**Risk:** Building all these features is hard
-**Mitigation:** Phase approach, MVP first, iterate
+**Risk:** 204 features across 27 feature groups is ambitious
+**Mitigation:** 6-phase approach. Launch with 155 features, add 49 post-launch.
+
+## Avatar System
+**Risk:** Multi-style avatar creation + growth is technically complex
+**Mitigation:** Start with 2D styles, add 3D later. Growth system is data-driven, not art-intensive.
+
+## AI Voice Generation
+**Risk:** Quality AI voices for 8-12 characters
+**Mitigation:** Start with text-only (free tier), add voice progressively. AI voice tech is improving rapidly.
 
 ## Design Execution
-**Risk:** Getting the "mysterious/exclusive" vibe right is hard
+**Risk:** Getting the "mysterious/exclusive" vibe right
 **Mitigation:** Reference Pure dating app, iterate on design, get feedback
 
 ## User Acquisition
-**Risk:** Building it is easy, getting users is hard
-**Mitigation:** Build for shareability, aesthetic that people want to show off, social features that drive invites
+**Risk:** Building it is easier than getting users
+**Mitigation:** Workout Replay drives in-app sharing. Aesthetic drives screenshots. Avatar/room drives daily engagement.
 
 ## Competition
 **Risk:** Liftoff/Hevy/Strong are established
-**Mitigation:** Differentiate on personality, aesthetic, and static verified ranks
+**Mitigation:** Differentiate on personality + avatar + verified ranks + competitions. No one has online PL meets or BB shows.
 
 ---
 
 # DECISION LOG
 
-## 2026-01-25: Interview Complete
-Key decisions made:
+## 2026-01-29: Feature Brainstorm Interview
+Full transcript: `docs/AskUQ/2026-01-29-feature-brainstorm.md`
+
+Key decisions:
+- **AI Gym Buddy:** 8-12 archetypes, tiered (basic/premium/legendary), reactive commentary, AI-generated voices, original characters only
+- **Avatar & Hangout Room:** Finch-inspired, multiple art styles, visual-only social room, purchasable decorations
+- **Workout Replay:** Cinematic post-workout summary, share to in-app feed (not external)
+- **Forge DNA:** Training identity fingerprint, premium blur mechanic
+- **Forge Lab:** Premium analytics dashboard, weight graph free
+- **Forge Milestones:** Tiered rarity (common/rare/epic/legendary), trophy case
+- **Forge Seasons:** Lighter version (no battle pass), limited-time cosmetics
+- **Online Competitions:** PL meets + BB shows, tiered judging, seasonal events
+- **Gym Finder / Map:** Full ecosystem with community reviews + partnerships
+- **Templates Marketplace:** Community-driven routine sharing
+- **Training Journal:** Free-form notes, feeds into AI coaching
+- **AI Coaching:** Template-based first, AI suggestions layer on top, premium
+- **Live Workout Together:** Passive + shared + guided modes
+- **Business model:** Freemium + IAP (not just subscription)
+- **Notifications:** Minimal only (friend requests, DMs, competition results)
+- **Integrations:** Health data only (Apple Health, MFP, Whoop), no music
+- **Sound:** Buddy sounds only, no ambient/music
+- **Accessibility:** Community-driven exercise alternatives, inclusive body options standard
+- **Target user:** All lifters (serious, newcomers, social, gamers)
+- **Launch strategy:** Polished, feature-rich day one
+
+## 2026-01-25: Initial Interview
+Key decisions:
 - Forgerank scoring system confirmed (0-1000, 20 ranks, static standards)
 - Cue system with customizable personalities
 - Pure-inspired aesthetic (mysterious/exclusive)
 - Full social features in v1
 - Freemium + cosmetic store model
-- 3+ month timeline
 - iOS + Android simultaneously
 
 ---
 
-**End of Master Plan v1.0**
+**End of Master Plan v2.0**
 *This document is the source of truth for Forgerank's vision and strategy.*
+*Updated from brainstorm interview on 2026-01-29.*

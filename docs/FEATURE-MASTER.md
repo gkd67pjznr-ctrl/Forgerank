@@ -1,11 +1,11 @@
 # FORGERANK FEATURE MASTER
 
 **Last Updated:** 2026-01-29
-**Version:** v0.1 (Pre-launch)
+**Version:** v0.2 (Pre-launch, post-brainstorm)
 
 ---
 
-## Quick Summary
+## Quick Summary — Launch (v1)
 
 | Feature Group | Status | Progress | Details |
 |---------------|--------|----------|---------|
@@ -13,30 +13,54 @@
 | [Workout Logging UX](#workout-logging-ux) | **Done** | 10/10 | [Details](features/feature-workout-logging-ux.md) |
 | [Exercise Library](#exercise-library) | Done | 3/3 | [Details](features/feature-exercises.md) |
 | [Scoring & Ranks](#scoring--ranks) | Done | 5/5 | [Details](features/feature-scoring.md) |
-| [Cue System (Gym Buddy)](#cue-system-gym-buddy) | Planned | 1/10 | [Details](features/feature-cue-system.md) |
+| [AI Gym Buddy](#ai-gym-buddy) | In Progress | 1/11 | [Details](features/feature-cue-system.md) |
 | [Body Model](#body-model) | Planned | 0/5 | [Details](features/feature-body-model.md) |
 | [Authentication](#authentication) | In Progress | 7/10 | [Details](features/feature-auth.md) |
 | [Social & Feed](#social--feed) | In Progress | 9/15 | [Details](features/feature-social.md) |
-| [Leaderboards](#leaderboards) | Planned | 0/4 | [Details](features/feature-leaderboards.md) |
-| [Gamification](#gamification) | **Done** | **12/12** | [Details](features/feature-gamification.md) |
-| [Notifications](#notifications) | Planned | 0/5 | [Details](features/feature-notifications.md) |
+| [Gamification](#gamification) | **Done** | 12/12 | [Details](features/feature-gamification.md) |
+| [Notifications](#notifications) | Planned | 0/4 | [Details](features/feature-notifications.md) |
 | [UI & Design](#ui--design) | In Progress | 8/15 | [Details](features/feature-ui.md) |
 | [Backend & Sync](#backend--sync) | In Progress | 9/10 | [Details](features/feature-backend.md) |
-| [Integrations](#integrations) | Planned | 0/4 | [Details](features/feature-integrations.md) |
-| [Onboarding](#onboarding) | In Progress | 3/5 | [Details](features/feature-onboarding.md) |
+| [Onboarding](#onboarding) | In Progress | 3/7 | [Details](features/feature-onboarding.md) |
+| [Avatar & Hangout Room](#avatar--hangout-room) | Planned | 0/8 | [Details](features/feature-avatar-hangout.md) |
+| [Workout Replay](#workout-replay) | Planned | 0/5 | [Details](features/feature-workout-replay.md) |
+| [Forge DNA](#forge-dna) | Planned | 0/4 | [Details](features/feature-forge-dna.md) |
+| [Forge Lab (Analytics)](#forge-lab-analytics) | Planned | 0/6 | [Details](features/feature-forge-lab.md) |
+| [Forge Milestones](#forge-milestones) | Planned | 0/5 | [Details](features/feature-forge-milestones.md) |
 
-**Total:** 72/133 features (54%)
+**Launch Total:** 75/155 features (48%)
+
+## Quick Summary — Post-Launch
+
+| Feature Group | Status | Progress | Details |
+|---------------|--------|----------|---------|
+| [Leaderboards & Competitions](#leaderboards--competitions) | Planned | 0/10 | [Details](features/feature-leaderboards.md) |
+| [Integrations](#integrations) | Planned | 0/5 | [Details](features/feature-integrations.md) |
+| [Online Competitions](#online-competitions) | Planned | 0/8 | [Details](features/feature-competitions.md) |
+| [Gym Finder / Map](#gym-finder--map) | Planned | 0/6 | [Details](features/feature-gym-finder.md) |
+| [Live Workout Together](#live-workout-together) | Planned | 0/4 | [Details](features/feature-live-together.md) |
+| [AI Coaching](#ai-coaching) | Planned | 0/4 | [Details](features/feature-ai-coaching.md) |
+| [Templates Marketplace](#templates-marketplace) | Planned | 0/4 | [Details](features/feature-templates-marketplace.md) |
+| [Training Journal](#training-journal) | Planned | 0/4 | [Details](features/feature-training-journal.md) |
+| [Forge Seasons](#forge-seasons) | Planned | 0/4 | [Details](features/feature-forge-seasons.md) |
+
+**Post-Launch Total:** 0/49 features (0%)
+
+**Grand Total:** 75/204 features (37%)
 
 ---
 
 ## Core Differentiators
 
-These features set Forgerank apart from competitors:
+What sets Forgerank apart — the combination is the killer feature:
 
-1. **Forgerank Scoring** - Static, verified standards (not user-inflated)
-2. **Cue System** - Gym buddy with personality (text + audio)
-3. **Aesthetic** - Pure-inspired dark, mysterious UI
-4. **Social Loop** - Built for lifters, not general fitness
+1. **Forgerank Scoring** — Static, verified standards (not user-inflated). Your rank means something.
+2. **AI Gym Buddy** — 8-12 personality archetypes with reactive commentary. The app has a character.
+3. **Avatar & Hangout Room** — Finch-inspired growing avatar + social room. Emotional investment.
+4. **Aesthetic** — Pure-inspired dark, mysterious UI. Looks so good people show it off.
+5. **Social Loop** — Feed, friends, live presence, competitions. Built for lifters.
+6. **Workout Replay** — Cinematic post-workout summaries. The share moment.
+7. **Forge DNA** — Visual training identity fingerprint. Unique to each person.
 
 ---
 
@@ -61,43 +85,30 @@ The core workout logging and tracking experience.
 ## Workout Logging UX
 **Status:** Done | **Progress:** 10/10 features
 
-The visual interface for logging sets - complete redesign (Fitbod/Liftoff style).
+The visual interface for logging sets — complete redesign (Fitbod/Liftoff style).
 
 **Completed:**
-- ✅ Add Exercise button (prominent, with dashed border)
-- ✅ Exercise cards with collapsible header
-- ✅ Set lines with weight/reps inputs and checkmark
-- ✅ Empty state component
-- ✅ Smart defaults (auto-fill from previous set)
-- ✅ Keyboard handling (number pad, focus management)
-- ✅ Editing state management (workoutEditingStore)
-- ✅ Exercise reordering (drag-to-reorder with DraggableExerciseList)
-- ✅ PR detection integration
-- ✅ Haptic feedback
-- ✅ Set completion flow with logging
-- ✅ Exercise removal with confirmation dialog
-- ✅ Settings toggle (useNewWorkoutUX)
-- ✅ NewWorkoutSection wrapper for integration
-- ✅ Integration into live-workout.tsx with UXToggle button
-- ✅ Rest timer integration
-
-**Optional Enhancements (Future):**
-- Swipe-to-remove gesture
-- Smooth drag animations
-- Additional polish/feedback
-
-**Bugs Fixed:**
-- BUG-LOG-001: Duplicate set logging flows ✅
-- BUG-LOG-002: "Mark Done" is backwards ✅
-- BUG-LOG-005: Auto-focus issues ✅
-- BUG-LOG-007: No indication of current exercise ✅
+- Add Exercise button (prominent, with dashed border)
+- Exercise cards with collapsible header
+- Set lines with weight/reps inputs and checkmark
+- Empty state component
+- Smart defaults (auto-fill from previous set)
+- Keyboard handling (number pad, focus management)
+- Editing state management (workoutEditingStore)
+- Exercise reordering (drag-to-reorder with DraggableExerciseList)
+- PR detection integration
+- Haptic feedback
+- Set completion flow with logging
+- Exercise removal with confirmation dialog
+- Settings toggle (useNewWorkoutUX)
+- NewWorkoutSection wrapper for integration
+- Integration into live-workout.tsx with UXToggle button
+- Rest timer integration
 
 ---
 
 ## Exercise Library
 **Status:** Done | **Progress:** 3/3 features
-
-Static exercise database with metadata.
 
 - 50+ exercises defined with IDs and display names
 - Muscle group assignments
@@ -108,8 +119,6 @@ Static exercise database with metadata.
 ## Scoring & Ranks
 **Status:** Done | **Progress:** 5/5 features
 
-The Forgerank scoring algorithm - core differentiator.
-
 - 0-1000 score calculation (e1RM-based)
 - 7 tiers: Iron, Bronze, Silver, Gold, Platinum, Diamond, Mythic
 - 20 ranks per exercise
@@ -118,47 +127,49 @@ The Forgerank scoring algorithm - core differentiator.
 
 ---
 
-## Cue System (Gym Buddy)
-**Status:** Planned | **Progress:** 1/10 features
+## AI Gym Buddy
+**Status:** In Progress | **Progress:** 1/11 features
+**Previously:** Cue System
 
-The app's personality - what makes it feel alive.
+The app's personality — reactive commentary that makes it feel alive. Like a sports announcer, not a chatbot.
 
-- Basic PR detection cues (implemented)
+**Completed:**
+- Basic PR detection cues
 
-**Planned:**
-- Customizable gym buddy personalities (3-5 at launch)
-- Text-based encouragement
-- Audio voice packs (optional)
-- Contextual cues (knows your state)
-- PR celebration reactions
-- Rank-up celebrations
-- Streak milestone reactions
-- Personality store integration
+**Planned (Launch):**
+- 8-12 personality archetypes (Coach, Hype Beast, Chill, Savage, Anime Sensei, Action Hero, Drill Sergeant, Zen Master, Trash Talker, etc.)
+- Tiered buddy system:
+  - **Basic** = text-only cues (2-3 free at launch)
+  - **Premium** = voice lines + text (IAP)
+  - **Legendary** = full theme transformation (IAP — accent color, card style, sounds, voice, cue text)
+- Reactive commentary — performance events (PRs, rank-ups, volume milestones)
+- Reactive commentary — behavior patterns (long rests, skipping, streaks, returning after absence)
+- Reactive commentary — session flow (start hype, mid-workout, final set, finish summary)
+- AI-generated voice system (original characters, not real people)
+- Community-created personality packs (post-launch)
+- Text cue templates per personality
+- Audio voice lines per personality
+- Buddy store integration with Forge Tokens + IAP
 
 ---
 
 ## Body Model
 **Status:** Planned | **Progress:** 0/5 features
 
-Visual muscle representation for engagement.
-
-**Planned:**
 - Detailed muscle subdivisions (upper chest, rear delts, etc.)
 - Volume-based coloring (gradient based on sets)
 - Primary/secondary/tertiary muscle mapping per exercise
 - Default post image (if no photo uploaded)
 - Interactive body stats screen
+- Inclusive body options standard (gender-neutral, diverse representation)
 
 ---
 
 ## Authentication
 **Status:** In Progress | **Progress:** 7/10 features
 
-User accounts and authentication.
-
 **Completed:**
-- Login screen UI with email/password
-- Signup screen UI with email/password/name
+- Login/signup screen UI with email/password
 - Supabase Auth integration (working)
 - Auth state management (Zustand)
 - Google OAuth flow (implemented)
@@ -166,13 +177,11 @@ User accounts and authentication.
 - Dev login for quick testing (DEV mode)
 - User profile editing (display name, avatar)
 - Avatar upload/remove functionality
-- Keyboard-aware scroll views for auth screens
+- Keyboard-aware scroll views
 
 **Remaining:**
 - Apple Sign In setup
 - Password reset flow
-- Email verification UI
-- Protected routes implementation
 - Account deletion flow
 
 ---
@@ -180,120 +189,86 @@ User accounts and authentication.
 ## Social & Feed
 **Status:** In Progress | **Progress:** 9/15 features
 
-Social features for community engagement.
-
 **Completed:**
 - Feed screen UI with pull-to-refresh
-- Friends list screen UI
+- Friends list with real-time user search
 - Post creation screen
-- Direct messaging screen
-- Social data models (Post, Reaction, Comment, Friendship)
-- Social stores (social, feed, friends, chat)
-- Database schema designed (8 tables)
-- Row Level Security policies
-- Backend sync system (4-week rollout complete)
+- Direct messaging with typing indicators
+- Social data models and stores (all sync-connected)
+- Database schema + RLS policies
 - Real-time subscriptions via Supabase
-- Offline mutation queuing
-- Conflict resolution strategies
-- User discovery/search functionality
+- Offline mutation queuing + conflict resolution
 - Sync status indicators
-- Feed and friends screens connected to sync data
 
 **Planned:**
 - Global + Friends feed tabs
-- Workout posts with stats
-- Optional photo upload
+- Auto-generated workout cards (beautiful, shareable)
+- Auto-posts for milestones (rank-ups, PRs, streaks)
+- Optional photo attachments
 - Body model default image
 - Rank badges on posts
 - Reactions (quick emotes)
 - Comments
-- Friend request notifications
-- User profile pages
 - Content moderation (report + block)
-
----
-
-## Leaderboards
-**Status:** Planned | **Progress:** 0/4 features
-
-Competition among friends.
-
-**Planned:**
-- Per-exercise leaderboard (among friends)
-- Overall Forgerank leaderboard
-- Volume/consistency leaderboard
-- User level leaderboard
 
 ---
 
 ## Gamification
 **Status:** Done | **Progress:** 12/12 features
 
-XP, levels, streaks, currency, and cosmetics.
+XP, levels, streaks, currency, and cosmetics. Separate from Forgerank scoring.
 
 **Completed:**
-- XP system (separate from Forgerank)
-- User levels with visual XP bar
+- XP system with level thresholds
+- Level-up modal with animation + sound + confetti
 - Streak system (5-day break threshold)
-- XP calculation from workouts
-- Currency (forge tokens)
-- Level-up modal with animation
+- Currency (Forge Tokens) earned from leveling/milestones
 - Stats and ranks card component
-- Gamification store with sync integration
-- Backend sync for gamification data
-- Streak calendar (GitHub-style)
-- Streak milestone celebrations with modal
+- Gamification store with backend sync
+- Streak calendar (GitHub-style, 365 days)
+- Streak milestone celebrations
 - Cosmetic store UI (shop.tsx)
 - Achievements/badges display component
-
-**Planned:**
-- Streak color progression
-- Voice pack audio options
-- Profile frame rendering on posts
 
 ---
 
 ## Notifications
-**Status:** Planned | **Progress:** 0/5 features
+**Status:** Planned | **Progress:** 0/4 features
 
-Push notifications and reminders.
+**Philosophy:** Minimal. Don't be annoying.
 
 **Planned:**
-- Rest timer finished (push notification)
-- Streak warnings (before it breaks)
-- Rest day reminders (configurable)
-- iOS Live Activities widget (dynamic island)
-- Minimal/opt-in approach (don't be annoying)
+- Friend requests
+- DMs received
+- Competition results
+- Rest timer (push notification when backgrounded)
+
+**NOT doing:** Streak nag, "you haven't worked out" reminders, social activity spam. Respect the user's attention.
 
 ---
 
 ## UI & Design
 **Status:** In Progress | **Progress:** 8/15 features
 
-Visual design and polish - Pure-inspired aesthetic.
+Pure-inspired dark aesthetic — looks so good people want to show it off.
 
 **Completed:**
-- Dark theme foundation
-- Design system tokens (colors, spacing, typography)
+- Dark theme foundation + design system tokens
 - Accent color themes (toxic, electric, ember, ice)
-- Tab navigation
-- Basic screen layouts
-- Error boundaries
-- PR celebration animations (4-tier system, 60 celebrations)
-- Sound effects integration
-- Haptic feedback patterns
+- Tab navigation + screen layouts
+- Error boundaries with retry
+- PR celebration animations (4-tier, 60 celebrations)
+- Sound effects + haptic feedback patterns
 - Sync status indicators
-- Keyboard-aware scroll view component
-- User profile editing screen
+- Keyboard-aware scroll views
 
 **Planned:**
 - Rank-up animations with sound
-- Dark gradients
-- Bold typography refinement
+- Dark gradients + bold typography
 - Minimal UI chrome
 - Punchy animations throughout
 - Skeleton screens
-- Pull-to-refresh
+- Pull-to-refresh patterns
 - Empty states
 - Onboarding screens
 
@@ -302,21 +277,11 @@ Visual design and polish - Pure-inspired aesthetic.
 ## Backend & Sync
 **Status:** In Progress | **Progress:** 9/10 features
 
-Supabase backend integration.
-
 **Completed:**
-- Supabase client configured
-- Database schema designed (9 tables with user search)
-- Row Level Security policies
+- Supabase client + 9-table schema + RLS policies
 - TypeScript types (100% coverage)
-- Complete backend sync system (5 phases):
-  - Phase 1: Core Infrastructure (SyncOrchestrator, NetworkMonitor, repositories)
-  - Phase 2: Store Integration (workout, routines, plans)
-  - Phase 3: Social Sync (friends, social, feed)
-  - Phase 4: Chat Sync (typing indicators)
-  - Phase 5: Utility Hooks (useSyncStatus, useSyncState)
-- Offline mutation queuing
-- Conflict resolution strategies
+- Complete 5-phase sync system
+- Offline mutation queuing + conflict resolution
 - Real-time subscriptions (feed, friends, chat)
 - File storage (avatar uploads)
 
@@ -326,30 +291,252 @@ Supabase backend integration.
 
 ---
 
-## Integrations
-**Status:** Planned | **Progress:** 0/4 features
+## Onboarding
+**Status:** In Progress | **Progress:** 3/7 features
 
-Third-party app connections.
+Full premium onboarding — all steps skippable.
+
+**Completed:**
+- Welcome step with feature overview
+- Profile setup (name, bodyweight, experience level)
+- Personality picker (4 options)
 
 **Planned:**
-- Apple Health (weight, BMI import)
-- Fitbit (weight, BMI import)
-- Spotify integration (workout music controls)
-- Apple Music integration
+- Avatar creation step (default assigned if skipped)
+- Goal setting ("What are you training for?" — strength, aesthetics, health, sport)
+- Guided first workout (walk through logging one real set)
+- Ranking system introduction
 
 ---
 
-## Onboarding
-**Status:** Planned | **Progress:** 0/5 features
+## Avatar & Hangout Room
+**Status:** Planned | **Progress:** 0/8 features
+**NEW — from 2026-01-29 brainstorm**
 
-First-time user experience.
+Finch-inspired virtual gym avatar that grows as you work out, living in a shared room with friends.
 
 **Planned:**
-- Quick profile setup (name, bodyweight, experience level)
-- Personality picker (choose gym buddy)
-- Personality preview
-- Guided first workout
-- Ranking system introduction
+- Avatar creation (character creator, multiple art styles)
+- Art style options: Bitmoji-stylized, pixel art (Mega Man), retro (Street Fighter 2), 3D
+- Avatar growth system (literal height/size growth, like growing up — driven by volume, sets, and rank)
+- Hangout room (visual-only social space, lightly animated)
+- Room decorations (purchasable with Forge Tokens / IAP)
+- Friends' avatar presence (avatar leaves room when friend is working out)
+- Avatar cosmetics (clothes, accessories — IAP)
+- Room admin controls (creator manages what's displayed)
+
+**Growth philosophy:** Represents the user caring about themselves and sticking to it. Inspirational, not just gamification.
+
+---
+
+## Workout Replay
+**Status:** Planned | **Progress:** 0/5 features
+**NEW — from 2026-01-29 brainstorm**
+
+Cinematic post-workout summary — THE share moment.
+
+**Planned:**
+- Animated stat cards (exercises, volume, duration)
+- PR highlights with buddy commentary
+- Rank changes display
+- Buddy personality sign-off
+- Share to in-app feed (focus on Forgerank social, not external platforms)
+
+---
+
+## Forge DNA
+**Status:** Planned | **Progress:** 0/4 features
+**NEW — from 2026-01-29 brainstorm**
+
+Visual fingerprint of your training identity — profile centerpiece.
+
+**Planned:**
+- Training identity visualization (single beautiful graphic)
+- Muscle group balance display
+- Training style analysis (strength vs volume vs endurance)
+- Premium blur mechanic (blur interesting sections to incentivize subscription)
+
+---
+
+## Forge Lab (Analytics)
+**Status:** Planned | **Progress:** 0/6 features
+**NEW — from 2026-01-29 brainstorm**
+
+Premium analytics dashboard for serious lifters.
+
+**Free:**
+- Weight graph over time
+- Basic e1RM trends
+
+**Premium:**
+- Strength curves per exercise
+- Volume trends (weekly/monthly)
+- Muscle group balance analytics
+- Recovery patterns
+- Rank progression graphs
+- Integration data (Apple Health, MFP, Whoop imports)
+
+---
+
+## Forge Milestones
+**Status:** Planned | **Progress:** 0/5 features
+**NEW — from 2026-01-29 brainstorm**
+
+Non-repeatable lifetime achievements with tiered rarity — prestige markers.
+
+**Planned:**
+- Common tier (10 workouts, first PR, first rank-up)
+- Rare tier (100 workouts, 30-day streak, 5 exercises ranked)
+- Epic tier (1000lb club, all exercises Silver+, year-long streak)
+- Legendary tier (top 1% achievements — genuinely hard)
+- Trophy case on profile with special visual treatment by rarity
+
+---
+
+## Leaderboards & Competitions
+**Status:** Planned | **Progress:** 0/10 features
+**Post-launch**
+
+**Leaderboards:**
+- Per-exercise Forgerank leaderboard (friends + global)
+- Overall Forgerank leaderboard
+- Volume leaderboard
+- User level leaderboard
+- Gym-level leaderboards (tied to Gym Finder)
+
+**Competitions:**
+- Volume challenges (fun: "most calf volume this week")
+- Online powerlifting meets (video submission + judging)
+- Online bodybuilding shows (posing video + judging)
+- Tiered judging system (casual = community, ranked = panel, championship = AI + panel)
+- Seasonal events + always-open practice stage
+
+See [feature-leaderboards.md](features/feature-leaderboards.md) and [feature-competitions.md](features/feature-competitions.md)
+
+---
+
+## Online Competitions
+**Status:** Planned | **Progress:** 0/8 features
+**Post-launch v2**
+
+First-of-its-kind: online powerlifting meets and bodybuilding shows inside an app.
+
+**Powerlifting Meets:**
+- Video submission for lifts
+- Tiered judging (community → panel → AI+panel)
+- Scored like real meets (3 white/red lights)
+- Casual and ranked divisions
+
+**Bodybuilding Shows:**
+- Posing routine video submission
+- Verified high-quality judges
+- Seasonal championship events
+- Always-open practice stage with community ratings
+
+---
+
+## Integrations
+**Status:** Planned | **Progress:** 0/5 features
+**Post-launch**
+
+Health data integrations only — no music player, no nutrition tracking.
+
+**Planned:**
+- Apple Health (weight, BMI import/export)
+- MyFitnessPal (nutrition data for analytics)
+- Whoop (recovery, strain data)
+- Fitbit (weight, activity data)
+- Health data display in Forge Lab (premium)
+
+---
+
+## Gym Finder / Map
+**Status:** Planned | **Progress:** 0/6 features
+**Post-launch**
+
+Full gym ecosystem.
+
+**Planned:**
+- Gym discovery (Google/Apple Maps integration)
+- Community gym profiles (ratings, reviews, equipment lists, photos)
+- Friend gym mapping (see which friends go where)
+- Gym-level leaderboards (top lifters at your gym)
+- Gym partnerships (discounts, featured gyms — B2B revenue)
+- Check-in system (optional, non-pushy — smooth UX feature)
+
+---
+
+## Live Workout Together
+**Status:** Planned | **Progress:** 0/4 features
+**Post-launch v2**
+
+Real-time social workout experience.
+
+**Planned:**
+- Passive presence (see friends currently working out + exercise, send quick emotes)
+- Shared session (workout "room" — friends see each other's sets in real-time)
+- Guided partner mode (one person leads, others follow — virtual group class)
+- Quick reactions/emotes during live sessions
+
+---
+
+## AI Coaching
+**Status:** Planned | **Progress:** 0/4 features
+**Post-launch**
+
+Template-based programming with AI suggestions. Enhances, not replaces, user judgment.
+
+**Planned:**
+- Curated program template library (by level, goals, available days)
+- AI suggestions after 1+ week of usage (exercise swaps, deload detection)
+- Goal-based program recommendations
+- Premium feature (behind subscription)
+
+**Philosophy:** Start with templates, layer AI suggestions on top. Not "fully AI-generated" — the AI enhances the user's own direction.
+
+---
+
+## Templates Marketplace
+**Status:** Planned | **Progress:** 0/4 features
+**Post-launch**
+
+Community-driven workout template sharing.
+
+**Planned:**
+- Create and publish workout templates/routines
+- Browse/search community templates
+- Popular templates ranking (rise to top)
+- Creator attribution and profiles
+
+---
+
+## Training Journal
+**Status:** Planned | **Progress:** 0/4 features
+**Post-launch**
+
+Free-form workout notes for serious lifters.
+
+**Planned:**
+- Per-workout notes (how you felt, what went well)
+- Per-day journal entries
+- Mood/energy/soreness tracking
+- Journal history and search
+
+Could feed into AI coaching suggestions over time.
+
+---
+
+## Forge Seasons
+**Status:** Planned | **Progress:** 0/4 features
+**Post-launch**
+
+Seasonal content drops to keep things fresh.
+
+**Planned:**
+- Quarterly seasonal themes
+- Limited-time earnable cosmetics (avatar items, room decorations)
+- Seasonal leaderboard events
+- Exclusive seasonal items (no battle-pass grind — just limited-time earnable)
 
 ---
 
@@ -365,66 +552,84 @@ First-time user experience.
 
 ## Development Phases
 
-### Phase 0: Stabilization (Current - Near Complete)
+### Phase 0: Stabilization (Complete)
 - ✅ Fix existing bugs
 - ✅ Complete Zustand migration
 - ✅ Add error handling
 - ✅ Implement authentication
 - ✅ Build backend sync system
 
-### Phase 1: Core Workout Polish (Month 1-2)
+### Phase 1: Core Workout Polish
 - Routine-based workout flow
 - Set input improvements
 - Rest timer enhancements
 - Protected routes
 
-### Phase 2: Social Features (Month 2-3)
-- Full feed implementation
-- Reactions system
-- User profiles
-- Content moderation
+### Phase 2: AI Gym Buddy + Avatar
+- Personality engine (8-12 archetypes)
+- Reactive commentary system
+- AI-generated voice system
+- Avatar creation + growth system
+- Hangout room
 
-### Phase 3: Personality & Cosmetics (Month 3-4)
-- Cue system with multiple personalities
-- Cosmetic store
-- Currency system
-- Body model with muscle coloring
+### Phase 3: Social & Engagement
+- Full feed with auto-generated workout cards
+- Workout Replay (cinematic summaries)
+- Reactions + comments
+- Forge DNA + Forge Lab
+- Forge Milestones
 
 ### Phase 4: Launch Polish
-- Onboarding
-- Visual polish
+- Onboarding (avatar creation, goal setting, guided workout)
+- Visual polish + animations
 - Performance optimization
-- Integrations
+- Forge Milestones trophy case
 
-**v1 Launch Target:** 3+ months
+### Phase 5: Post-Launch v2
+- Leaderboards + competitions
+- Online powerlifting meets
+- Online bodybuilding shows
+- Live Workout Together
+- Integrations (Apple Health, MFP, Whoop)
+
+### Phase 6: Ecosystem
+- Gym Finder / Map
+- AI Coaching
+- Templates Marketplace
+- Training Journal
+- Forge Seasons
 
 ---
 
-## Business Model Summary
+## Business Model
 
 ### Free Tier
-- Full workout logging
-- Forgerank scoring and ranks
-- Social feed + friends + reactions
-- Basic history/calendar
-- Streak tracking
-- Starter personalities
-- CSV export
+- Full workout logging + Forgerank scoring
+- Basic social feed + friends + reactions
+- 2-3 starter gym buddy personalities (text-only)
+- Basic history/calendar + weight graph
+- Streak tracking + gamification
+- Avatar (default style) + hangout room
+- Forge DNA (partially blurred)
+- Forge Milestones
 
-### Premium Tier (Yearly)
-- Advanced analytics
-- Body composition tracking
-- Cloud sync + multi-device
-- Web app access
-- Early access to new features
+### Pro Subscription
+- Forge Lab (full analytics dashboard)
+- Full Forge DNA (unblurred)
+- Advanced AI coaching suggestions
+- Integration data analytics (Apple Health, MFP, Whoop)
 
-### Cosmetic Store (No Pay-to-Win)
-- Themes/color schemes
-- Voice packs/personalities
-- Card skins
-- Profile customization
+### IAP (In-App Purchases)
+- Premium buddy packs (voice + text)
+- Legendary buddy packs (full theme transformation)
+- Avatar cosmetics (clothes, accessories, art style packs)
+- Room decorations
+- Seasonal items (limited-time)
+
+**Philosophy:** No pay-to-win. Cosmetics and analytics only. Core workout experience is always free.
 
 ---
 
 *See individual feature files in `docs/features/` for detailed breakdowns.*
 *See `docs/MASTER_PLAN.md` for full vision and strategy.*
+*See `docs/AskUQ/2026-01-29-feature-brainstorm.md` for the full brainstorm interview.*
