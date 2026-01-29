@@ -494,3 +494,6 @@ iOS Bundled 41ms src/lib/sync/index.ts (1 module)
  LOG  [RealtimeManager] Channel posts:user_474e8865-0a3c-4e0b-aff5-e2e3638968bb status: CLOSED
  LOG  [RealtimeManager] Channel posts:user_474e8865-0a3c-4e0b-aff5-e2e3638968bb status: SUBSCRIBED
  WARN  [postRepository] Backend tables not set up yet
+Tunnel connection has been closed. This is often related to intermittent connection issues between the dev server and ngrok. Restart the dev server to try connecting to ngrok again.
+Check the Ngrok status page for outages: https://status.ngrok.com/
+Tunnel connected.
