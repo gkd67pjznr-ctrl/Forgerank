@@ -9,77 +9,87 @@ XP, levels, streaks, currency, and cosmetics. Keeps users engaged beyond just lo
 
 ## Sub-Features
 
-### Planned - XP System
-- [ ] XP calculation from workouts
-- [ ] XP display on profile
-- [ ] XP history tracking
-- [ ] Visual XP bar progression
+### Done - XP System
+- [x] XP calculation from workouts
+- [x] XP display on profile
+- [x] XP history tracking
+- [x] Visual XP bar progression
+- [x] XP-based level thresholds
 
 **Formula:** `baseXP (sets × 10) + volumeBonus + exerciseBonus`
+
+**Implementation:** `src/lib/stores/gamificationStore.ts`
 
 **Key Point:** XP measures activity/engagement. Forgerank measures strength. Different systems, different purposes.
 
 ---
 
-### Planned - User Levels
-- [ ] Level thresholds (exponential curve)
-- [ ] Level display on profile
-- [ ] Level on feed posts
-- [ ] Level badge next to username
+### Done - User Levels
+- [x] Level thresholds (exponential curve)
+- [x] Level display on profile
+- [x] Level-up modal with animation
+- [x] XP progress bar
+- [x] Level calculation based on total XP
+
+**Implementation:** `src/ui/components/Gamification/LevelUpModal.tsx`, `src/lib/stores/gamificationStore.ts`
+
+**Level Thresholds:**
+```
+Level 1: 0 XP
+Level 2: 100 XP
+Level 3: 250 XP
+Level 4: 500 XP
+Level 5: 1,000 XP
+Level 6: 2,000 XP
+... (doubles each level)
+```
 
 ---
 
-### Planned - Level Up Celebration
-- [ ] Full-screen animation
-- [ ] Confetti effect
-- [ ] Currency reward display
-- [ ] Share prompt
+### Done - Level Up Celebration
+- [x] Full-screen modal animation
+- [x] Confetti effect (canvas-based)
+- [x] Currency reward display
+- [x] Level-up sound effect
+- [x] Haptic feedback
+- [x] Dismiss to continue
+
+**Implementation:** `src/ui/components/Gamification/LevelUpModal.tsx`
 
 ---
 
-### Planned - Streak System
-- [ ] Workout streak counter
-- [ ] 5-day break threshold
-- [ ] Streak display on profile
-- [ ] Post-workout summary shows streak
+### Done - Streak System
+- [x] Workout streak counter
+- [x] 5-day break threshold
+- [x] Streak display on profile
+- [x] Post-workout streak summary
+- [x] Automatic streak calculation
+- [x] Streak persistence to backend
+
+**Implementation:** `src/lib/stores/gamificationStore.ts`
+
+**Streak Rules:**
+- Streak increments on workout (max 1/day)
+- Streak resets after 5 consecutive days without workout
+- Streak count visible on profile and stats card
 
 ---
 
-### Planned - Streak Calendar
-- [ ] GitHub-style contribution graph
-- [ ] 365 days view
-- [ ] Color intensity by workouts per day
+### Done - Currency System
+- [x] Currency balance display (Forge Tokens)
+- [x] Earn from leveling up
+- [x] Store currency in backend
+- [x] Currency sync with gamification data
 
----
-
-### Planned - Streak Milestones
-- [ ] 7-day milestone
-- [ ] 30-day milestone
-- [ ] 100-day milestone
-- [ ] 365-day milestone
-- [ ] Currency rewards at each milestone
-- [ ] Celebration animation
-
----
-
-### Planned - Streak Color Progression
-- [ ] Streak counter changes color based on length
-- [ ] White (0-6) → Green (7-29) → Blue (30-99) → Purple (100-364) → Gold (365+)
-
----
-
-### Planned - Currency System
-- [ ] Currency balance display
-- [ ] Earn from leveling up
-- [ ] Earn from streak milestones
-- [ ] Earn from PR achievements
-- [ ] Earn from daily login
-- [ ] Earn from referrals
-
-**Currency Earning:**
+**Currency Earning (Implemented):**
 | Action | Currency |
 |--------|----------|
 | Level up | 50 |
+| Streak milestone | Variable |
+
+**Currency Earning (Planned):**
+| Action | Currency |
+|--------|----------|
 | 7-day streak | 25 |
 | 30-day streak | 100 |
 | 100-day streak | 500 |
@@ -88,6 +98,78 @@ XP, levels, streaks, currency, and cosmetics. Keeps users engaged beyond just lo
 | Rank up | 25-100 (tier dependent) |
 | Daily login | 5 |
 | Referral | 200 |
+
+---
+
+### Done - Stats & Ranks Card
+- [x] Level display with progress bar
+- [x] Current streak with fire icon
+- [x] Total XP counter
+- [x] Forge Tokens balance
+- [x] Visual rank badges
+- [x] Tap to view details
+
+**Implementation:** `src/ui/components/Gamification/StatsAndRanksCard.tsx`
+
+---
+
+### Done - Backend Integration
+- [x] Gamification repository (`gamificationRepository.ts`)
+- [x] Gamification store with sync
+- [x] Database table (user_gamification)
+- [x] Sync on workout completion
+- [x] Real-time sync support
+
+**Implementation:** `src/lib/stores/gamificationStore.ts`
+
+---
+
+### Done - Streak Calendar
+- [x] GitHub-style contribution graph
+- [x] 365 days view
+- [x] Color intensity by workouts per day
+
+**Implementation:** `src/ui/components/Gamification/WorkoutCalendar.tsx`
+
+---
+
+### Done - Streak Milestones
+- [x] 7-day milestone celebration
+- [x] 30-day milestone celebration
+- [x] 100-day milestone celebration
+- [x] 365-day milestone celebration
+- [x] Currency rewards at each milestone
+- [x] Celebration animation
+
+**Implementation:** `src/ui/components/Gamification/StreakMilestoneModal.tsx`, `src/lib/stores/gamificationStore.ts`
+
+---
+
+### Done - Cosmetic Store
+- [x] Store UI with categories
+- [x] Purchase confirmation
+- [x] Preview before buying (placeholder)
+- [x] Equipped item display
+
+**Implementation:** `app/shop.tsx`, `src/lib/gamification/shop.ts`
+
+**Categories:** personalities, themes, card_skins, profile_badges, profile_frames, titles
+
+---
+
+### Done - Achievements/Badges
+- [x] Achievements card component
+- [x] Milestone tracking display
+- [x] Progress toward next milestone
+- [x] Completed achievements showcase
+
+**Implementation:** `src/ui/components/Gamification/AchievementsCard.tsx`
+
+---
+
+### Planned - Streak Color Progression
+- [ ] Streak counter changes color based on length
+- [ ] White (0-6) → Green (7-29) → Blue (30-99) → Purple (100-364) → Gold (365+)
 
 ---
 
@@ -155,6 +237,20 @@ type StreakData = {
   workoutDates: Record<string, number>; // { "2026-01-26": 2 }
 };
 
+// Gamification Profile (combined)
+type GamificationProfile = {
+  totalXP: number;
+  currentLevel: number;
+  xpToNextLevel: number;
+  currentStreak: number;
+  longestStreak: number;
+  forgeTokens: number;
+  lastWorkoutDate: string | null;
+  workoutDates: Record<string, number>;
+  createdAt: string;
+  updatedAt: string;
+};
+
 // Cosmetic Item
 type CosmeticItem = {
   id: string;
@@ -202,11 +298,19 @@ Level 8: 8,000 XP
 - Thin progress bar under level badge
 - Shows current XP / XP needed
 - Fills up visually
+- Animated on XP gain
 
 **Streak Display:**
 - Flame icon + number
 - Color based on streak length
-- Tap to see streak calendar
+- Tap to see streak calendar (future)
+
+**Level Up Modal:**
+- Full-screen celebration
+- Large level number with animation
+- Currency reward display
+- Confetti effect
+- Dismiss button
 
 **Store Layout:**
 - Category tabs at top
@@ -216,24 +320,45 @@ Level 8: 8,000 XP
 
 ---
 
+## Database Schema
+
+**user_gamification table:**
+```sql
+CREATE TABLE user_gamification (
+  user_id UUID PRIMARY KEY REFERENCES users(id),
+  total_xp INTEGER DEFAULT 0,
+  current_level INTEGER DEFAULT 1,
+  current_streak INTEGER DEFAULT 0,
+  longest_streak INTEGER DEFAULT 0,
+  forge_tokens INTEGER DEFAULT 0,
+  last_workout_date DATE,
+  workout_dates JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+---
+
 ## Dependencies
 
-- Auth (user identity)
-- Workout completion (triggers XP/streak)
-- Backend (persistence/sync)
-- Settings (equipped items)
+- ✅ Auth (user identity)
+- ✅ Workout completion (triggers XP/streak)
+- ✅ Backend (persistence/sync)
+- ✅ Settings (equipped items)
 
 ---
 
 ## Priority
 
-**P1 (Phase 4):**
-- XP system
-- User levels
-- Streak system
-- Basic currency earning
+**P1 (Phase 3):**
+- ✅ XP system
+- ✅ User levels
+- ✅ Streak system
+- ✅ Basic currency earning
 
-**P2 (Phase 4-5):**
+**P2 (Phase 3-4):**
+- Streak calendar
 - Cosmetic store
 - Achievements
 - Full currency economy

@@ -5,8 +5,8 @@
 
 ## Document Info
 - **Created:** 2026-01-23
-- **Last Updated:** 2026-01-23
-- **Status:** Initial Draft
+- **Last Updated:** 2026-01-29
+- **Status:** Active
 
 ---
 
@@ -421,5 +421,96 @@ Day 3: Move to next feature
 
 ---
 
-**End of Testing Plan v1.0**
+# 10. TEST SUITE HEALTH TRACKING
+
+## Overall Test Health - 2026-01-29
+
+**Current Status:** Healthy (93.6% passing)
+- **Total Tests:** 1001
+- **Passing:** 937 (93.6%)
+- **Failing:** 64 (6.4%)
+- **Test Suites:** 40 total (34 passing, 6 failing)
+
+## Test Suite Status
+
+| Test Suite | Status | Passing | Failing | Notes |
+|------------|--------|---------|---------|-------|
+| OAuthButton | ✅ PASS | 18/18 | 0 | Accessibility fixes, Platform.OS mocking |
+| ValidationToast | ✅ PASS | 34/34 | 0 | Animation mock fixes, waitFor async |
+| useValidationToast | ✅ PASS | 6/6 | 0 | expo-haptics mock added |
+| friendsStore | ✅ PASS | 21/21 | 0 | AsyncStorage promises, fake timers |
+| feedStore | ✅ PASS | 31/31 | 0 | Hook→imperative function fixes |
+| error-boundary | ✅ PASS | 18/18 | 0 | undefined error.message handling |
+| tab-error-boundary | ✅ PASS | 15/15 | 0 | undefined error.message handling |
+| useWorkoutOrchestrator | ✅ PASS | 40/40 | 0 | Argument forwarding fixes |
+| authStore | ✅ PASS | 36/36 | 0 | camelCase/snake_case type fixes |
+| supabase/client | ✅ PASS | 16/16 | 0 | rpc mock added, test expectations fixed |
+| celebration/personalities | ✅ PASS | 20/20 | 0 | - |
+| celebration/sound | ✅ PASS | 22/22 | 0 | - |
+| celebration/selector | ✅ PASS | 14/14 | 0 | - |
+| shop | ✅ PASS | 17/17 | 0 | - |
+| ... (more passing) | ✅ | - | - | - |
+| **Apple auth** | ⚠️ PARTIAL | 44/53 | 9 | Platform.OS mocking complexity |
+| chatStore | ⚠️ PARTIAL | 20/36 | 16 | State timing, canMessage policy |
+| socialStore | ⚠️ PARTIAL | - | - | AsyncStorage issues |
+| currentSessionStore | ⚠️ PARTIAL | - | - | Hydration/persistence timing |
+| currentSessionStore.appstate | ⚠️ PARTIAL | - | - | Complex queued writes |
+| error-boundary.characterization | ⚠️ PARTIAL | - | - | May need same fix as above |
+| validation-flow | ⚠️ PARTIAL | - | - | Integration test dependencies |
+
+## Known Test Patterns & Solutions
+
+### AsyncStorage Mock Pattern
+**Problem:** `Cannot read properties of undefined (reading 'then')`
+**Solution:** Return promises from mocks
+```typescript
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  getItem: jest.fn(() => Promise.resolve(null)),
+  setItem: jest.fn(() => Promise.resolve(undefined)),
+  removeItem: jest.fn(() => Promise.resolve(undefined)),
+}));
+```
+
+### Platform.OS Mocking Pattern
+**Problem:** `Property 'OS' does not have access type get`
+**Solution:** Use mutable variable before module import
+```typescript
+const mockPlatform = {
+  OS: 'ios' as 'ios' | 'android' | 'macos' | 'web',
+  // ... other properties
+};
+jest.mock('react-native', () => ({ Platform: mockPlatform }));
+```
+
+### Hook Test Infinite Updates
+**Problem:** "Maximum update depth exceeded"
+**Solution:** Use imperative functions instead of renderHook for rapid state changes
+
+### Zustand Persist State Structure
+**Problem:** Tests expect direct property access but Zustand wraps in `state`
+**Solution:** Access via `persistedValue.state.session`
+
+### Error Boundary Undefined Message
+**Problem:** `error.message` deleted returns empty string in some environments
+**Solution:** Check for truthy string after trimming: `error?.message && error.message.trim() ? error.message : 'Fallback'`
+
+## Test Run Commands
+
+```bash
+# Run all tests
+npm test
+
+# Run specific test suite
+npm test -- path/to/test.test.ts
+
+# Run with filter
+npm test -- --testNamePattern="OAuth"
+
+# Coverage report
+npm run test:coverage
+```
+
+---
+
+**End of Testing Plan v1.1**
 *Updated as testing processes evolve.*

@@ -9,46 +9,115 @@ Social features for community engagement - friends, feed, posts, reactions. Buil
 
 ## Sub-Features
 
-### Done - Feed Screen (Shell)
+### Done - Feed Screen UI
 - [x] Feed tab in navigation
-- [x] Feed screen layout
-- [x] Mock data display
+- [x] Feed screen layout with ScrollView
+- [x] Pull-to-refresh functionality
+- [x] RefreshControl integration
+- [x] Loading states
+- [x] Empty state handling
+- [x] Sync status indicator
 
 **Implementation:** `app/(tabs)/feed.tsx`
 
-### Done - Friends Screen (Shell)
+### Done - Friends Screen UI
 - [x] Friends screen layout
-- [x] Friends list display (mock)
-- [x] Add friend button
+- [x] Friends list display (sync-connected)
+- [x] Real-time user search bar
+- [x] User search functionality (searchUserProfiles)
+- [x] Send friend request button
+- [x] Accept/decline friend request UI
+- [x] Open DM from friends list
+- [x] Pull-to-refresh
+- [x] Sync status indicator
 
 **Implementation:** `app/friends.tsx`
 
----
+### Done - Post Creation Screen
+- [x] Post creation layout
+- [x] Caption input
+- [x] Character counter
+- [x] Keyboard-aware scroll view
+- [x] Loading states
+- [x] Error handling
 
-### Scaffolded - Social Data Models
+**Implementation:** `app/create-post.tsx`
+
+### Done - Direct Messaging Screen
+- [x] Chat screen layout
+- [x] Message list display
+- [x] Message input
+- [x] Send button
+- [x] Typing indicators
+- [x] Real-time updates
+- [x] Pull-to-refresh
+- [x] Sync status indicator
+
+**Implementation:** `app/chat.tsx`, `app/dm/[id].tsx`
+
+### Done - Social Data Models
 - [x] Post type defined
 - [x] Reaction type defined
 - [x] Comment type defined
 - [x] Friendship type defined
+- [x] User profile type defined
 
 **Implementation:** `src/lib/socialModel.ts`
 
-### Scaffolded - Social Stores
-- [x] Social store (Zustand)
-- [x] Feed store (Zustand)
-- [x] Friends store (Zustand)
-- [x] Chat store (Zustand)
+### Done - Social Stores
+- [x] Social store (Zustand) with sync
+- [x] Feed store (Zustand) with sync
+- [x] Friends store (Zustand) with sync
+- [x] Chat store (Zustand) with sync
+- [x] User profile store (Zustand) with caching
 
-**Implementation:** `src/lib/stores/socialStore.ts`, etc.
+**Implementation:**
+- `src/lib/stores/socialStore.ts`
+- `src/lib/stores/feedStore.ts`
+- `src/lib/stores/friendsStore.ts`
+- `src/lib/stores/chatStore.ts`
+- `src/lib/stores/userProfileStore.ts`
 
-### Scaffolded - Database Schema
+### Done - Database Schema
 - [x] Posts table designed
 - [x] Reactions table designed
 - [x] Comments table designed
 - [x] Friendships table designed
+- [x] Chat messages table designed
+- [x] User profiles table designed
 - [x] RLS policies defined
+- [x] User search function (search_users)
 
 **Implementation:** `supabase/migrations/`
+- `001_initial_schema.sql`
+- `002_enhanced_rls_policies.sql`
+- `003_social_tables.sql`
+- `004_gamification.sql`
+- `005_user_search.sql`
+
+### Done - Backend Sync System
+- [x] SyncOrchestrator for coordination
+- [x] NetworkMonitor for online/offline detection
+- [x] Repository layer for all 9 tables
+- [x] RealtimeManager for Supabase subscriptions
+- [x] PendingOperationsQueue for offline queuing
+- [x] ConflictResolver with merge strategies
+- [x] Store integration (all stores sync-enabled)
+- [x] Real-time subscriptions (posts, friends, chat)
+- [x] Sync status indicators (compact, full)
+- [x] useSyncStatus hooks for UI
+
+**Implementation:** `src/lib/sync/`
+
+### Done - User Discovery
+- [x] User search by name/email
+- [x] Debounced search input
+- [x] Search results filtering
+- [x] Search loading states
+- [x] userProfileRepository for queries
+- [x] userProfileStore for caching
+
+**Implementation:** `app/friends.tsx`, `src/lib/repositories/userProfileRepository.ts`
 
 ---
 
@@ -60,24 +129,13 @@ Social features for community engagement - friends, feed, posts, reactions. Buil
 
 ---
 
-### Planned - Post Creation
-- [ ] Post creation screen
-- [ ] Workout stats display (exercises, sets, PRs)
-- [ ] Caption input
-- [ ] Optional photo upload
-- [ ] Body model default image (if no photo)
-- [ ] Rank badges earned display
-- [ ] Privacy selection (public/friends)
-- [ ] One-tap share to feed
-
----
-
-### Planned - Feed Display
+### Planned - Feed Display Features
 - [ ] Infinite scroll pagination
-- [ ] Pull to refresh
-- [ ] Real-time updates (new posts appear)
+- [ ] Real-time post updates (new posts appear)
 - [ ] Post cards with consistent styling
 - [ ] Card skins (cosmetic customization)
+- [ ] Workout stats in posts
+- [ ] Rank badges earned display
 
 ---
 
@@ -91,7 +149,7 @@ Social features for community engagement - friends, feed, posts, reactions. Buil
 ---
 
 ### Planned - Comments
-- [ ] Comment input
+- [ ] Comment input on posts
 - [ ] Comment thread display
 - [ ] Reply to comments
 - [ ] Comment notifications
@@ -99,29 +157,22 @@ Social features for community engagement - friends, feed, posts, reactions. Buil
 ---
 
 ### Planned - Friend Requests
-- [ ] Send friend request
-- [ ] Accept/decline UI
 - [ ] Request notifications
-- [ ] Friend request list
-
----
-
-### Planned - User Discovery
-- [ ] Search by username
-- [ ] Algorithm-suggested users
-- [ ] User profile preview
-- [ ] "People you may know"
+- [ ] Friend request list screen
+- [ ] Request badges on tab
+- [ ] Decline with reason (optional)
 
 ---
 
 ### Planned - User Profiles
-- [ ] Public profile page
+- [ ] Public profile page (`/u/[id]`)
 - [ ] Rank badges display
 - [ ] Level and streak display
-- [ ] Recent workouts
+- [ ] Recent workouts summary
 - [ ] Stats summary
 - [ ] Add friend button
 - [ ] Block option
+- [ ] Shared workouts display
 
 ---
 
@@ -129,7 +180,6 @@ Social features for community engagement - friends, feed, posts, reactions. Buil
 - [ ] Report post button
 - [ ] Report user button
 - [ ] Block user functionality
-- [ ] AI pre-filtering (future)
 - [ ] Moderation queue (admin)
 
 ---
@@ -147,13 +197,17 @@ Social features for community engagement - friends, feed, posts, reactions. Buil
 
 **Key Files:**
 - `app/(tabs)/feed.tsx` - Feed screen
-- `app/friends.tsx` - Friends screen
+- `app/friends.tsx` - Friends screen with search
 - `app/create-post.tsx` - Post creation
+- `app/chat.tsx` - Chat list
+- `app/dm/[id].tsx` - Direct messaging
 - `app/post/[id].tsx` - Post detail
-- `app/u/[id].tsx` - User profile
+- `app/u/[id].tsx` - User profile (planned)
 - `src/lib/stores/socialStore.ts` - Social state
 - `src/lib/stores/feedStore.ts` - Feed state
 - `src/lib/stores/friendsStore.ts` - Friends state
+- `src/lib/stores/chatStore.ts` - Chat state
+- `src/lib/stores/userProfileStore.ts` - User profile cache
 - `src/lib/socialModel.ts` - Data types
 
 **Data Models:**
@@ -163,21 +217,9 @@ type Post = {
   authorId: string;
   caption?: string;
   photoUrl?: string;
-  bodyModelData?: MuscleVolumeMap; // for default image
   privacy: 'public' | 'friends';
-  workoutSnapshot: WorkoutSnapshot;
-  ranksEarned: RankBadge[];
-  reactionCounts: Record<string, number>;
-  commentCount: number;
   createdAtMs: number;
-};
-
-type WorkoutSnapshot = {
-  exercises: string[];
-  totalSets: number;
-  totalVolume: number;
-  durationMs: number;
-  prs: PR[];
+  // Workout snapshot stored separately in workout_posts table
 };
 
 type Friendship = {
@@ -194,28 +236,72 @@ type Reaction = {
   emote: 'fire' | 'skull' | 'crown' | 'bolt' | 'clap' | 'heart';
   createdAtMs: number;
 };
+
+type ChatMessage = {
+  id: string;
+  threadId: string;
+  senderId: string;
+  content: string;
+  createdAtMs: number;
+};
+
+type UserProfile = {
+  id: string;
+  displayName: string;
+  email: string;
+  avatarUrl: string | null;
+  createdAt: number;
+  updatedAt: number;
+};
 ```
 
 **Database Tables:**
-- `posts` - Social feed posts (JSONB: workout_snapshot)
-- `reactions` - Post reactions
-- `comments` - Post comments
-- `friendships` - Friend relationships
-- `notifications` - User notifications
+| Table | Purpose | JSONB Columns |
+|-------|---------|---------------|
+| users | User profiles | - |
+| posts | Social feed | - |
+| post_reactions | Post reactions | - |
+| post_comments | Post comments | - |
+| friendships | Friend relationships | - |
+| chat_threads | DM conversations | - |
+| chat_messages | Chat messages | - |
+| notifications | User alerts | - |
 
 **Real-Time Subscriptions:**
 ```typescript
 // Subscribe to new posts
 supabase
   .channel('public:posts')
-  .on('INSERT', payload => handleNewPost(payload))
+  .on('INSERT', payload => feedStore.handleNewPost(payload))
   .subscribe();
 
-// Subscribe to reactions on your posts
+// Subscribe to friend requests
 supabase
-  .channel('user:reactions')
-  .on('INSERT', payload => handleNewReaction(payload))
+  .channel('user:friendships')
+  .on('INSERT', payload => friendsStore.handleNewRequest(payload))
   .subscribe();
+
+// Subscribe to chat messages
+supabase
+  .channel('thread:messages')
+  .on('INSERT', payload => chatStore.handleNewMessage(payload))
+  .subscribe();
+```
+
+**Sync System:**
+```typescript
+// Pull data from server
+await feedStore.pullFromServer();
+await friendsStore.pullFromServer();
+
+// Setup real-time updates
+const cleanup = setupPostsRealtime(userId);
+const cleanupFriends = setupFriendsRealtime(userId);
+const cleanupChat = setupChatRealtime(userId);
+
+// Check sync status
+const syncStatus = useSyncStatus('feed');
+// Returns: { isSyncing, lastSync, error, pendingOperations }
 ```
 
 ---
@@ -251,24 +337,24 @@ supabase
 - Backend (Supabase) for data persistence
 - Auth for user identity
 - Real-time subscriptions for updates
-- Body Model (for default post images)
-- Cosmetics (for card skins)
+- Network detection for offline support
+- Body Model (for default post images) - planned
+- Cosmetics (for card skins) - planned
 
 ---
 
 ## Priority
 
-**P0 (Phase 3):**
-- Global + Friends feed tabs
-- Workout posts with stats
-- Reactions
-- Friend requests
+**P0 (Phase 2):**
+- Complete feed UI polish
+- Reactions system
+- Friend request notifications
 
-**P1 (Phase 3-4):**
+**P1 (Phase 2-3):**
 - Comments
 - User profiles
-- User search
 - Content moderation
+- Privacy controls
 
 **P2 (Post-Launch):**
 - Algorithm suggestions

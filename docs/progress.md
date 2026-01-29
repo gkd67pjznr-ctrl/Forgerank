@@ -1,6 +1,6 @@
 # Forgerank Project Progress
 
-**Last Updated:** 2026-01-26
+**Last Updated:** 2026-01-29
 **Project Start:** ~2026-01-14 (initial scaffolding)
 
 ---
@@ -46,6 +46,7 @@
 - Workout history storage
 - Basic routine builder
 - Premade plan browser
+- User profile editing (display name, avatar upload/remove)
 
 ### Technical Foundation
 - Expo 54 + React Native 0.81
@@ -78,19 +79,23 @@
 - Backend sync system implemented ✅
 - Real-time subscriptions implemented ✅
 - Social stores integrated with sync ✅
-- Feed/social UI needs to use sync data instead of mock data
-- Friends list needs to use sync data
+- Feed UI connected to sync data ✅
+- Friends UI connected to sync data ✅
+- User discovery/search implemented ✅
+- User profile editing (display name, avatar) ✅
+- Need to apply migration 005_user_search.sql to Supabase
 
 ### Backend
 - Backend sync system implemented ✅
-- Repository layer for all 8 tables ✅
+- Repository layer for all 8 tables ✅ (including user profiles)
 - Real-time subscriptions via Supabase ✅
 - Offline mutation queuing ✅
 - Conflict resolution strategies ✅
-- Need to connect UI to sync data streams
+- UI connected to sync data streams ✅
+- Sync status indicators added ✅
 
 ### Polish
-- No PR celebration animations
+- PR celebration animations implemented ✅
 - No onboarding
 - Many empty states missing
 - Input polish needed
@@ -118,15 +123,15 @@
 ## Next Steps
 
 ### Immediate (This Week)
-1. Connect social UI to sync data streams
+1. Apply database migration 005_user_search.sql to Supabase
 2. Implement protected routes
-3. Add sync status UI components
+3. Test sync functionality with real backend
 
 ### Short Term (Next 2 Weeks)
 1. Routine-based workout flow
 2. Set input polish
 3. Rest timer enhancements
-4. PR detection celebration
+4. Onboarding screens
 
 ### Medium Term (Next Month)
 1. Complete social feature integration
@@ -158,6 +163,117 @@
 ---
 
 ## Decision Log
+
+### 2026-01-28 (profile edit)
+- Created User Profile Editing Screen:
+  - Added `updateDisplayName()` action to authStore for updating user display names
+  - Created `app/profile/edit.tsx` with keyboard-aware form
+  - Integrated `expo-image-picker` for avatar image selection from gallery
+  - Added avatar upload functionality using existing `uploadAvatar()` action
+  - Added remove avatar option with confirmation dialog
+  - Added "Edit Profile" card link to profile tab
+  - Form validation for display name (required, max 50 characters)
+  - Loading states for save and upload operations
+  - Uses `KeyboardAwareScrollView` for better input handling on mobile
+
+### 2026-01-28 (onboarding)
+- Implemented Onboarding feature:
+  - Created `onboardingStore.ts` with Zustand for onboarding state management
+  - Extended `settingsStore.ts` with profile fields (displayName, bodyweight, experienceLevel, personalityId)
+  - Created multi-step onboarding screen (`app/onboarding.tsx`):
+    - Welcome step with feature overview
+    - Profile setup step (name, bodyweight with lb/kg toggle, experience level)
+    - Personality picker (4 options: Coach, Hype, Chill, Savage)
+    - Tutorial placeholder for future guided workout
+    - Completion screen with celebration
+  - Integrated into app layout with auto-redirect logic for new users
+  - All state persists to AsyncStorage via Zustand persist middleware
+  - Onboarding flow: Welcome → Profile → Personality → Tutorial → Complete → Home
+
+### 2026-01-29 (gamification)
+- Completed remaining Gamification features (3/12 remaining → 12/12 done):
+  - Created `StreakMilestoneModal.tsx` for celebrating streak milestone achievements
+  - Created `app/shop.tsx` - Cosmetic Store screen for purchasing items with Forge Tokens
+  - Created `AchievementsCard.tsx` component for displaying achievements and progress
+  - Added `pendingStreakMilestone` state to gamificationStore with celebration triggering
+  - Integrated `StreakMilestoneModal` into profile.tsx with hooks and dismiss action
+  - Added `StreakMilestoneCelebration` type to gamification types
+  - Updated feature-gamification.md to mark Streak Calendar, Streak Milestones, Cosmetic Store, and Achievements as done
+  - Updated FEATURE-MASTER.md: Gamification 9/12 → 12/12 (Status: Done)
+  - Total feature progress: 59/133 → 62/133 (47%)
+
+### 2026-01-29 (workout logging ux - final integration)
+- Completed Workout Logging UX redesign (All Phases Done):
+  - Created `UXToggle.tsx` - Toggle button for switching between old and new UX
+  - Integrated `NewWorkoutSection` into `app/live-workout.tsx` with conditional rendering
+  - Added `useNewWorkoutUX` hook to settingsStore for persistent toggle
+  - Integrated rest timer trigger with set completion flow
+  - Users can now toggle between old and new UX via the toggle button
+  - All 10/10 sub-features complete
+  - All 3 phases complete: Core Components, Polish & Features, Final Integration
+  - Fixed bugs: Duplicate set logging flows, backwards "Mark Done" flow, auto-focus issues
+  - Updated feature-workout-logging-ux.md: Status changed to Done
+  - Updated FEATURE-MASTER.md: Workout Logging UX 10/10 (Status: Done)
+  - Total feature progress: 72/133 → 73/133 (55%)
+
+**Files Created (Phase 3):**
+  - `src/ui/components/LiveWorkout/UXToggle.tsx` - Toggle button component
+  - Integration into `app/live-workout.tsx` - Conditional rendering with settings check
+
+**How to Test:**
+  1. Start a workout via the app
+  2. Tap the "Old UX" / "New UX" toggle button (near timer bar)
+  3. New UX shows exercise cards with inline set entry (weight | reps | ✓)
+  4. Old UX shows the traditional ExerciseBlocksCard interface
+  5. Toggle persists across app restarts
+
+### 2026-01-29 (test fixing)
+- Fixed 33 failing tests across 7 test suites (97 failed → 64 failed)
+- **Test suite health: 93.6% passing** (937/1001 tests)
+- **OAuthButton** (18/18 passing ✅):
+  - Added testID="activity-indicator" to ActivityIndicator
+  - Added accessibilityRole="button" to Pressable
+  - Fixed Platform.OS mocking for Apple button tests using mockPlatform variable
+  - Fixed custom style test to handle style arrays with falsy values
+- **ValidationToast** (34/34 passing ✅):
+  - Fixed animation duration/easing tests to filter mock calls properly
+  - Fixed auto-dismiss test to use waitFor for async callback
+- **useValidationToast** (6/6 passing ✅):
+  - Added expo-haptics mock with NotificationFeedbackType enum
+- **friendsStore** (21/21 passing ✅):
+  - Added AsyncStorage mock promises (mockResolvedValue)
+  - Added fake timers setup with beforeEach/afterEach
+  - Fixed hook tests to use imperative functions instead of renderHook
+  - Fixed persistence test for queued writes with state.edges check
+- **feedStore** (31/31 passing ✅):
+  - Fixed useVisibleFeed hook tests causing infinite updates
+  - Fixed hydration test to check for boolean type
+  - Fixed persistence test for Zustand state wrapping
+- **error-boundary** (18/18 passing ✅):
+  - Fixed undefined error.message handling with trim check
+  - Fixed test to use getAllByText for multiple matching elements
+- **tab-error-boundary** (15/15 passing ✅):
+  - Applied same undefined error.message fix as error-boundary
+- **Apple auth improvements**:
+  - Fixed getAppleDisplayName to trim individual names before concatenating
+  - Fixed hasEmail to check for empty strings (not just null/undefined)
+- Remaining issues (6 failed test suites): Apple auth (Platform.OS mocking), chatStore (state timing), socialStore, currentSessionStore (hydration/persistence), error-boundary.characterization, validation-flow integration
+
+### 2026-01-28 (continued)
+- Connected Social UI to sync data streams:
+  - Verified Feed and Friends screens already using sync-aware stores
+  - Feed uses `socialStore` with `pullFromServer()` and `setupPostsRealtime()`
+  - Friends uses `friendsStore` with `pullFromServer()` and `setupFriendsRealtime()`
+  - Created `SyncStatusIndicator` UI component for visual sync feedback
+  - Added sync indicators to Feed and Friends screens
+  - Created debug screen `app/debug/sync-status.tsx` for detailed sync monitoring
+  - Implemented user discovery functionality:
+    - Created `userProfileRepository` for searching users by name/email
+    - Created `userProfileStore` for caching user profiles locally
+    - Added database migration `005_user_search.sql` with `search_users()` function
+    - Updated Friends screen with real-time search bar and user search
+    - Replaced mock `DIRECTORY` with real user search results
+  - Created `useSyncState()` hook for accessing sync status across all stores
 
 ### 2026-01-28
 - Implemented complete PR Celebration System:

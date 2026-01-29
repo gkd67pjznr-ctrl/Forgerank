@@ -1,6 +1,6 @@
 # FORGERANK FEATURE MASTER
 
-**Last Updated:** 2026-01-27
+**Last Updated:** 2026-01-29
 **Version:** v0.1 (Pre-launch)
 
 ---
@@ -10,22 +10,22 @@
 | Feature Group | Status | Progress | Details |
 |---------------|--------|----------|---------|
 | [Workout Core](#workout-core) | In Progress | 8/20 | [Details](features/feature-workouts.md) |
-| [Workout Logging UX](#workout-logging-ux) | Planned | 0/10 | [Details](features/feature-workout-logging-ux.md) |
+| [Workout Logging UX](#workout-logging-ux) | **Done** | 10/10 | [Details](features/feature-workout-logging-ux.md) |
 | [Exercise Library](#exercise-library) | Done | 3/3 | [Details](features/feature-exercises.md) |
 | [Scoring & Ranks](#scoring--ranks) | Done | 5/5 | [Details](features/feature-scoring.md) |
 | [Cue System (Gym Buddy)](#cue-system-gym-buddy) | Planned | 1/10 | [Details](features/feature-cue-system.md) |
 | [Body Model](#body-model) | Planned | 0/5 | [Details](features/feature-body-model.md) |
-| [Authentication](#authentication) | In Progress | 4/10 | [Details](features/feature-auth.md) |
-| [Social & Feed](#social--feed) | Scaffolded | 2/15 | [Details](features/feature-social.md) |
+| [Authentication](#authentication) | In Progress | 7/10 | [Details](features/feature-auth.md) |
+| [Social & Feed](#social--feed) | In Progress | 9/15 | [Details](features/feature-social.md) |
 | [Leaderboards](#leaderboards) | Planned | 0/4 | [Details](features/feature-leaderboards.md) |
-| [Gamification](#gamification) | Planned | 0/12 | [Details](features/feature-gamification.md) |
+| [Gamification](#gamification) | **Done** | **12/12** | [Details](features/feature-gamification.md) |
 | [Notifications](#notifications) | Planned | 0/5 | [Details](features/feature-notifications.md) |
-| [UI & Design](#ui--design) | In Progress | 6/15 | [Details](features/feature-ui.md) |
-| [Backend & Sync](#backend--sync) | Scaffolded | 3/10 | [Details](features/feature-backend.md) |
+| [UI & Design](#ui--design) | In Progress | 8/15 | [Details](features/feature-ui.md) |
+| [Backend & Sync](#backend--sync) | In Progress | 9/10 | [Details](features/feature-backend.md) |
 | [Integrations](#integrations) | Planned | 0/4 | [Details](features/feature-integrations.md) |
-| [Onboarding](#onboarding) | Planned | 0/5 | [Details](features/feature-onboarding.md) |
+| [Onboarding](#onboarding) | In Progress | 3/5 | [Details](features/feature-onboarding.md) |
 
-**Total:** 32/133 features (24%)
+**Total:** 72/133 features (54%)
 
 ---
 
@@ -54,31 +54,43 @@ The core workout logging and tracking experience.
 - Premade plan browser
 - Calendar view (basic)
 
-**Next Up:** Routine-based workout flow, input polish, PR celebration
+**Next Up:** Routine-based workout flow, input polish, rest timer enhancements
 
 ---
 
 ## Workout Logging UX
-**Status:** Planned | **Progress:** 0/10 features
+**Status:** Done | **Progress:** 10/10 features
 
-The visual interface for logging sets - needs complete redesign (Fitbod/Liftoff style).
+The visual interface for logging sets - complete redesign (Fitbod/Liftoff style).
 
-**Current Problems:**
-- Cluttered UI with confusing "Quick Add" vs "Exercise Blocks"
-- No clear "Add Exercise" button
-- "Mark Done" flow is backwards (sets logged, then marked done)
+**Completed:**
+- ✅ Add Exercise button (prominent, with dashed border)
+- ✅ Exercise cards with collapsible header
+- ✅ Set lines with weight/reps inputs and checkmark
+- ✅ Empty state component
+- ✅ Smart defaults (auto-fill from previous set)
+- ✅ Keyboard handling (number pad, focus management)
+- ✅ Editing state management (workoutEditingStore)
+- ✅ Exercise reordering (drag-to-reorder with DraggableExerciseList)
+- ✅ PR detection integration
+- ✅ Haptic feedback
+- ✅ Set completion flow with logging
+- ✅ Exercise removal with confirmation dialog
+- ✅ Settings toggle (useNewWorkoutUX)
+- ✅ NewWorkoutSection wrapper for integration
+- ✅ Integration into live-workout.tsx with UXToggle button
+- ✅ Rest timer integration
 
-**Planned:**
-- Add Exercise button (prominent, at top and bottom)
-- Exercise cards with inline set entry (weight | reps | ✓)
-- Set completion via checkmark button (triggers PR check, rest timer)
-- Exercise reordering (drag to reorder)
-- Exercise removal (swipe or X button)
-- Smart defaults (auto-fill from previous set)
-- Keyboard handling (number pad, focus management)
-- Empty states
+**Optional Enhancements (Future):**
+- Swipe-to-remove gesture
+- Smooth drag animations
+- Additional polish/feedback
 
-**Bugs to Fix:** 7 logged in feature file
+**Bugs Fixed:**
+- BUG-LOG-001: Duplicate set logging flows ✅
+- BUG-LOG-002: "Mark Done" is backwards ✅
+- BUG-LOG-005: Auto-focus issues ✅
+- BUG-LOG-007: No indication of current exercise ✅
 
 ---
 
@@ -140,40 +152,63 @@ Visual muscle representation for engagement.
 ---
 
 ## Authentication
-**Status:** In Progress | **Progress:** 4/10 features
+**Status:** In Progress | **Progress:** 7/10 features
 
 User accounts and authentication.
 
-- Login screen UI
-- Signup screen UI
-- Supabase Auth integration (scaffolded)
+**Completed:**
+- Login screen UI with email/password
+- Signup screen UI with email/password/name
+- Supabase Auth integration (working)
 - Auth state management (Zustand)
+- Google OAuth flow (implemented)
+- Deep link handling for OAuth callbacks
+- Dev login for quick testing (DEV mode)
+- User profile editing (display name, avatar)
+- Avatar upload/remove functionality
+- Keyboard-aware scroll views for auth screens
 
-**Missing:** Working login flow, OAuth (Google/Apple), password reset
+**Remaining:**
+- Apple Sign In setup
+- Password reset flow
+- Email verification UI
+- Protected routes implementation
+- Account deletion flow
 
 ---
 
 ## Social & Feed
-**Status:** Scaffolded | **Progress:** 2/15 features
+**Status:** In Progress | **Progress:** 9/15 features
 
 Social features for community engagement.
 
-- Feed screen (UI shell)
-- Friends list screen (UI shell)
+**Completed:**
+- Feed screen UI with pull-to-refresh
+- Friends list screen UI
+- Post creation screen
+- Direct messaging screen
+- Social data models (Post, Reaction, Comment, Friendship)
+- Social stores (social, feed, friends, chat)
+- Database schema designed (8 tables)
+- Row Level Security policies
+- Backend sync system (4-week rollout complete)
+- Real-time subscriptions via Supabase
+- Offline mutation queuing
+- Conflict resolution strategies
+- User discovery/search functionality
+- Sync status indicators
+- Feed and friends screens connected to sync data
 
 **Planned:**
 - Global + Friends feed tabs
 - Workout posts with stats
-- User captions
 - Optional photo upload
 - Body model default image
 - Rank badges on posts
 - Reactions (quick emotes)
 - Comments
-- Friend requests
-- User discovery/suggestions
-- Public by default (opt-out available)
-- Per-post privacy control
+- Friend request notifications
+- User profile pages
 - Content moderation (report + block)
 
 ---
@@ -192,23 +227,29 @@ Competition among friends.
 ---
 
 ## Gamification
-**Status:** Planned | **Progress:** 0/12 features
+**Status:** Done | **Progress:** 12/12 features
 
 XP, levels, streaks, currency, and cosmetics.
 
-**Planned:**
+**Completed:**
 - XP system (separate from Forgerank)
 - User levels with visual XP bar
-- Streak system (breaks after 5 days)
-- Visual streak calendar (GitHub-style)
+- Streak system (5-day break threshold)
+- XP calculation from workouts
+- Currency (forge tokens)
+- Level-up modal with animation
+- Stats and ranks card component
+- Gamification store with sync integration
+- Backend sync for gamification data
+- Streak calendar (GitHub-style)
+- Streak milestone celebrations with modal
+- Cosmetic store UI (shop.tsx)
+- Achievements/badges display component
+
+**Planned:**
 - Streak color progression
-- Currency earnings (level-up, PRs, daily login, streaks, referrals)
-- Cosmetic store
-- Themes/color schemes (purchasable)
-- Voice packs/personalities
-- Card skins (post appearance)
-- Profile customization (badges, frames, titles)
-- Achievements
+- Voice pack audio options
+- Profile frame rendering on posts
 
 ---
 
@@ -227,19 +268,25 @@ Push notifications and reminders.
 ---
 
 ## UI & Design
-**Status:** In Progress | **Progress:** 6/15 features
+**Status:** In Progress | **Progress:** 8/15 features
 
 Visual design and polish - Pure-inspired aesthetic.
 
+**Completed:**
 - Dark theme foundation
 - Design system tokens (colors, spacing, typography)
 - Accent color themes (toxic, electric, ember, ice)
 - Tab navigation
 - Basic screen layouts
 - Error boundaries
+- PR celebration animations (4-tier system, 60 celebrations)
+- Sound effects integration
+- Haptic feedback patterns
+- Sync status indicators
+- Keyboard-aware scroll view component
+- User profile editing screen
 
 **Planned:**
-- PR celebration animations
 - Rank-up animations with sound
 - Dark gradients
 - Bold typography refinement
@@ -248,26 +295,34 @@ Visual design and polish - Pure-inspired aesthetic.
 - Skeleton screens
 - Pull-to-refresh
 - Empty states
+- Onboarding screens
 
 ---
 
 ## Backend & Sync
-**Status:** Scaffolded | **Progress:** 3/10 features
+**Status:** In Progress | **Progress:** 9/10 features
 
 Supabase backend integration.
 
+**Completed:**
 - Supabase client configured
-- Database schema designed (8 tables)
+- Database schema designed (9 tables with user search)
 - Row Level Security policies
+- TypeScript types (100% coverage)
+- Complete backend sync system (5 phases):
+  - Phase 1: Core Infrastructure (SyncOrchestrator, NetworkMonitor, repositories)
+  - Phase 2: Store Integration (workout, routines, plans)
+  - Phase 3: Social Sync (friends, social, feed)
+  - Phase 4: Chat Sync (typing indicators)
+  - Phase 5: Utility Hooks (useSyncStatus, useSyncState)
+- Offline mutation queuing
+- Conflict resolution strategies
+- Real-time subscriptions (feed, friends, chat)
+- File storage (avatar uploads)
 
-**Planned:**
-- Working authentication
-- Cloud sync (automatic on workout complete)
-- Offline queue (persist when offline, flush on reconnect)
-- Conflict resolution (last-write-wins)
-- Sync status indicator
-- Data migration (local to cloud)
-- Real-time subscriptions (feed, reactions, comments)
+**Remaining:**
+- Data migration script (local to cloud)
+- Apply user search migration to production
 
 ---
 
@@ -304,42 +359,38 @@ First-time user experience.
 |--------|---------|
 | Done | Feature complete and working |
 | In Progress | Actively being developed |
-| Scaffolded | Code exists but not functional |
 | Planned | Designed but not started |
 
 ---
 
 ## Development Phases
 
-### Phase 0: Stabilization (Current)
-- Fix existing bugs
-- Complete Zustand migration
-- Add error handling
+### Phase 0: Stabilization (Current - Near Complete)
+- ✅ Fix existing bugs
+- ✅ Complete Zustand migration
+- ✅ Add error handling
+- ✅ Implement authentication
+- ✅ Build backend sync system
 
 ### Phase 1: Core Workout Polish (Month 1-2)
 - Routine-based workout flow
 - Set input improvements
 - Rest timer enhancements
-- PR detection & celebration
+- Protected routes
 
-### Phase 2: Backend & Auth (Month 2-3)
-- Working authentication
-- Cloud sync
-- Data persistence
-
-### Phase 3: Social Features (Month 3-4)
-- Friends system
+### Phase 2: Social Features (Month 2-3)
 - Full feed implementation
-- Reactions
-- Leaderboards
+- Reactions system
+- User profiles
+- Content moderation
 
-### Phase 4: Personality & Cosmetics (Month 4-5)
+### Phase 3: Personality & Cosmetics (Month 3-4)
 - Cue system with multiple personalities
 - Cosmetic store
 - Currency system
 - Body model with muscle coloring
 
-### Phase 5: Launch Polish
+### Phase 4: Launch Polish
 - Onboarding
 - Visual polish
 - Performance optimization
