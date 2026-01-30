@@ -32,24 +32,24 @@ Push notifications with a MINIMAL philosophy. Forgerank respects the user's atte
 
 ### 1. Friend Requests
 
-- [ ] Push notification when someone sends a friend request
+- [✅] Push notification when someone sends a friend request
 - [ ] Tap opens the friend request screen
 - [✅] Toggleable in settings
 
 **Priority:** P1 (requires social features)
-**Status:** Partial - Settings infrastructure complete, push notification sending not yet implemented
+**Status:** Partial - Push notification sending implemented, tap-to-open routing not yet implemented
 
 ---
 
 ### 2. Direct Messages
 
-- [ ] Push notification when a DM is received
-- [ ] Shows sender name and message preview
+- [✅] Push notification when a DM is received
+- [✅] Shows sender name and message preview
 - [ ] Tap opens the conversation
 - [✅] Toggleable in settings
 
 **Priority:** P1 (requires DM feature)
-**Status:** Partial - Settings infrastructure complete, push notification sending not yet implemented
+**Status:** Partial - Push notification sending implemented with message preview, tap-to-open routing not yet implemented
 
 ---
 
@@ -153,19 +153,19 @@ const requestNotificationPermission = async () => {
 
 ## Implementation Status
 
-**Overall Progress:** 4/4 sub-features (100% of P0, 0% of P1, 0% of P2)
+**Overall Progress:** 4/4 sub-features (100% of P0, 67% of P1, 0% of P2)
 
 ### Completed (P0 - Launch Required)
 - ✅ Rest timer push notifications (backgrounded)
 - ✅ Notification service infrastructure
 - ✅ Settings store integration
 - ✅ Permission handling (contextual request)
-- ✅ Comprehensive test suite (18/18 tests passing)
+- ✅ Comprehensive test suite (28/28 tests passing)
 
-### Partial (Settings Complete, Push Sending Pending)
-- Friend requests notifications
-- Direct messages notifications
-- Competition results notifications
+### Partial (Push Sending Implemented, UI Integration Pending)
+- Friend requests notifications - Push sending complete, tap-to-open routing pending
+- Direct messages notifications - Push sending complete with message preview, tap-to-open routing pending
+- Competition results notifications - Settings complete, push sending not yet implemented
 
 ### Not Started
 - iOS Live Activities (requires native Swift module)

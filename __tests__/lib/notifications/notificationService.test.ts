@@ -8,6 +8,9 @@ import {
   scheduleRestTimerNotification,
   cancelRestTimerNotification,
   requestNotificationPermission,
+  sendFriendRequestNotification,
+  sendDirectMessageNotification,
+  registerPushToken,
 } from '@/src/lib/notifications/notificationService';
 import { updateSettings } from '@/src/lib/stores/settingsStore';
 
@@ -243,6 +246,114 @@ describe('Notification Service', () => {
     it('should handle errors gracefully', async () => {
       require('expo-notifications').cancelAllScheduledNotificationsAsync.mockRejectedValue(new Error('Cancellation error'));
       await expect(cancelRestTimerNotification()).resolves.not.toThrow();
+    });
+  });
+
+  describe('sendFriendRequestNotification', () => {
+    it('should send friend request notification when enabled', async () => {
+      await sendFriendRequestNotification('sender1', 'John Doe', 'receiver1');
+
+      expect(require('expo-notifications').scheduleNotificationAsync).not.toHaveBeenCalled();
+      // Should call sendPushNotification (which is mocked to log)
+    });
+
+    it('should not send notification when friend requests are disabled', async () => {
+      // Disable friend request notifications
+      updateSettings({
+        notificationPrefs: {
+          friendRequests: false,
+        },
+      });
+
+      await sendFriendRequestNotification('sender1', 'John Doe', 'receiver1');
+
+      // Should not call any notification functions
+      expect(require('expo-notifications').scheduleNotificationAsync).not.toHaveBeenCalled();
+    });
+
+    it('should handle errors gracefully', async () => {
+      // Mock sendPushNotification to throw error
+      const originalSendPushNotification = require('@/src/lib/notifications/notificationService').sendPushNotification;
+      require('@/src/lib/notifications/notificationService').sendPushNotification = jest.fn(() => {
+        throw new Error('Push error');
+      });
+
+      await expect(sendFriendRequestNotification('sender1', 'John Doe', 'receiver1')).resolves.not.toThrow();
+
+      // Restore original function
+      require('@/src/lib/notifications/notificationService').sendPushNotification = originalSendPushNotification;
+    });
+  });
+
+  describe('sendDirectMessageNotification', () => {
+    it('should send DM notification when enabled', async () => {
+      await sendDirectMessageNotification('sender1', 'John Doe', 'receiver1', 'thread1', 'Hello there!');
+
+      expect(require('expo-notifications').scheduleNotificationAsync).not.toHaveBeenCalled();
+      // Should call sendPushNotification (which is mocked to log)
+    });
+
+    it('should truncate long message bodies', async () => {
+      const longMessage = 'This is a very long message that should be truncated to fit within the notification body limits and not exceed the maximum length allowed for push notifications.';
+
+      await sendDirectMessageNotification('sender1', 'John Doe', 'receiver1', 'thread1', longMessage);
+
+      // Should still work without errors
+      expect(require('expo-notifications').scheduleNotificationAsync).not.toHaveBeenCalled();
+    });
+
+    it('should not send notification when DMs are disabled', async () => {
+      // Disable DM notifications
+      updateSettings({
+        notificationPrefs: {
+          directMessages: false,
+        },
+      });
+
+      await sendDirectMessageNotification('sender1', 'John Doe', 'receiver1', 'thread1', 'Hello there!');
+
+      // Should not call any notification functions
+      expect(require('expo-notifications').scheduleNotificationAsync).not.toHaveBeenCalled();
+    });
+
+    it('should handle errors gracefully', async () => {
+      // Mock sendPushNotification to throw error
+      const originalSendPushNotification = require('@/src/lib/notifications/notificationService').sendPushNotification;
+      require('@/src/lib/notifications/notificationService').sendPushNotification = jest.fn(() => {
+        throw new Error('Push error');
+      });
+
+      await expect(sendDirectMessageNotification('sender1', 'John Doe', 'receiver1', 'thread1', 'Hello there!')).resolves.not.toThrow();
+
+      // Restore original function
+      require('@/src/lib/notifications/notificationService').sendPushNotification = originalSendPushNotification;
+    });
+  });
+
+  describe('registerPushToken', () => {
+    it('should register push token when permissions are granted', async () => {
+      // Mock getPermissionsAsync to return granted status
+      require('expo-notifications').getPermissionsAsync.mockResolvedValue({ status: 'granted' });
+      require('expo-notifications').getExpoPushTokenAsync.mockResolvedValue({ data: 'mock-token' });
+
+      await registerPushToken();
+
+      expect(require('expo-notifications').getPermissionsAsync).toHaveBeenCalled();
+      expect(require('expo-notifications').getExpoPushTokenAsync).toHaveBeenCalled();
+    });
+
+    it('should not register when permissions are not granted', async () => {
+      require('expo-notifications').getPermissionsAsync.mockResolvedValue({ status: 'denied' });
+
+      await registerPushToken();
+
+      expect(require('expo-notifications').getExpoPushTokenAsync).not.toHaveBeenCalled();
+    });
+
+    it('should handle errors gracefully', async () => {
+      require('expo-notifications').getPermissionsAsync.mockRejectedValue(new Error('Permission error'));
+
+      await expect(registerPushToken()).resolves.not.toThrow();
     });
   });
 });

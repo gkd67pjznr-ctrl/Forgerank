@@ -282,6 +282,130 @@ export const cancelRestTimerNotification = async (): Promise<void> => {
 };
 
 /**
+ * Send friend request notification
+ * Called when a user receives a friend request
+ */
+export const sendFriendRequestNotification = async (
+  senderId: string,
+  senderName: string,
+  receiverId: string
+): Promise<void> => {
+  try {
+    const settings = getSettings();
+    const prefs = settings.notificationPrefs;
+
+    if (!prefs.friendRequests) {
+      console.log('Friend request notifications disabled for user', receiverId);
+      return;
+    }
+
+    const payload: NotificationPayload = {
+      type: 'friend_request',
+      title: 'New Friend Request',
+      body: `${senderName} wants to be your friend!`,
+      data: {
+        type: 'friend_request',
+        screen: 'friends',
+        senderId,
+        senderName,
+      },
+    };
+
+    // Send via backend
+    await sendPushNotification(receiverId, payload);
+
+    // Also create in-app notification
+    await createInAppNotification(receiverId, payload);
+  } catch (error) {
+    console.error('Failed to send friend request notification:', error);
+  }
+};
+
+/**
+ * Send direct message notification
+ * Called when a user receives a new DM
+ */
+export const sendDirectMessageNotification = async (
+  senderId: string,
+  senderName: string,
+  receiverId: string,
+  threadId: string,
+  messageText: string
+): Promise<void> => {
+  try {
+    const settings = getSettings();
+    const prefs = settings.notificationPrefs;
+
+    if (!prefs.directMessages) {
+      console.log('Direct message notifications disabled for user', receiverId);
+      return;
+    }
+
+    const payload: NotificationPayload = {
+      type: 'dm_received',
+      title: `New Message from ${senderName}`,
+      body: messageText.length > 50 ? `${messageText.substring(0, 50)}...` : messageText,
+      data: {
+        type: 'dm_received',
+        screen: 'dm',
+        threadId,
+        senderId,
+        senderName,
+      },
+    };
+
+    // Send via backend
+    await sendPushNotification(receiverId, payload);
+
+    // Also create in-app notification
+    await createInAppNotification(receiverId, payload);
+  } catch (error) {
+    console.error('Failed to send direct message notification:', error);
+  }
+};
+
+/**
+ * Create in-app notification in database
+ * Stores notification for in-app display and history
+ */
+const createInAppNotification = async (
+  userId: string,
+  payload: NotificationPayload
+): Promise<void> => {
+  try {
+    // This would call the Supabase client to insert into notifications table
+    console.log(`Creating in-app notification for user ${userId}:`, payload);
+    // For now, we'll just log it since we don't have the backend
+    // implementation for in-app notifications yet
+  } catch (error) {
+    console.error('Failed to create in-app notification:', error);
+  }
+};
+
+/**
+ * Register or update push token for current user
+ * Should be called when user logs in or notification permissions change
+ */
+export const registerPushToken = async (): Promise<void> => {
+  try {
+    const { status } = await Notifications.getPermissionsAsync();
+    if (status !== 'granted') {
+      console.log('Notification permissions not granted');
+      return;
+    }
+
+    const token = await Notifications.getExpoPushTokenAsync();
+    console.log('Expo push token:', token.data);
+
+    // In a real implementation, this would save the token to the user's record
+    // For now, we'll just log it
+    console.log('Would save push token to user record:', token.data);
+  } catch (error) {
+    console.error('Failed to register push token:', error);
+  }
+};
+
+/**
  * Send push notification via backend
  * This would be called from the backend when social events occur
  */
