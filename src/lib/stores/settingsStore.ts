@@ -14,6 +14,7 @@ export interface Settings {
   unitSystem: "lb" | "kg";
   defaultRestSeconds: number;
   accent: Accent;
+  replayAutoPlay: boolean;
 }
 
 const DEFAULTS: Settings = {
@@ -22,6 +23,7 @@ const DEFAULTS: Settings = {
   unitSystem: "lb",
   defaultRestSeconds: 90,
   accent: "toxic",
+  replayAutoPlay: true,
 };
 
 interface SettingsState extends Settings {
@@ -58,6 +60,7 @@ export const useSettingsStore = create<SettingsState>()(
         unitSystem: state.unitSystem,
         defaultRestSeconds: state.defaultRestSeconds,
         accent: state.accent,
+        replayAutoPlay: state.replayAutoPlay,
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHydrated(true);
@@ -73,6 +76,7 @@ export const selectSettings = (state: SettingsState): Settings => ({
   unitSystem: state.unitSystem,
   defaultRestSeconds: state.defaultRestSeconds,
   accent: state.accent,
+  replayAutoPlay: state.replayAutoPlay,
 });
 
 // Hook for accessing settings (matches old API)
@@ -83,6 +87,7 @@ export function useSettings(): Settings {
   const unitSystem = useSettingsStore((state) => state.unitSystem);
   const defaultRestSeconds = useSettingsStore((state) => state.defaultRestSeconds);
   const accent = useSettingsStore((state) => state.accent);
+  const replayAutoPlay = useSettingsStore((state) => state.replayAutoPlay);
 
   // Memoize the settings object to prevent unnecessary re-renders
   return useMemo(
@@ -92,8 +97,9 @@ export function useSettings(): Settings {
       unitSystem,
       defaultRestSeconds,
       accent,
+      replayAutoPlay,
     }),
-    [hapticsEnabled, soundsEnabled, unitSystem, defaultRestSeconds, accent]
+    [hapticsEnabled, soundsEnabled, unitSystem, defaultRestSeconds, accent, replayAutoPlay]
   );
 }
 
@@ -106,6 +112,7 @@ export function getSettings(): Settings {
     unitSystem: state.unitSystem,
     defaultRestSeconds: state.defaultRestSeconds,
     accent: state.accent,
+    replayAutoPlay: state.replayAutoPlay,
   };
 }
 

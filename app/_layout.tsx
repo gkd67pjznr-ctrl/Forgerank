@@ -106,6 +106,8 @@ export default function RootLayout() {
             <Stack.Screen name="auth/forgot-password" options={{ headerShown: false, presentation: 'card', contentStyle: { paddingBottom: 0 } }} />
             <Stack.Screen name="auth/reset-password" options={{ headerShown: false, presentation: 'card', contentStyle: { paddingBottom: 0 } }} />
             <Stack.Screen name="auth/verify-email" options={{ headerShown: false, presentation: 'card', contentStyle: { paddingBottom: 0 } }} />
+        <Stack.Screen name="hangout" options={{ headerShown: false }} />
+        <Stack.Screen name="avatar" options={{ headerShown: false }} />
           </Stack>
           <PersistentTabBar />
         </View>
