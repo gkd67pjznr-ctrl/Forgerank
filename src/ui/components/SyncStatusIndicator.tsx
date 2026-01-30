@@ -265,16 +265,32 @@ export function SyncStatusIndicator({
 /**
  * Preset variants for common use cases
  */
-export const SyncStatusPill = (props: Omit<SyncStatusIndicatorProps, 'displayMode'>) => (
-  <SyncStatusIndicator {...props} displayMode="minimal" />
-);
+export const SyncStatusIndicator = Object.assign(
+  function SyncStatusIndicatorBase(props: SyncStatusIndicatorProps) {
+    return <SyncStatusIndicator {...props} />;
+  },
+  {
+    /**
+     * Minimal pill version for headers
+     */
+    Pill: (props: Omit<SyncStatusIndicatorProps, 'displayMode'>) => (
+      <SyncStatusIndicator {...props} displayMode="minimal" />
+    ),
 
-export const SyncStatusDetailed = (props: Omit<SyncStatusIndicatorProps, 'displayMode'>) => (
-  <SyncStatusIndicator {...props} displayMode="detailed" />
-);
+    /**
+     * Detailed version for settings/debug screens
+     */
+    Detailed: (props: Omit<SyncStatusIndicatorProps, 'displayMode'>) => (
+      <SyncStatusIndicator {...props} displayMode="detailed" />
+    ),
 
-export const SyncStatusRow = (props: Omit<SyncStatusIndicatorProps, 'displayMode' | 'labelPosition'>) => (
-  <SyncStatusIndicator {...props} displayMode="compact" labelPosition="right" />
+    /**
+     * Row version for horizontal layouts
+     */
+    Row: (props: Omit<SyncStatusIndicatorProps, 'displayMode' | 'labelPosition'>) => (
+      <SyncStatusIndicator {...props} displayMode="compact" labelPosition="right" />
+    ),
+  }
 );
 
 export default SyncStatusIndicator;

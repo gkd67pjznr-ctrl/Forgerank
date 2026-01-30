@@ -21,6 +21,11 @@ Configuration lives in `.claude/settings.local.json` under the `env` key. Each w
 bash scripts/llm/switch-openrouter.sh
 ```
 
+### Switch to Devstral 2 (all slots)
+```bash
+bash scripts/llm/switch-devstral.sh
+```
+
 ### Switch back to direct Anthropic
 ```bash
 bash scripts/llm/switch-claude.sh
@@ -46,7 +51,7 @@ The current OpenRouter template (`openrouter-template.json`) maps:
 
 | Slot | Model | Use Case |
 |------|-------|----------|
-| Haiku | `deepseek/deepseek-chat` | Cheap/fast tasks |
+| Haiku | `mistralai/devstral-2512` | Cheap/fast tasks |
 | Sonnet | `google/gemini-2.5-pro` | Default tasks |
 | Opus | `anthropic/claude-opus-4` | Heavy tasks |
 
@@ -59,7 +64,7 @@ Edit `openrouter-template.json` to change the default mapping:
   "ANTHROPIC_AUTH_TOKEN": "__OPENROUTER_API_KEY__",
   "ANTHROPIC_API_KEY": "",
   "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
-  "ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek/deepseek-chat",
+  "ANTHROPIC_DEFAULT_HAIKU_MODEL": "mistralai/devstral-2512",
   "ANTHROPIC_DEFAULT_SONNET_MODEL": "qwen/qwen3-coder-480b-a35b",
   "ANTHROPIC_DEFAULT_OPUS_MODEL": "anthropic/claude-opus-4"
 }
@@ -121,21 +126,27 @@ When using direct Anthropic, none of these are set (Claude Code uses its default
 
 ### Budget Coding (all cheap)
 ```json
-"ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek/deepseek-chat",
-"ANTHROPIC_DEFAULT_SONNET_MODEL": "deepseek/deepseek-chat",
-"ANTHROPIC_DEFAULT_OPUS_MODEL": "deepseek/deepseek-chat"
+"ANTHROPIC_DEFAULT_HAIKU_MODEL": "mistralai/devstral-2512",
+"ANTHROPIC_DEFAULT_SONNET_MODEL": "mistralai/devstral-2512",
+"ANTHROPIC_DEFAULT_OPUS_MODEL": "mistralai/devstral-2512"
 ```
+
+### Devstral All-In
+```bash
+bash scripts/llm/switch-devstral.sh
+```
+Maps all three slots to Devstral 2 via OpenRouter.
 
 ### Qwen3-Coder Focus
 ```json
-"ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek/deepseek-chat",
+"ANTHROPIC_DEFAULT_HAIKU_MODEL": "mistralai/devstral-2512",
 "ANTHROPIC_DEFAULT_SONNET_MODEL": "qwen/qwen3-coder-480b-a35b",
 "ANTHROPIC_DEFAULT_OPUS_MODEL": "qwen/qwen3-coder-480b-a35b"
 ```
 
 ### Mixed (Best Value)
 ```json
-"ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek/deepseek-chat",
+"ANTHROPIC_DEFAULT_HAIKU_MODEL": "mistralai/devstral-2512",
 "ANTHROPIC_DEFAULT_SONNET_MODEL": "qwen/qwen3-coder-480b-a35b",
 "ANTHROPIC_DEFAULT_OPUS_MODEL": "anthropic/claude-opus-4"
 ```

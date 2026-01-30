@@ -13,10 +13,16 @@ First-time user experience that gets users set up quickly while introducing key 
 - [x] Name input
 - [x] Bodyweight input (with unit toggle)
 - [x] Experience level selection
+### Done - Quick Profile Setup ✅
+- [x] Name input
+- [x] Bodyweight input (with unit toggle)
+- [x] Experience level selection
   - Beginner (0-1 years)
   - Intermediate (1-3 years)
   - Advanced (3+ years)
 - [ ] Optional: Profile photo
+
+**Implementation:** `app/onboarding.tsx`, `src/lib/stores/onboardingStore.ts`
 
 **Implementation:** `app/onboarding.tsx`, `src/lib/stores/onboardingStore.ts`
 
@@ -29,7 +35,11 @@ First-time user experience that gets users set up quickly while introducing key 
 ### Done - Personality Picker ✅
 - [x] Display available gym buddy options
 - [x] Preview text samples
+### Done - Personality Picker ✅
+- [x] Display available gym buddy options
+- [x] Preview text samples
 - [ ] Preview audio samples (if available)
+- [x] Select one to start
 - [x] Select one to start
 - [ ] "Can change later in settings" note
 
@@ -136,10 +146,13 @@ type OnboardingStep =
 
 **Storage:**
 - Store onboarding state in AsyncStorage via Zustand persist
+- Store onboarding state in AsyncStorage via Zustand persist
 - Clear on logout/account deletion
 - Track completion for analytics
 
 **Tutorial Overlay:**
+- Placeholder in onboarding flow
+- Future: Use react-native-copilot or custom tooltip/highlight system
 - Placeholder in onboarding flow
 - Future: Use react-native-copilot or custom tooltip/highlight system
 - Must not block app usage (skippable)
@@ -220,6 +233,8 @@ type OnboardingStep =
 ## Priority
 
 **P0 (Pre-Launch):**
+- ✅ Profile setup (name, bodyweight)
+- ✅ Personality picker
 - ✅ Profile setup (name, bodyweight)
 - ✅ Personality picker
 

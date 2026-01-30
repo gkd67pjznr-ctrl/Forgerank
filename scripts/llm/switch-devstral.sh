@@ -1,5 +1,5 @@
 #!/bin/bash
-# Switch Claude Code backend to OpenRouter
+# Switch Claude Code backend to Devstral 2 (via OpenRouter)
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -9,10 +9,10 @@ const fs = require('fs');
 const path = require('path');
 
 const settingsPath = path.join('$PROJECT_DIR', '.claude', 'settings.local.json');
-const templatePath = path.join('$SCRIPT_DIR', 'openrouter-template.json');
+const templatePath = path.join('$SCRIPT_DIR', 'devstral-template.json');
 const keyPath = path.join(require('os').homedir(), '.config', 'forgerank', '.env.openrouter');
 
-// Read OpenRouter key
+// Read OpenRouter key (Devstral routes through OpenRouter)
 if (!fs.existsSync(keyPath)) {
   console.error('Error: OpenRouter API key not found.');
   console.error('Run: ./scripts/llm/save-openrouter-key.sh <your-api-key>');
@@ -29,12 +29,6 @@ const apiKey = match[1];
 // Read existing settings
 let settings = {};
 try { settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8')); } catch(e) {}
-
-// Check if already on OpenRouter
-if (settings.env && settings.env.ANTHROPIC_BASE_URL && settings.env.ANTHROPIC_BASE_URL.includes('openrouter.ai')) {
-  console.log('Already using OpenRouter backend.');
-  process.exit(0);
-}
 
 // Clean any existing backend keys
 const keysToRemove = ['ANTHROPIC_AUTH_TOKEN', 'ANTHROPIC_API_KEY', 'ANTHROPIC_BASE_URL',
@@ -57,11 +51,11 @@ Object.assign(settings.env, substituted);
 // Write
 fs.mkdirSync(path.dirname(settingsPath), { recursive: true });
 fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + '\n');
-console.log('Switched to OpenRouter backend.');
+console.log('Switched to Devstral 2 backend (via OpenRouter).');
 console.log('Added 6 env vars to .claude/settings.local.json');
 console.log('  Haiku  -> mistralai/devstral-2512');
-console.log('  Sonnet -> google/gemini-2.5-pro');
-console.log('  Opus   -> anthropic/claude-opus-4');
+console.log('  Sonnet -> mistralai/devstral-2512');
+console.log('  Opus   -> mistralai/devstral-2512');
 console.log('');
 console.log('Restart Claude Code to apply changes.');
 "

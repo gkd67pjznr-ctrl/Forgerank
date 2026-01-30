@@ -590,6 +590,189 @@ export default function SettingsScreen() {
           </View>
         </View>
 
+<<<<<<< HEAD
+        {/* Dev Menu Link */}
+        {__DEV__ && (
+          <Link href="/dev-menu" asChild>
+            <Pressable
+              style={{
+                borderWidth: 1,
+                borderColor: c.border,
+                borderRadius: 14,
+                backgroundColor: c.card,
+                padding: 12,
+              }}
+            >
+              <Text style={{ fontWeight: "900", fontSize: 16, color: c.text }}>Dev Menu</Text>
+              <Text style={{ opacity: 0.75, color: c.muted }}>Quick access to all screens for testing.</Text>
+            </Pressable>
+          </Link>
+        )}
+=======
+        {/* Personality Selection */}
+        <View style={{ borderWidth: 1, borderColor: c.border, borderRadius: 14, backgroundColor: c.card, padding: 12 }}>
+          <Pressable onPress={() => setShowPersonalityModal(true)}>
+            <Row
+              title="Gym Buddy Personality"
+              subtitle="Choose your workout motivation style"
+              right={
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <Text style={{ fontSize: 24 }}>{currentPersonality.emoji}</Text>
+                  <View style={{ paddingVertical: 8, paddingHorizontal: 12, borderRadius: 12, backgroundColor: c.bg, borderWidth: 1, borderColor: c.border }}>
+                    <Text style={{ fontWeight: "900", fontSize: 12 }}>{currentPersonality.name}</Text>
+                  </View>
+                </View>
+              }
+            />
+          </Pressable>
+        </View>
+>>>>>>> glm-work
+
+        {/* Email Verification Status */}
+        <View style={{ borderWidth: 1, borderColor: c.border, borderRadius: 14, backgroundColor: c.card, padding: 12 }}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <View>
+              <Text style={{ fontWeight: "900", fontSize: 16 }}>Email Verification</Text>
+              <Text style={{ opacity: 0.75, fontSize: 12 }}>
+                {session?.user?.email || "No email"}
+              </Text>
+            </View>
+            <View
+              style={{
+                paddingHorizontal: 10,
+                paddingVertical: 6,
+                borderRadius: 999,
+                backgroundColor: isEmailVerified ? "#d1fae5" : "#fee2e2",
+                borderWidth: 1,
+                borderColor: isEmailVerified ? "#6ee7b7" : "#fca5a5",
+              }}
+            >
+              <Text style={{ color: isEmailVerified ? "#065f46" : "#991b1b", fontWeight: "900", fontSize: 12 }}>
+                {isEmailVerified ? "Verified" : "Not Verified"}
+              </Text>
+            </View>
+          </View>
+
+          {!isEmailVerified && (
+            <>
+              <Text style={{ opacity: 0.75, fontSize: 13, marginBottom: 8 }}>
+                Verify your email to access all features and ensure account security.
+              </Text>
+              <Pressable
+                onPress={handleResendVerification}
+                style={{
+                  paddingVertical: 10,
+                  paddingHorizontal: 14,
+                  borderRadius: 12,
+                  backgroundColor: c.card,
+                  borderWidth: 1,
+                  borderColor: c.border,
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ fontWeight: "900" }}>Resend Verification Email</Text>
+              </Pressable>
+            </>
+          )}
+        </View>
+
+        {/* Account Section */}
+        <View style={{ borderWidth: 1, borderColor: c.border, borderRadius: 14, backgroundColor: c.card, padding: 12 }}>
+          <Row
+            title="Sign Out"
+            subtitle="Sign out of your account"
+          />
+          <Pressable
+            onPress={handleSignOut}
+            disabled={authLoading}
+            style={{
+              marginTop: 12,
+              paddingVertical: 12,
+              paddingHorizontal: 14,
+              borderRadius: 12,
+              backgroundColor: "#fee2e2",
+              borderWidth: 1,
+              borderColor: "#fca5a5",
+              alignItems: "center",
+              opacity: authLoading ? 0.5 : 1,
+            }}
+          >
+            <Text style={{ color: "#991b1b", fontWeight: "900", fontSize: 14 }}>
+              {authLoading ? "Signing Out..." : "Sign Out"}
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Delete Account Section */}
+        <View style={{ borderWidth: 1, borderColor: c.border, borderRadius: 14, backgroundColor: c.card, padding: 12 }}>
+          <Row
+            title="Delete Account"
+            subtitle="Permanently delete your account and all data"
+          />
+          <Pressable
+            onPress={openDeleteModal}
+            style={{
+              marginTop: 12,
+              paddingVertical: 12,
+              paddingHorizontal: 14,
+              borderRadius: 12,
+              backgroundColor: "#fee2e2",
+              borderWidth: 1,
+              borderColor: "#fca5a5",
+              alignItems: "center",
+            }}
+          >
+            <Text style={{ color: "#991b1b", fontWeight: "900", fontSize: 14 }}>
+              Delete Account
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Data Migration Section */}
+        <View style={{ borderWidth: 1, borderColor: c.border, borderRadius: 14, backgroundColor: c.card, padding: 12 }}>
+          <Row
+            title="Data Migration"
+            subtitle="Import data from other apps or migrate local data to cloud"
+          />
+          <View style={{ flexDirection: "row", gap: 8, marginTop: 12 }}>
+            <Pressable
+              onPress={handleMigrateLocalData}
+              disabled={isMigrating}
+              style={{
+                flex: 1,
+                paddingVertical: 10,
+                paddingHorizontal: 14,
+                borderRadius: 12,
+                backgroundColor: c.bg,
+                borderWidth: 1,
+                borderColor: c.border,
+                alignItems: "center",
+                opacity: isMigrating ? 0.5 : 1,
+              }}
+            >
+              <Text style={{ fontWeight: "700", fontSize: 12 }}>Migrate Local Data</Text>
+            </Pressable>
+
+            <Pressable
+              onPress={handleImportCSV}
+              disabled={isMigrating}
+              style={{
+                flex: 1,
+                paddingVertical: 10,
+                paddingHorizontal: 14,
+                borderRadius: 12,
+                backgroundColor: c.bg,
+                borderWidth: 1,
+                borderColor: c.border,
+                alignItems: "center",
+                opacity: isMigrating ? 0.5 : 1,
+              }}
+            >
+              <Text style={{ fontWeight: "700", fontSize: 12 }}>Import CSV</Text>
+            </Pressable>
+          </View>
+        </View>
+
         <Text style={{ color: c.muted }}>
           Next: we'll wire these settings into LiveWorkout (rest timer default + unit display).
         </Text>

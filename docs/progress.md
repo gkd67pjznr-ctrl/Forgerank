@@ -124,13 +124,16 @@
 
 ### Immediate (This Week)
 1. Apply database migration 005_user_search.sql to Supabase
+1. Apply database migration 005_user_search.sql to Supabase
 2. Implement protected routes
+3. Test sync functionality with real backend
 3. Test sync functionality with real backend
 
 ### Short Term (Next 2 Weeks)
 1. Routine-based workout flow
 2. Set input polish
 3. Rest timer enhancements
+4. Onboarding screens
 4. Onboarding screens
 
 ### Medium Term (Next Month)

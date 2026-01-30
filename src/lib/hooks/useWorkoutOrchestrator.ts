@@ -18,10 +18,10 @@ import { formatDuration, uid as uid2, type WorkoutSession, type WorkoutSet } fro
 import { setCurrentPlan } from "../workoutPlanStore";
 import { uid as routineUid, type Routine, type RoutineExercise } from "../routinesModel";
 // [MIGRATED 2026-01-23] Using Zustand stores
-import { addWorkoutSession, clearCurrentSession, ensureCurrentSession, useCurrentSession, useIsHydrated, upsertRoutine, useUser } from "../stores";
+import { addWorkoutSession, clearCurrentSession, ensureCurrentSession, useCurrentSession, useIsHydrated, upsertRoutine } from "../stores";
 // Gamification integration
-import { toWorkoutForCalculation } from "../hooks/useGamificationWorkoutFinish";
-import { useGamificationStore, processGamificationWorkout } from "../stores/gamificationStore";
+import { processGamificationWorkout, toWorkoutForCalculation } from "../hooks/useGamificationWorkoutFinish";
+import { useGamificationStore } from "../stores/gamificationStore";
 
 function exerciseName(exerciseId: string) {
   return EXERCISES_V1.find((e) => e.id === exerciseId)?.name ?? exerciseId;
@@ -118,6 +118,13 @@ export function useWorkoutOrchestrator(options: WorkoutOrchestratorOptions): Wor
       setInstantCue({ message: title, detail, intensity: "high" });
       onHaptic?.('pr');
       onSound?.('pr');
+
+      // Award Forge Tokens for PR
+      const { calculatePRReward } = require("../gamification");
+      const { addGamificationTokens } = require("../stores/gamificationStore");
+      const tier = meta.tier as number | undefined;
+      const reward = calculatePRReward(t, tier);
+      addGamificationTokens(reward.amount);
 
       // Trigger PR celebration callback
       onPRCelebration?.({

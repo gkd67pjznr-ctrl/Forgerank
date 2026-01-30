@@ -12,7 +12,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import ErrorBoundary from '@/src/ui/error-boundary';
 import { setupAuthListener, useAuthStore } from '@/src/lib/stores';
 import { supabase } from '@/src/lib/supabase/client';
-import { PersistentTabBar } from '@/src/ui/components/PersistentTabBar';
+import { useIsOnboarding } from '@/src/lib/stores/onboardingStore';
 
 // Initialize WebBrowser for auth sessions
 WebBrowser.maybeCompleteAuthSession();
@@ -38,8 +38,15 @@ function HeaderBackButton({ tintColor }: { tintColor: string }) {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const tintColor = colorScheme === 'dark' ? '#fafafa' : '#111827';
-  const bgColor = colorScheme === 'dark' ? '#0a0a0a' : '#ffffff';
+  const router = useRouter();
+  const isOnboarding = useIsOnboarding();
+
+  // Redirect to onboarding if not completed
+  useEffect(() => {
+    if (isOnboarding) {
+      router.replace('/onboarding');
+    }
+  }, [isOnboarding, router]);
 
   // Initialize auth state listener on mount
   useEffect(() => {
@@ -76,39 +83,51 @@ export default function RootLayout() {
   return (
     <ErrorBoundary name="root">
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <View style={{ flex: 1 }}>
-          <Stack
-            screenOptions={{
-              headerShown: true,
-              headerTitle: '',
-              headerBackVisible: false,
-              headerLeft: () => <HeaderBackButton tintColor={tintColor} />,
-              headerStyle: {
-                backgroundColor: bgColor,
-              },
-              headerShadowVisible: false,
-              contentStyle: {
-                paddingBottom: 60,
-                backgroundColor: bgColor,
-              },
+        <Stack>
+          <Stack.Screen
+            name="onboarding"
+            options={{
+              headerShown: false,
+              presentation: 'card',
             }}
-          >
-            <Stack.Screen
-              name="(tabs)"
-              options={{
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen name="live-workout" options={{ headerShown: false }} />
-            <Stack.Screen name="auth/login" options={{ headerShown: false, presentation: 'card', contentStyle: { paddingBottom: 0 } }} />
-            <Stack.Screen name="auth/signup" options={{ headerShown: false, presentation: 'card', contentStyle: { paddingBottom: 0 } }} />
-            <Stack.Screen name="auth/forgot-password" options={{ headerShown: false, presentation: 'card', contentStyle: { paddingBottom: 0 } }} />
-            <Stack.Screen name="auth/reset-password" options={{ headerShown: false, presentation: 'card', contentStyle: { paddingBottom: 0 } }} />
-            <Stack.Screen name="auth/verify-email" options={{ headerShown: false, presentation: 'card', contentStyle: { paddingBottom: 0 } }} />
-          </Stack>
-          <PersistentTabBar />
-        </View>
+          />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="auth/login"
+            options={{
+              headerShown: false,
+              presentation: 'card',
+            }}
+          />
+          <Stack.Screen
+            name="auth/signup"
+            options={{
+              headerShown: false,
+              presentation: 'card',
+            }}
+          />
+          <Stack.Screen
+            name="auth/forgot-password"
+            options={{
+              headerShown: false,
+              presentation: 'card',
+            }}
+          />
+          <Stack.Screen
+            name="auth/reset-password"
+            options={{
+              headerShown: false,
+              presentation: 'card',
+            }}
+          />
+          <Stack.Screen
+            name="auth/verify-email"
+            options={{
+              headerShown: false,
+              presentation: 'card',
+            }}
+          />
+        </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
     </ErrorBoundary>
