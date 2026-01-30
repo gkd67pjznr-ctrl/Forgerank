@@ -21,6 +21,11 @@ Configuration lives in `.claude/settings.local.json` under the `env` key. Each w
 bash scripts/llm/switch-openrouter.sh
 ```
 
+### Switch to DeepSeek V3 (all slots)
+```bash
+bash scripts/llm/switch-deepseek.sh
+```
+
 ### Switch to Devstral 2 (all slots)
 ```bash
 bash scripts/llm/switch-devstral.sh
@@ -130,6 +135,12 @@ When using direct Anthropic, none of these are set (Claude Code uses its default
 "ANTHROPIC_DEFAULT_SONNET_MODEL": "mistralai/devstral-2512",
 "ANTHROPIC_DEFAULT_OPUS_MODEL": "mistralai/devstral-2512"
 ```
+
+### DeepSeek All-In
+```bash
+bash scripts/llm/switch-deepseek.sh
+```
+Maps all three slots to DeepSeek V3 via OpenRouter. Ultra cheap ($0.24/$0.38 per 1M tokens).
 
 ### Devstral All-In
 ```bash
