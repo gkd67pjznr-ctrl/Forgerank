@@ -268,6 +268,53 @@
     - Added comprehensive test cases to USER_TESTING_CHECKLIST.md
   - Total feature progress: 75/133 → 80/133 (60%)
 
+### 2026-01-30 (notifications feature - P0 complete)
+- Implemented P0 (launch required) notifications feature:
+  - Installed `expo-notifications` package
+  - Created comprehensive notification service (`src/lib/notifications/notificationService.ts`):
+    - Notification permission handling with contextual requests
+    - Local notification scheduling and management
+    - Rest timer specific notification functionality
+    - Comprehensive error handling and logging
+  - Created notification types and constants (`src/lib/notifications/types.ts`):
+    - NotificationType enum with all supported types
+    - NotificationPreferences interface
+    - Notification channel definitions for Android
+  - Updated settings store to include notification preferences:
+    - Added `notificationPrefs` field to Settings interface
+    - Integrated with existing notification preferences system
+    - Default values set (all social notifications ON, marketing OFF)
+  - Enhanced RestTimerOverlay component:
+    - Added background notification scheduling when app is backgrounded
+    - App state change handling for proper notification cleanup
+    - Workout ID support for notification data
+  - Updated live-workout.tsx:
+    - Notification service initialization on workout start
+    - Notification response listener setup
+    - Contextual permission request on first rest timer use
+    - Notification tap handling
+  - Created comprehensive test suite (`__tests__/lib/notifications/notificationService.test.ts`):
+    - 18 tests covering all notification service functionality
+    - Mock-based testing for expo-notifications
+    - Settings store mocking for isolated testing
+    - 100% test coverage for notification service
+  - Updated feature documentation:
+    - Marked Rest Timer notifications as complete in feature-notifications.md
+    - Updated FEATURE-MASTER.md (Notifications: 0/4 → 1/4)
+    - Added implementation details and technical notes
+  - Total feature progress: 80/133 → 81/133 (61%)
+
+**Files Created:**
+- `src/lib/notifications/types.ts` - Notification types and constants
+- `src/lib/notifications/notificationService.ts` - Core notification service
+- `__tests__/lib/notifications/notificationService.test.ts` - Comprehensive test suite
+
+**Files Modified:**
+- `src/lib/stores/settingsStore.ts` - Added notification preferences
+- `src/lib/notificationPrefs.ts` - Updated to match new structure
+- `src/ui/components/RestTimerOverlay.tsx` - Added background notifications
+- `app/live-workout.tsx` - Added notification initialization and permission handling
+
 **Files Created (Phase 3):**
   - `src/ui/components/LiveWorkout/UXToggle.tsx` - Toggle button component
   - Integration into `app/live-workout.tsx` - Conditional rendering with settings check

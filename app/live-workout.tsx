@@ -46,11 +46,19 @@ import {
   updateCurrentSession,
   useCurrentSession,
 } from "../src/lib/stores";
+import { getSettings as getSettingsV2 } from "../src/lib/stores/settingsStore";
 
 // Utils
 import { randomHighlightDurationMs } from "../src/lib/perSetCue";
 import { selectCelebration } from "../src/lib/celebration";
 import type { SelectedCelebration } from "../src/lib/celebration";
+
+// Notifications
+import {
+  initializeNotificationService,
+  setupNotificationResponseListener,
+  requestNotificationPermission,
+} from "../src/lib/notifications/notificationService";
 
 // Constants
 const DEFAULT_REST_SECONDS = 90;
@@ -120,6 +128,7 @@ export default function LiveWorkout() {
   const [focusMode, setFocusMode] = useState(false);
   const [restVisible, setRestVisible] = useState(false);
   const [showTimerDetails, setShowTimerDetails] = useState(false);
+  const notificationPermissionRequestedRef = useRef(false);
 
   // PR celebration state
   const [celebration, setCelebration] = useState<SelectedCelebration | null>(null);
@@ -209,8 +218,29 @@ export default function LiveWorkout() {
     ensureCurrentSession({
       selectedExerciseId: first,
       exerciseBlocks: pickerState.planMode ? pickerState.plannedExerciseIds.slice() : [first],
+      done: pickerState.planMode ? new Set() : new Set([first]),
     });
     initializedRef.current = true;
+
+    // Initialize notification service
+    initializeNotificationService().catch(console.error);
+
+    // Set up notification response listener
+    const responseListener = setupNotificationResponseListener((response) => {
+      // Handle notification taps
+      const data = response.notification.request.content.data;
+      if (data?.screen === 'live-workout') {
+        // Bring app to foreground and focus on workout
+        // This is handled automatically by the OS when tapping notification
+      }
+    });
+
+    return () => {
+      // Clean up listener when component unmounts
+      if (responseListener && typeof responseListener.remove === 'function') {
+        responseListener.remove();
+      }
+    };
   }, [persisted, pickerState]);
 
   // Persist UI state (selected exercise, exercise blocks)
@@ -229,6 +259,18 @@ export default function LiveWorkout() {
 
     if (source === "quick") {
       pickerState.setSelectedExerciseId(exerciseId);
+    }
+
+    // Request notification permission on first rest timer use (contextual permission request)
+    if (!notificationPermissionRequestedRef.current) {
+      requestNotificationPermission().then((granted) => {
+        if (granted) {
+          console.log('Notification permission granted');
+        } else {
+          console.log('Notification permission denied');
+        }
+      });
+      notificationPermissionRequestedRef.current = true;
     }
 
     setRestVisible(true);
@@ -292,6 +334,7 @@ export default function LiveWorkout() {
         initialSeconds={DEFAULT_REST_SECONDS}
         onClose={() => setRestVisible(false)}
         onDone={onRestTimerDoneFeedback}
+        workoutId={persisted?.session?.id}
       />
 
       <PRCelebration

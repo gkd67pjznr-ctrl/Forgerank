@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Animated, Pressable, Text, View } from "react-native";
+import { Animated, AppState, AppStateStatus, Pressable, Text, View } from "react-native";
 import { useThemeColors } from "../theme";
+import { scheduleRestTimerNotification, cancelRestTimerNotification } from "@/src/lib/notifications/notificationService";
+import { getSettings } from "@/src/lib/stores/settingsStore";
 
 type Props = {
   visible: boolean; // if false, render nothing
   initialSeconds: number;
   onClose: () => void; // hides timer completely
   onDone?: () => void; // called when timer hits 0
+  workoutId?: string; // optional workout ID for notification data
 };
 
 function clampInt(n: number, min: number, max: number) {
@@ -20,14 +23,49 @@ function formatMMSS(totalSeconds: number) {
   return `${mm}:${String(ss).padStart(2, "0")}`;
 }
 
+/**
+ * Handle app state changes
+ */
+const handleAppStateChange = (nextAppState: AppStateStatus) => {
+  setAppState(nextAppState);
+
+  // If app comes back to foreground, cancel any scheduled notifications
+  if (nextAppState === 'active') {
+    cancelRestTimerNotification().catch(console.error);
+    setScheduledNotificationId(null);
+  }
+};
+
+/**
+ * Schedule background notification for rest timer
+ */
+const scheduleBackgroundNotification = async (secondsLeft: number) => {
+  try {
+    // Cancel any existing notification first
+    if (scheduledNotificationId) {
+      await cancelRestTimerNotification();
+    }
+
+    // Schedule new notification
+    const notificationId = await scheduleRestTimerNotification(secondsLeft);
+    if (notificationId) {
+      setScheduledNotificationId(notificationId);
+    }
+  } catch (error) {
+    console.error('Failed to schedule background notification:', error);
+  }
+};
+
 export function RestTimerOverlay(props: Props) {
   const c = useThemeColors();
+  const [appState, setAppState] = useState(AppState.currentState);
 
   // pill always shows when visible, panel expands on tap
   const [expanded, setExpanded] = useState(false);
 
   const [secondsLeft, setSecondsLeft] = useState(props.initialSeconds);
   const [isRunning, setIsRunning] = useState(true);
+  const [scheduledNotificationId, setScheduledNotificationId] = useState<string | null>(null);
 
   // slide animation: panel only (overlay)
   const panelY = useRef(new Animated.Value(220)).current; // off-screen-ish
@@ -38,6 +76,9 @@ export function RestTimerOverlay(props: Props) {
     setExpanded(false);
     setSecondsLeft(props.initialSeconds);
     setIsRunning(true);
+
+    // Clean up any existing notification when timer starts
+    cancelRestTimerNotification().catch(console.error);
   }, [props.visible, props.initialSeconds]);
 
   useEffect(() => {
@@ -54,13 +95,35 @@ export function RestTimerOverlay(props: Props) {
     return () => clearInterval(t);
   }, [props.visible, isRunning]);
 
+  // Handle app state changes for background notifications
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    return () => subscription.remove();
+  }, []);
+
+  // Schedule background notification when timer starts and app is in background
+  useEffect(() => {
+    if (!props.visible || !isRunning || secondsLeft <= 0) return;
+
+    // Only schedule notification if app is in background
+    if (appState !== 'active') {
+      scheduleBackgroundNotification(secondsLeft);
+    }
+  }, [props.visible, isRunning, secondsLeft, appState]);
+
   useEffect(() => {
     if (!props.visible) return;
     if (secondsLeft !== 0) return;
 
     setIsRunning(false);
     props.onDone?.();
-  }, [secondsLeft, props]);
+
+    // Cancel the notification when timer completes
+    if (scheduledNotificationId) {
+      cancelRestTimerNotification().catch(console.error);
+      setScheduledNotificationId(null);
+    }
+  }, [secondsLeft, props, scheduledNotificationId]);
 
   useEffect(() => {
     if (!props.visible) return;

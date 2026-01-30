@@ -18,7 +18,7 @@
 | [Authentication](#authentication) | In Progress | 7/10 | [Details](features/feature-auth.md) |
 | [Social & Feed](#social--feed) | In Progress | 9/15 | [Details](features/feature-social.md) |
 | [Gamification](#gamification) | **Done** | 12/12 | [Details](features/feature-gamification.md) |
-| [Notifications](#notifications) | Planned | 0/4 | [Details](features/feature-notifications.md) |
+| [Notifications](#notifications) | In Progress | 1/4 | [Details](features/feature-notifications.md) |
 | [UI & Design](#ui--design) | In Progress | 8/15 | [Details](features/feature-ui.md) |
 | [Backend & Sync](#backend--sync) | In Progress | 9/10 | [Details](features/feature-backend.md) |
 | [Onboarding](#onboarding) | In Progress | 3/7 | [Details](features/feature-onboarding.md) |
@@ -28,7 +28,7 @@
 | [Forge Lab (Analytics)](#forge-lab-analytics) | Planned | 0/6 | [Details](features/feature-forge-lab.md) |
 | [Forge Milestones](#forge-milestones) | Planned | 0/5 | [Details](features/feature-forge-milestones.md) |
 
-**Launch Total:** 90/155 features (58%)
+**Launch Total:** 91/155 features (59%)
 
 ## Quick Summary — Post-Launch
 
