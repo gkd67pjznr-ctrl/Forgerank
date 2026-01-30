@@ -563,6 +563,7 @@ After testing, please provide feedback on:
 ```
 
 
+
 ### TC-A2: Avatar Growth Visualization
 **Steps:**
 1. Navigate to Avatar screen
@@ -577,6 +578,7 @@ After testing, please provide feedback on:
 ```
 [Your notes here]
 ```
+
 
 
 ### TC-A3: Hangout Room Navigation
@@ -594,6 +596,7 @@ After testing, please provide feedback on:
 ```
 [Your notes here]
 ```
+
 
 
 ### TC-A4: Friend Presence Indicators
@@ -663,7 +666,6 @@ After testing, please provide feedback on:
 ```
 [Your notes here]
 ```
-
 
 **End of Testing Checklist**
 *Add new test sessions above as features are completed*

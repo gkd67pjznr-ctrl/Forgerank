@@ -22,6 +22,15 @@ export interface Settings {
   personalityId: string;
   accent: Accent;
   replayAutoPlay: boolean;
+  // Notification preferences
+  notificationPrefs: {
+    friendRequests: boolean;
+    directMessages: boolean;
+    competitionResults: boolean;
+    restTimer: boolean;
+    reactions: boolean;
+    comments: boolean;
+  };
 }
 
 const DEFAULTS: Settings = {
@@ -35,6 +44,14 @@ const DEFAULTS: Settings = {
   personalityId: "coach",
   accent: "toxic",
   replayAutoPlay: true,
+  notificationPrefs: {
+    friendRequests: true,
+    directMessages: true,
+    competitionResults: true,
+    restTimer: true,
+    reactions: true,
+    comments: true,
+  },
 };
 
 interface SettingsState extends Settings {
@@ -76,6 +93,7 @@ export const useSettingsStore = create<SettingsState>()(
         personalityId: state.personalityId,
         accent: state.accent,
         replayAutoPlay: state.replayAutoPlay,
+        notificationPrefs: state.notificationPrefs,
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHydrated(true);
@@ -96,6 +114,7 @@ export const selectSettings = (state: SettingsState): Settings => ({
   personalityId: state.personalityId,
   accent: state.accent,
   replayAutoPlay: state.replayAutoPlay,
+  notificationPrefs: state.notificationPrefs,
 });
 
 // Hook for accessing settings (matches old API)
@@ -125,6 +144,14 @@ export function useSettings(): Settings {
       personalityId,
       accent,
       replayAutoPlay,
+      notificationPrefs: {
+        friendRequests: true,
+        directMessages: true,
+        competitionResults: true,
+        restTimer: true,
+        reactions: true,
+        comments: true,
+      },
     }),
     [hapticsEnabled, soundsEnabled, unitSystem, defaultRestSeconds, displayName, bodyweight, experienceLevel, personalityId, accent, replayAutoPlay]
   );
@@ -144,6 +171,7 @@ export function getSettings(): Settings {
     personalityId: state.personalityId,
     accent: state.accent,
     replayAutoPlay: state.replayAutoPlay,
+    notificationPrefs: state.notificationPrefs,
   };
 }
 

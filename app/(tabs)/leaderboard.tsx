@@ -320,7 +320,7 @@ export default function LeaderboardTab() {
                       </View>
                     </View>
                   );
-                })}
+                }))}
               </View>
             )}
 

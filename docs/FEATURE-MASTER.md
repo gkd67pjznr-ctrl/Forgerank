@@ -236,15 +236,22 @@ XP, levels, streaks, currency, and cosmetics. Separate from Forgerank scoring.
 ---
 
 ## Notifications
-**Status:** Planned | **Progress:** 0/4 features
+**Status:** In Progress | **Progress:** 1/4 features
 
 **Philosophy:** Minimal. Don't be annoying.
 
+**Completed:**
+- Rest timer (push notification when backgrounded) - P0 launch feature
+- Notification service infrastructure (expo-notifications)
+- Settings integration with toggleable preferences
+- Contextual permission handling
+- Android notification channels (Social, Workout, Competition)
+- Comprehensive test suite (18 tests)
+
 **Planned:**
-- Friend requests
-- DMs received
-- Competition results
-- Rest timer (push notification when backgrounded)
+- Friend requests - Service functions implemented, backend integration pending
+- DMs received - Service functions implemented, backend integration pending
+- Competition results - Service functions stubbed, requires competition feature
 
 **NOT doing:** Streak nag, "you haven't worked out" reminders, social activity spam. Respect the user's attention.
 

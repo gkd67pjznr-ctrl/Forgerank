@@ -8,23 +8,21 @@ const KEY = "notificationPrefs.v1";
 
 export type NotificationPrefs = {
   // Social
-  likes: boolean;
-  comments: boolean;
   friendRequests: boolean;
-
-  // Chat
-  messages: boolean;
-
-  // System-ish
-  marketing: boolean; // future store/emote bundles/etc.
+  directMessages: boolean;
+  competitionResults: boolean;
+  restTimer: boolean;
+  reactions: boolean;
+  comments: boolean;
 };
 
 const DEFAULTS: NotificationPrefs = {
-  likes: true,
-  comments: true,
   friendRequests: true,
-  messages: true,
-  marketing: false,
+  directMessages: true,
+  competitionResults: true,
+  restTimer: true,
+  reactions: true,
+  comments: true,
 };
 
 let prefs: NotificationPrefs = { ...DEFAULTS };
